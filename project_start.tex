@@ -68,7 +68,9 @@ Summarise your report concisely.
 
 \chapter{Literature Review}
 
-\textbf{PAPERS THAT COMBINE DL AND LINGUISTICS} \\ 
+\textbf{PAPERS ON PSYCHOLOGY WITH DL} \\ 
+
+So far below is the only that explicitly takes psychology/DL approach to object categorization. This is still related to many other papers covered here and thus bit strange that it doesnt really cite many of the other DL with linguistic papers that I have covered in the 'zero-shot learning section'.
 
 \underline{Learning Hierarchical Visual Representations in DNNs Using Hierarchical Linguistic Labels - Peterson et al. 2018}. \\ 
 \textit{Overview} \\
@@ -88,8 +90,30 @@ The study most closely related to ours is Peterson \textit{et al.} \cite{Peterso
 
 \newpage
 
+\textbf{ZERO-SHOT LEARNING AND RELATED PAPERS} \\
+These zero-shot learning papers are very much related to ours in the sense that they try to achieve generalization via word embeddings into unseen image classes. The DeViSE paper is probably the most similar though others relevant too. In fact, some of them already used this idea before the deep learning revolution. \\
+
+\underline{Large Scale Image Annotation: Learning to Rank with Joint Word-image Embeddings - Weston et al. 2010} \\
+\textit{Overview}\\
+This is a pre-deep learning paper, on how to handle efficiently annotation of 'new' large scale data-sets such as ImageNet.  Approach is to learn to represent images and annotations jontly in a low dimensional embedding space, idea being that low-dimension at test time translated into faster model. Indeed, a pre-deep learning methods such as performing knn in image feature space suffer from the curse of dimensionality.  To do this they use a loss function that allow the model to learn-to-rank i.e. to optimize precision of k-top annotations. In practice, their model performs linear mapping into joint embedding space (i.e. annotations and images are multiplied by their own matrices of equal dimensions). \\
+\textit{Thoughts:} \\
+\begin{itemize}
+    \item while impressive at the time, no longer state-of-the-art, but their point about curse of dimensionality may still be important even for DL. Say if a DL model has a softmax of too high N, it becomes harder and harder to separate out different classes so word embedding may help here
+    \item The model used by the authors is just a linear matrix transformation. Thus DeViSE paper can be seen as a big improvment over this.
+  \end{itemize}
+
+
+
+
+\underline{DeViSE: A Deep Visual-Semantic Embedding Model} \\
+\textit{Overview} \\
+Typical object classification models treat all the categories unrelated, via N-way softmax. This leads to models that 'cannot transfer semantic information about learned labels to unseen words or phrases. Solution this paper proposes is to use both standard image data and then an unrelated large unannotated text data to learn semantic information. In particular, the model maps image inputs into this rich semantic embedding space. The results show similar performance to standard state-of-the-art DL models, but with a significant improvement in that much less 'semantically unreasonable' mistakes are made. Perhaps more importantly, they show this joint training allows the model to generalize to 20000 visual categories, despite having trained the model on just 1000 categories. 
+
+
+\newpage 
+
 \textbf{MULTI-LABEL CLASSIFICATION PAPERS} \\
-According to current plan, we are concerned with typical single-label classification. Nevertheless, multi-label image classification is relevant to us since those papers have to explicitly try to learn relationships between many related categories in objects. Different papers below approach this in different ways and have somewhat differing aims. They do share our goal of trying enforce some way of semantic understanding into DL papers. I do sometimes feel that multi-label classification is 'under rated'; it's much closer to how I imagine that humans process visual data.
+According to current plan, we are concerned with typical single-label classification. Nevertheless, multi-label image classification is relevant to us since those papers have to explicitly try to learn relationships between many related categories in objects. Different papers below approach this in different ways and have somewhat differing aims. They do share our goal of trying enforce some way of semantic understanding into DL papers. I do sometimes feel that multi-label classification is 'under rated'; it's much closer to how I imagine that humans process visual data. \\
 
 \underline{YOLO 9000 - Redmon and Farhadi 2016} \\ 
 \textit{Overview} \\
@@ -116,9 +140,11 @@ Results: state-of-the-art on multi-label since can weed out labels that can't po
 \\\\
 \textit{Thoughts:}
 \begin{itemize}
-    \item A big difference between all these multi-label approaches and ours would be that here semantics are really controlled only by what's visiable in images, whilst we could use entire corpus of text / ImageNet hierarchy even for a single image.
-
-
+    \item A big difference between all these multi-label approaches and ours would be that here semantics are really controlled only by what's visible in images, whilst we could use entire corpus of text / ImageNet hierarchy even for a single image.
+    \item On the other hand, our model wouldn't be able to do multi-label classification as it's hierarchical 'understanding' would derive entirely from word embeddings..
+    \item A little like that attention here, I wonder if we could also visualize if using hierarchical model changes the regions of the image that the model focuses on vs. non-hierarchical model
+    \item the observation about toaster/hair dryer being difficult to capture semantically is interesting. I wonder if our word embedding approach would suffer from similar? 
+    \item bit like the nearest neighbour label prediction here, we should attempt also to predict into the embedding space after training the model. I really wonder if we could thus train on single label data but actually somehow accomplish multi-label predictions (based on predicted embedding space). I guess this would be kind of what the zero-shot learning papers (see the section on those papers) attempt to do using word embeddings. 
 
 
 
@@ -127,7 +153,10 @@ Results: state-of-the-art on multi-label since can weed out labels that can't po
 \textbf{Other relevant papers and intro stuff} \\
 Computer vision researchers have already long before the advent of deep learning, been interested in multi-label classification as it would greatly enhanc our ability, for example to search and reterieve large quantities of image data \cite{MakadiaBaseline}. Further, multilabel classification much closer corresponds to how humans perceive complex visual scenes and thus developing models with rich semantic ability would be a valuable step for development of artificial intelligence technology such as autonomous vehicles. Multi-label classification already of interest before deep learning: \cite{tagprop}.  \\
 
-How is multi-label classification different from semantic segmentation / object detection? Not trying to locate/bound any object but rather concerned with labeling. Why would we need something other than YOLO9000 (Redmon and Farhadi 2016). Further, in our approach we are not trying to perform multi-label classification, rather we still perform single label classification but trying to benefit from semantic dependencies in training..
+Similarly, word embeddings have been used extensively to capture image semantics much before deep learning. As an example \cite{MonayPLSA} perform unsupervised image auto-annotation with a probabilistic model in which a joint latent space is used to represent co-occurence of image features and words. More specifically, the authors constraint the latent space to be mainly defined by word-features as they argue that the semantic relationships between words is richer than that of image features, and second, co-occurence of words in text is semantically more meaningful than that of visual features. The authors' first point may be less relevant for the state-of-the-art today as convolutional neural networks have shown the ability to build complex fvisual features. Nevertheless, if we train model that captures full semantic relationships in large sample text, this should be richer still; for instance, ImageNet is represented by a Directed Graph rather than just a tree hierarchy. The second point too remains apt, image feature co-occurence indeed may not mean much (though deeper layer ones do probably more so in CNNs). The presence of varying background and other objects, makes it difficult to maintain semantic similarity on the basis of visual features alone. 
+
+
+How is multi-label classification different from semantic segmentation / object detection? Not trying to locate/bound any object but rather concerned with labeling. Why would we need something other than YOLO9000 (Redmon and Farhadi 2016). Further, in our approach we are not trying to perform multi-label classification, rather we still perform single label classification but trying to benefit from semantic dependencies in training\dots
 
 
 \bibliographystyle{ieeetr}
