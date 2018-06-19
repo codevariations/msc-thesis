@@ -66,11 +66,33 @@ Summarise your report concisely.
 \setcounter{page}{1}
 
 
-\chapter{Literature Review}
 
-\textbf{PAPERS ON PSYCHOLOGY WITH DL} \\ 
+\chapter{Intro/Literature Review Notes}
 
-So far below is the only that explicitly takes psychology/DL approach to object categorization. This is still related to many other papers covered here and thus bit strange that it doesnt really cite many of the other DL with linguistic papers that I have covered in the 'zero-shot learning section'.
+Humans are able to extract rich semantic information from visual scenes. For instance, upon viewing a picture of a dog, we may also be able to identify it as a specific breed such as a golden retriever. Further, our understanding of the image benefits from semantic knowledge that is not captured explicitly in the visual features of a specific image. For example, we also know that the dog belongs in the category of mammals which, in turn, are animals and thus living entities. While this type of hierarchical semantic visual understanding comes to us effortlessly, it remains a challenging task for computer vision. In fact, most image classification models are trained on data sets with single, mutually exlusive labels and thus the learnt feature representations do not account, for example, for both cat and dog being four-legged animals. Why is this a problem? Generalization?  An exception to this is the area of knowledge transfer and related tasks such as zero-shot learning in which the aim is to predict labels of previously unseen classes of images; a popular approach for zero-shot learning is to borrown strength from, say text data, to create a semantic space that embed all the possible labels of images including those not seen previously. Mapping between images and the semantic space is then learned using the 'seen' images. Once this mapping is learnt, it can be used to transform previously unseen images into the semantic space and then apply some distance measure to label it as the category thats cloest in the embedding space. We postulate that the same idea could also be employed in the simple image classification tasks to achieve better generalization performance. In particular, we will train a deep learning model for image classification against a hierarchical semantic embedding derived from the WordNet database which, as we will show, will correspond to regularizing the model weights to account for these semantic relationships. We will use the recently developed poincare embeddings as the resulting embedding space can capture both the similarity between the possible labels as well as the hierarchical semantic relationships encoded by WordNet graphical model. The learnt model is then transferred to perform standard image classification by adding a final softmax classification layer and fine tuning this agains the ImageNet database. Our results show \dots hopefully some improvements over training the model only against ImageNet which illustrates the benefit of incorporatig semantic knowledge..
+
+
+\textbf{PAPERS USING WORD HIERARCHIES IN IMAGE CLASSIFICATION} \\ 
+
+\underlin{Learning and Using Taxonomies For Fast Visual Categorisation - Griffin and Perona 2008}\\
+\textit{Overview} \\
+Pre DL-era paper in which the authors attempt to move from linear computational cost in number of categories of one-vs-other classifier to logarithmic cost by considering a tree-like hierarchical classification. This is particularly importan for large number of labels, say $10^4$. The authors conjecture that humans are able to perform fast visual categorization by moving down a hierarchical taxonomy an hence avoid considering irrelevant classes e.g. to classify an 'object' as a dog first decide if something is an animal or not and after that if the animal is a dog or a cat. To do this need to create hierarchy of categories as a binary tree. This is done using Spatial Pyramid Matchin on the images and their labels.  \\
+
+\textit{Thoughts:}
+\begin{itemize}
+    \item hierarchy here is in the classification model though the idea is similar to ours that humans hold visual categories
+    \item the model here is very complex in that it requires several pre-processing steps e.g with SIFT so very different from DL approach
+    \item rather than using wordnet hierarchy they calculate hierarchy from images and their labels. Using wordnet embedding would gives us the ability to draw strength from categories not necessarily in our images (though if we use imagenet, they should mostly be there?)
+
+
+
+
+
+
+
+
+
+
 
 \underline{Learning Hierarchical Visual Representations in DNNs Using Hierarchical Linguistic Labels - Peterson et al. 2018}. \\ 
 \textit{Overview} \\
