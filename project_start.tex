@@ -75,13 +75,22 @@ Humans are able to extract rich semantic information from visual scenes. For ins
 
 \textbf{PAPERS ON PSYCHOLOGY OF VISUAL PERCEPTION \& SEMANTICS} \\ 
 
-\underline{Basic Objects in Natural Categories \cite{Rosch1976}} \\
-\textit{Overview} \\ 
-The visual world that we experience consists of an infinite number of different stimuli, yet we are able to classify this environment into distinct objects. This is because there is an inherent correlative structure in real world objects. For instance, dogs never have wings and birds will not in general have a furry tail; humans are able to exploit this non-independence by grouping objects into categories based on their visual attributes. Categories in turn can be organised into hierarchical taxonomies. For instance, dogs and birds can be distinct categories but in a taxonomy can also be grouped into a higher level category of animals which are visually distinct from some other higher level category such as furnitures. In this paper the authors show that there is in general one level of abstraction in the taxonomy of visual objects at which humans naturally make the most fundamental distinction between objects i.e. they are the most differentiated at this level; this is called the basic level. The reason for this is that given infinite visual stimuli, it is more efficient to only differentiate objects that are relevant to any task at hand - the basic level represents the level of abstraction that is the most useful in most situations. Categories one level of abstraction above the basic level are called superordinate categories and they are less fundamental for separating objects as they have fewer common attributes with each other. Categories one level below the basic level are subordinate categories, and they are in turn less fundamental for separating objects because there is more sharing of visual features across contrasting subordinate categories. 
+\underline{Basic Objects in Natural Categories \cite{Rosch1976}}
+
+\textit{Overview}
+
+The visual world that we experience consists of an infinite number of different stimuli, yet we are able to classify this environment into distinct objects. This is because there is an inherent correlative structure in real world objects. For instance, dogs never have wings and birds will not in general have a furry tail; humans are able to exploit this non-independence by grouping objects into categories based on their visual attributes. Categories in turn can be organised into hierarchical taxonomies. For instance, dogs and birds can be distinct categories but in a taxonomy can also be grouped into a higher level category of animals which are visually distinct from some other higher level category such as furnitures. In this paper the authors show that there is in general one level of abstraction in the taxonomy of visual objects at which humans naturally make the most fundamental distinction between objects i.e. they are the most differentiated at this level; this is called the basic level. The reason for this is that given infinite visual stimuli, it is more efficient to only differentiate objects that are relevant to any task at hand - the basic level represents the level of abstraction that is the most useful in most situations. Categories one level of abstraction above the basic level are called superordinate categories and they are less fundamental for separating objects as they have fewer common attributes with each other. Categories one level below the basic level are subordinate categories, and they are in turn less fundamental for separating objects because there is more sharing of visual features across contrasting subordinate categories.
+
+\textit{Thoughts:}
+\begin{itemize}
+  \item DL for classification usually doesn't take account of taxonomies though one could argue that most datasets are at the basic level. Nevertheless it would be of benefit to account for entire hierarchy 
+  \item several limitations in this paper (see \cite{Joliceur1984}) \\
+\end{itemize}
 
 
+\underline{Pictures and Names: Making the Connection \cite{Joliceur1984}}
 
-
+\textit{Overview}
 
 
 
@@ -90,14 +99,14 @@ The visual world that we experience consists of an infinite number of different 
 
 \underline{Learning and Using Taxonomies For Fast Visual Categorisation - Griffin and Perona 2008}\\
 \textit{Overview} \\
-Pre DL-era paper in which the authors attempt to move from linear computational cost in number of categories of one-vs-other classifier to logarithmic cost by considering a tree-like hierarchical classification. This is particularly importan for large number of labels, say $10^4$. The authors conjecture that humans are able to perform fast visual categorization by moving down a hierarchical taxonomy an hence avoid considering irrelevant classes e.g. to classify an 'object' as a dog first decide if something is an animal or not and after that if the animal is a dog or a cat. To do this need to create hierarchy of categories as a binary tree. This is done using Spatial Pyramid Matchin on the images and their labels.  \\
+Pre DL-era paper in which the authors attempt to move from linear computational cost in number of categories of one-vs-other classifier to logarithmic cost by considering a tree-like hierarchical classification. This is particularly importan for large number of labels, say $10^4$. The authors conjecture that humans are able to perform fast visual categorization by moving down a hierarchical taxonomy an hence avoid considering irrelevant classes e.g. to classify an 'object' as a dog first decide if something is an animal or not and after that if the animal is a dog or a cat. To do this need to create hierarchy of categories as a binary tree. This is done using Spatial Pyramid Matchin on the images and their labels.  
 
 \textit{Thoughts:}
 \begin{itemize}
     \item hierarchy here is in the classification model though the idea is similar to ours that humans hold visual categories
     \item the model here is very complex in that it requires several pre-processing steps e.g with SIFT so very different from DL approach
     \item rather than using wordnet hierarchy they calculate hierarchy from images and their labels. Using wordnet embedding would gives us the ability to draw strength from categories not necessarily in our images (though if we use imagenet, they should mostly be there?)
-
+  \end{itemize}
 
 
 
@@ -185,7 +194,7 @@ This is a object detection paper so in a way quite different from ours i.e. it t
 \item the hierarchical approach is more of a 'means' here and in itself is not much analysed. e.g. there is no discussion of reprsentations
 \item Whilst how theyve built the tree from wordnet is impressive, it only captures hierarchies whilst a word emebedding space may be able to capture more complex relationships
 \item I find their point about graceful degradation fascinating and will look to explore that as well. Very curious if a hierarchically trained version of our model turns out to be more robust to adversarial attacks. 
-\end{itemize} \\
+\end{itemize} 
 
 \newpage
 
@@ -193,11 +202,10 @@ This is a object detection paper so in a way quite different from ours i.e. it t
 \textit{Overview}\\
 In reality, visual views rarely ever contain just a single object with a unique label; rather, we perceive rich semantic information in even the simplest views. Single label classification fails to capture this, hence multi-label classification. Usual approach to multi-label classification treats it as multiple single label classification problems. This fails to capture the dependency between multiple labels e.g. sky and clouds usually appear together but cars and water shouldnt. Machine vision has in the past captured these type of dependencies using markov random fields but such grid models only really control for pairwise dependencies. Cannot handle complex higher order relationships in images. To do this the authors of this paper use RNN on multi-label data and show that this significantly improves classification accuracy. \\
 
-Usually CNNs share features across different classifications, but the problem here is that small objects in images are hard to classify because the features are built on classifying the whole image in the best way possible. RNN helps in this because, as the paper shows, it implicitly creates an 'attention' model where the classifier focuses on different areas of the image based on the RNN memory state. More specifically, this is done by learning join image-label embedding to model semantic relevance, where the image embedding is the lower layer of the CNN. These are projected into same sub-space as label embeddings, and the LSTM memory thus captures higher order dependecies in this embedding space in particular. Model is best understood from figure 4. In prediction stage, beam search algorithm is used because markov property is not satisfied. And to be clear, training is done on multi-label data sets such as MS-COCO.
+Usually CNNs share features across different classifications, but the problem here is that small objects in images are hard to classify because the features are built on classifying the whole image in the best way possible. RNN helps in this because, as the paper shows, it implicitly creates an 'attention' model where the classifier focuses on different areas of the image based on the RNN memory state. More specifically, this is done by learning join image-label embedding to model semantic relevance, where the image embedding is the lower layer of the CNN. These are projected into same sub-space as label embeddings, and the LSTM memory thus captures higher order dependecies in this embedding space in particular. Model is best understood from figure 4. In prediction stage, beam search algorithm is used because markov property is not satisfied. And to be clear, training is done on multi-label data sets such as MS-COCO. \\
 
-Results: state-of-the-art on multi-label since can weed out labels that can't possibly co-occur. On 1000 label data set the performance is poor because the DL model is trained on image net, which doesnt have concepts such as actor/actress that occur in the large multi-label data-set On MS-COCO data set poor performance with few tiny objects such as toaster/hair dryer that have little dependence on other categories. The authors also show nearest neighbours in label-image joint space to illustrate that the model indeed captures semantic similarity. They also show that (using de-convolution), there is implicit attentional mechanism where first the model focuses on entire image and then moves on to smaller parts.
+Results: state-of-the-art on multi-label since can weed out labels that can't possibly co-occur. On 1000 label data set the performance is poor because the DL model is trained on image net, which doesnt have concepts such as actor/actress that occur in the large multi-label data-set On MS-COCO data set poor performance with few tiny objects such as toaster/hair dryer that have little dependence on other categories. The authors also show nearest neighbours in label-image joint space to illustrate that the model indeed captures semantic similarity. They also show that (using de-convolution), there is implicit attentional mechanism where first the model focuses on entire image and then moves on to smaller parts. \\
 
-\\\\
 \textit{Thoughts:}
 \begin{itemize}
     \item A big difference between all these multi-label approaches and ours would be that here semantics are really controlled only by what's visible in images, whilst we could use entire corpus of text / ImageNet hierarchy even for a single image.
@@ -205,7 +213,7 @@ Results: state-of-the-art on multi-label since can weed out labels that can't po
     \item A little like that attention here, I wonder if we could also visualize if using hierarchical model changes the regions of the image that the model focuses on vs. non-hierarchical model
     \item the observation about toaster/hair dryer being difficult to capture semantically is interesting. I wonder if our word embedding approach would suffer from similar? 
     \item bit like the nearest neighbour label prediction here, we should attempt also to predict into the embedding space after training the model. I really wonder if we could thus train on single label data but actually somehow accomplish multi-label predictions (based on predicted embedding space). I guess this would be kind of what the zero-shot learning papers (see the section on those papers) attempt to do using word embeddings. 
-
+  \end{itemize}
 
 
 
