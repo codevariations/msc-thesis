@@ -69,12 +69,26 @@ Summarise your report concisely.
 
 \chapter{Intro/Literature Review Notes}
 
-Humans are able to extract rich semantic information from visual scenes. For instance, upon viewing a picture of a dog, we may also be able to identify it as a specific breed such as a golden retriever. Further, our understanding of the image benefits from semantic knowledge that is not captured explicitly in the visual features of a specific image. For example, we also know that the dog belongs in the category of mammals which, in turn, are animals and thus living entities. While this type of hierarchical semantic visual understanding comes to us effortlessly, it remains a challenging task for computer vision. In fact, most image classification models are trained on data sets with single, mutually exlusive labels and thus the learnt feature representations do not account, for example, for both cat and dog being four-legged animals. Why is this a problem? Generalization?  An exception to this is the area of knowledge transfer and related tasks such as zero-shot learning in which the aim is to predict labels of previously unseen classes of images; a popular approach for zero-shot learning is to borrown strength from, say text data, to create a semantic space that embed all the possible labels of images including those not seen previously. Mapping between images and the semantic space is then learned using the 'seen' images. Once this mapping is learnt, it can be used to transform previously unseen images into the semantic space and then apply some distance measure to label it as the category thats cloest in the embedding space. We postulate that the same idea could also be employed in the simple image classification tasks to achieve better generalization performance. In particular, we will train a deep learning model for image classification against a hierarchical semantic embedding derived from the WordNet database which, as we will show, will correspond to regularizing the model weights to account for these semantic relationships. We will use the recently developed poincare embeddings as the resulting embedding space can capture both the similarity between the possible labels as well as the hierarchical semantic relationships encoded by WordNet graphical model. The learnt model is then transferred to perform standard image classification by adding a final softmax classification layer and fine tuning this agains the ImageNet database. Our results show \dots hopefully some improvements over training the model only against ImageNet which illustrates the benefit of incorporatig semantic knowledge..
+Humans are able to extract rich semantic information from visual scenes. For instance, upon viewing a picture of a dog, we may also be able to identify it as a specific breed such as a golden retriever. Further, our understanding of the image benefits from semantic knowledge that is not captured explicitly in the visual features of a specific image. For example, we also know that the dog belongs in the category of mammals which, in turn, are animals and thus living entities. While this type of hierarchical semantic visual understanding comes to us effortlessly, it remains a challenging task for computer vision. In fact, most image classification models are trained on data sets with single, mutually exlusive labels and thus the learnt feature representations do not account, for example, for both cat and dog being four-legged animals. Why is this a problem? Generalization?  An exception to this is the area of knowledge transfer and related tasks such as zero-shot learning in which the aim is to predict labels of previously unseen classes of images; a popular approach for zero-shot learning is to borrown strength from, say text data, to create a semantic space that embed all the possible labels of images including those not seen previously. Mapping between images and the semantic space is then learned using the 'seen' images. Once this mapping is learnt, it can be used to transform previously unseen images into the semantic space and then apply some distance measure to label it as the category thats cloest in the embedding space. We postulate that the same idea could also be employed in the simple image classification tasks to achieve better generalization performance. In particular, we will train a deep learning model for image classification against a hierarchical semantic embedding derived from the WordNet database which, as we will show, will correspond to regularizing the model weights to account for these semantic relationships. We will use the recently developed poincare embeddings as the resulting embedding space can capture both the similarity between the possible labels as well as the hierarchical semantic relationships encoded by WordNet graphical model. The learnt model is then transferred to perform standard image classification by adding a final softmax classification layer and fine tuning this agains the ImageNet database. Our results show \dots hopefully some improvements over training the model only against ImageNet which illustrates the benefit of incorporatig semantic knowledge.. \\
+
+\newpage
+
+\textbf{PAPERS ON PSYCHOLOGY OF VISUAL PERCEPTION \& SEMANTICS} \\ 
+
+\underline{Basic Objects in Natural Categories \cite{Rosch1976}} \\
+\textit{Overview} \\ 
+The visual world that we experience consists of an infinite number of different stimuli, yet we are able to classify this environment into distinct objects. This is because there is an inherent correlative structure in real world objects. For instance, dogs never have wings and birds will not in general have a furry tail; humans are able to exploit this non-independence by grouping objects into categories based on their visual attributes. Categories in turn can be organised into hierarchical taxonomies. For instance, dogs and birds can be distinct categories but in a taxonomy can also be grouped into a higher level category of animals which are visually distinct from some other higher level category such as furnitures. In this paper the authors show that there is in general one level of abstraction in the taxonomy of visual objects at which humans naturally make the most fundamental distinction between objects i.e. they are the most differentiated at this level; this is called the basic level. The reason for this is that given infinite visual stimuli, it is more efficient to only differentiate objects that are relevant to any task at hand - the basic level represents the level of abstraction that is the most useful in most situations. Categories one level of abstraction above the basic level are called superordinate categories and they are less fundamental for separating objects as they have fewer common attributes with each other. Categories one level below the basic level are subordinate categories, and they are in turn less fundamental for separating objects because there is more sharing of visual features across contrasting subordinate categories. 
+
+
+
+
+
+
 
 
 \textbf{PAPERS USING WORD HIERARCHIES IN IMAGE CLASSIFICATION} \\ 
 
-\underlin{Learning and Using Taxonomies For Fast Visual Categorisation - Griffin and Perona 2008}\\
+\underline{Learning and Using Taxonomies For Fast Visual Categorisation - Griffin and Perona 2008}\\
 \textit{Overview} \\
 Pre DL-era paper in which the authors attempt to move from linear computational cost in number of categories of one-vs-other classifier to logarithmic cost by considering a tree-like hierarchical classification. This is particularly importan for large number of labels, say $10^4$. The authors conjecture that humans are able to perform fast visual categorization by moving down a hierarchical taxonomy an hence avoid considering irrelevant classes e.g. to classify an 'object' as a dog first decide if something is an animal or not and after that if the animal is a dog or a cat. To do this need to create hierarchy of categories as a binary tree. This is done using Spatial Pyramid Matchin on the images and their labels.  \\
 
@@ -83,13 +97,6 @@ Pre DL-era paper in which the authors attempt to move from linear computational 
     \item hierarchy here is in the classification model though the idea is similar to ours that humans hold visual categories
     \item the model here is very complex in that it requires several pre-processing steps e.g with SIFT so very different from DL approach
     \item rather than using wordnet hierarchy they calculate hierarchy from images and their labels. Using wordnet embedding would gives us the ability to draw strength from categories not necessarily in our images (though if we use imagenet, they should mostly be there?)
-
-
-
-
-
-
-
 
 
 
@@ -108,7 +115,7 @@ The study most closely related to ours is Peterson \textit{et al.} \cite{Peterso
    \item the t-sne and dendrograms of representations i do like so might consider something similar
    \item their human similarity judgement experiment is nice but am not very convinced by their results. Would be cool to top them but not sure how realistic it is to get hands on that data since they collected using Amazon MTurk which costs some moneys
    \item Their generalization experiment with basic level bias is also unconvincing to me. They only have two levels of labels with one more general than the other, and a model where features are hierarchical so it doesnt surprise me that the higher level subsumes the lower. If they would have three levels and would generalize to the middle level, then that would be pretty cool. Need to think if this experiment is going to be relevant to us
-\end{itemize} \\
+\end{itemize} 
 
 \newpage
 
