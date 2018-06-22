@@ -159,7 +159,7 @@ Other interesting points: The authors show how the zero-shot learning can be fra
     \item a lot of useful references to go through from this paper, and some other intresting ideas not covered above may be worth exploring later \\
 \end{itemize}
 
-\underline{DeViSE: A Deep Visual-Semantic Embedding Model}
+\underline{DeViSE: A Deep Visual-Semantic Embedding Model - Frome et al. 2013}
 
 \textit{Overview}
 
@@ -178,7 +178,20 @@ The model is then used to perform zero-shot learning and compared against few ba
 \item we will also follow this by removing the softmax layer from our choice of DNN and instead use some similarity metric
 \item we need to thus think what will be our final loss we will use, probably try several different
 \item need to think how to perform testing since predictions just give embedding location. Not sure if the hashing technique is the best way to do this. 
-\item I really dont see why the use of the wikipedia data is superior to wordnet. Since wordnet seems to already correspond to how humans build a taxonomy of visual objects (see earlier 'psychology papers') then surely that would be the preferred approach? In particular, the wikipedia text is clearly larger but will have a lot of noise, and more importantly it may not be predictive of the relationship of how visual features correlate. For instance, the words 'bird' and 'sky' are likely to end up near each other based on the wikipedia data, but the two dont visually resemble each other so perhaps it's not good for them to be close if the aim is to influence what visual features are to be learnt.
+\item I really dont see why the use of the wikipedia data is superior to wordnet. Since wordnet seems to already correspond to how humans build a taxonomy of visual objects (see earlier 'psychology papers') then surely that would be the preferred approach? In particular, the wikipedia text is clearly larger but will have a lot of noise, and more importantly it may not be predictive of the relationship of how visual features correlate. For instance, the words 'bird' and 'sky' are likely to end up near each other based on the wikipedia data, but the two dont visually resemble each other so perhaps it's not good for them to be close if the aim is to influence what visual features are to be learnt. \\
+\end{itemize}
+
+\underline{Zero-shot Recognition via Semantic Embeddings and Knowledge Graphs - Wang et al. 2018}
+
+\textit{Overview}
+In previous literature, zero/few-shot learning has been achieved via knowledge transfer. Two different routes have been used for knowledge transfer. The first is to use implicit knowledge representations in the form of semantic embeddings create from some adjacent text data. Accoding to the authors, the generalization power of semantic models is limited, partly by the mapping models themselves. Further, there is no easy way to learn semantic embeddings from structured information such as knowledge graphs. Indeed, the second approach to zero-shot learning has been to use explicit knowledge transfer of rules and relationships. A simple example given is to learn a separate classifier for different compositional categories of a visual object.
+
+This paper's novel contribution is to use both implicit knowledge representation (i.e. word embeddings) and explicit ones (i.e. knowledge graph) to learn a visual classifier. This is done by constructing a knowledge graph where the nodes of the knowledge graphs are 
+
+\textit{Thoughts:}
+
+\begin{itemize}
+\item the authors say its hard to learn semantic embeddings from structured information but actually Poincare embedding should allow this since they precisely try to represent hierarchical data in embedding e.g. wordnet. 
 \end{itemize}
 
 \newpage
