@@ -92,27 +92,22 @@ The visual world that we experience consists of an infinite number of different 
 
 \textit{Overview}
 
-
-
-
-\textbf{PAPERS USING WORD HIERARCHIES IN IMAGE CLASSIFICATION} \\ 
-
-\underline{Learning and Using Taxonomies For Fast Visual Categorisation - Griffin and Perona 2008}\\
-\textit{Overview} \\
-Pre DL-era paper in which the authors attempt to move from linear computational cost in number of categories of one-vs-other classifier to logarithmic cost by considering a tree-like hierarchical classification. This is particularly importan for large number of labels, say $10^4$. The authors conjecture that humans are able to perform fast visual categorization by moving down a hierarchical taxonomy an hence avoid considering irrelevant classes e.g. to classify an 'object' as a dog first decide if something is an animal or not and after that if the animal is a dog or a cat. To do this need to create hierarchy of categories as a binary tree. This is done using Spatial Pyramid Matchin on the images and their labels.  
+This extends the work of \cite{Rosch1976}. The authors find that the basic level is a level at which identification is fastests on average. In fact, it is found that humans will work through taxonomy by first classifying an object at basic level and after that at a subordinate level. The classification we perform is thus time-dependent. Further the authors find that the same process is used to name text and visual data, which implies that there is an important link between our perception of visual scenes and semantic knowledge. More specifically, humans are able to use semantic knowledge to generalize to superordinate categories from seen objects. For example, upon seeing an image of a chair, we can say that this belongs to a broader category of furniture eventhough the image alone doesn't reveal that such higher level of abstraction exists. On the other hand, upon hearing about 'an office chair with wheels' we can easily access our visual memory to imagine what this would look like. Thus there is a strong link between our visual and semantic processes. Another important contribution of this work is that whilst basic level is indeed the level where usually identification is first made, this is not true always, especially when you have atypical examples: penguin for instance would be first identified as penguing rather than a bird which is the basic-level. In general, classification is also constrained by the subject knowledge, for instance a bird-watcher may identify a bird as a Robin but most people will just call it a 'bird'. 
 
 \textit{Thoughts:}
 \begin{itemize}
-    \item hierarchy here is in the classification model though the idea is similar to ours that humans hold visual categories
-    \item the model here is very complex in that it requires several pre-processing steps e.g with SIFT so very different from DL approach
-    \item rather than using wordnet hierarchy they calculate hierarchy from images and their labels. Using wordnet embedding would gives us the ability to draw strength from categories not necessarily in our images (though if we use imagenet, they should mostly be there?)
-  \end{itemize}
+  \item it is interesting that usually subordinate classification depends on the basic level. DL should thus take account of hierarchical semantic information optimally.
+  \item in general the close relationship between semantic and visual identification corroborates our aim of using semantic embedding. 
+  \item one concern is that we are limited by the lowest level of labels in the imagenet labels, however otherwise model training, unlike humans, is not restricted by classification time and ability to recall detailed labels and thus we should be able to incorporate all the possible semantic knowledge \\
+\end{itemize}
 
 
+\underline{Learning Hierarchical Visual Representations in DNNs Using Hierarchical Linguistic Labels \cite{Peterson2018}}
 
-\underline{Learning Hierarchical Visual Representations in DNNs Using Hierarchical Linguistic Labels - Peterson et al. 2018}. \\ 
-\textit{Overview} \\
-The study most closely related to ours is Peterson \textit{et al.} \cite{Peterson2018} who investigate whether the use of hierarchical labels helps DNNs to learn better visual representations. As DNNs are typically trained against single labels, the features learned are biased by the arbitrary level of these labels; for instance, different breeds of dogs each have their own label in the widely used ImageNet data-set, but there is no information in the labels that informs the models that all the different breeds are part of a larger category of 'dogs' \cite{Peterson2018}. In order to control for these hierarchical relationships in categories, the authors define two levels of labels for each image, called baseline (top-level, e.g. 'dog') and subordinate level (original low-level label e.g. 'golden retriever'). Peterson \textit{et al.} argue that this is much closer to how humans represent and learn object categories. To test this, they train four versions of the InceptionV3 \cite{inception} DNN architecture on the ImageNet Large Scale Visual Recognition Challenge 2012 data (ImageNet hereon): original pre-trained model that only uses subordinate-level labels, model pre-trained on the subordinate labels and fine-tuned on basic-level labels, model pre-trained on basic-level and fine tuned on subordinate lables, and finally a model trained purely on basic-level labels. Several interesting results were attained. First, the authors found that including the basic-level labels led to a much more clustered representation of the feature spaces (e.g. the features vectors of different breeds of dogs were now bundeled up together whilst if trained on just subordinate labels, then there was no clustering of similar categories). Additionally, dendrogram of hierarchical clustering of thelearned feature space with basic labels showed a clear separation between between nature related objectes 'natural images' and images of man-made objects 'artificial images', eventhough no such information about the two groups was given to the model \textit{a priori}. The authors note that this is close to humans' mental representations. To further compare the model's learn representation to humans, the authors investigate how well the model is able to capture human similarity judgements. For the models, similarity between two images is measured as the inner product of their feature representations, and this was compared to human ratings (on scale 1 to 10) of similarity of the same images. Whilst the authors found that on aggregate including basic labels improved the explanatory power of the DNN, the $R^2$ was not very high (0.57) and as noted, similar results have in the past been attained using only the subordinate labels. Finally, the paper also presents a generalization experiment in which the model is given just a few examples of either sub or basic level images and then told to find other images from the data set which it would predict to have the same label. The results of this few-shot generalization experiment show similar results as corresponding human studies \cite{XuTennenbaum} in that introducing basic-level in model training leads to basic-level bias (even if the example given is of subordinate level, the model will generalize by seeking matches in basic level).\\ \\
+\textit{Overview}
+
+This paper is the only one I have found that takes a psychological perspective and tries to make a link between the above two papers (\cite{Rosch1976}, \cite{Joliceur1984}) and deep learning. In the paper the authors investigate whether the use of two-level hierarchical labels helps DNNs to learn better visual representations. As DNNs are typically trained against single labels, the features learned are biased by the arbitrary level of these labels; for instance, different breeds of dogs each have their own label in the widely used ImageNet data-set, but there is no information in the labels that informs the models that all the different breeds are part of a larger category of 'dogs'. In order to control for these hierarchical relationships in categories, the authors define two levels of labels for each image, called base level (top-level, e.g. 'dog') and subordinate level (original low-level label e.g. 'golden retriever'). They argue that this is much closer to how humans represent and learn object categories. To test this, they train four versions of the InceptionV3 \cite{Szegedy2015} DNN architecture on the ImageNet Large Scale Visual Recognition Challenge 2012 data (ImageNet hereon): original pre-trained model that only uses subordinate-level labels, model pre-trained on the subordinate labels and fine-tuned on basic-level labels, model pre-trained on basic-level and fine tuned on subordinate lables, and finally a model trained purely on basic-level labels. Several interesting results were attained. First, the authors found that including the basic-level labels led to a much more clustered representation of the feature spaces (e.g. the features vectors of different breeds of dogs were now bundeled up together whilst if trained on just subordinate labels, then there was no clustering of similar categories). Additionally, dendrogram of hierarchical clustering of thelearned feature space with basic labels showed a clear separation between between nature related objectes 'natural images' and images of man-made objects 'artificial images', eventhough no such information about the two groups was given to the model \textit{a priori}. The authors note that this is close to humans' mental representations. To further compare the model's learn representation to humans, the authors investigate how well the model is able to capture human similarity judgements. For the models, similarity between two images is measured as the inner product of their feature representations, and this was compared to human ratings (on scale 1 to 10) of similarity of the same images. Whilst the authors found that on aggregate including basic labels improved the explanatory power of the DNN, the $R^2$ was not very high (0.57) and as noted, similar results have in the past been attained using only the subordinate labels. Finally, the paper also presents a generalization experiment in which the model is given just a few examples of either sub or basic level images and then told to find other images from the data set which it would predict to have the same label. The results of this few-shot generalization experiment show similar results as corresponding human studies \cite{Xu2000} in that introducing basic-level in model training leads to basic-level bias (even if the example given is of subordinate level, the model will generalize by seeking matches in basic level).
+
 \textit{Thoughts:}
 \begin{itemize}
     \item This is probably the most relevant papers to ours, though I dont actually think it's too similar because they use only two levels of labels so focus on just basic/subordinate, so I dont really see this as hierarchical. It's quite different from how we are going to do with word2vec or some other embedding that allows a much richer relationship between the words rather than just a 'vertical' link between two categories.
@@ -124,62 +119,92 @@ The study most closely related to ours is Peterson \textit{et al.} \cite{Peterso
    \item the t-sne and dendrograms of representations i do like so might consider something similar
    \item their human similarity judgement experiment is nice but am not very convinced by their results. Would be cool to top them but not sure how realistic it is to get hands on that data since they collected using Amazon MTurk which costs some moneys
    \item Their generalization experiment with basic level bias is also unconvincing to me. They only have two levels of labels with one more general than the other, and a model where features are hierarchical so it doesnt surprise me that the higher level subsumes the lower. If they would have three levels and would generalize to the middle level, then that would be pretty cool. Need to think if this experiment is going to be relevant to us
+   \item with regards to \cite{Rosch1976},\cite{Joliceur1984} this paper also doesnt address that level of identification depends on factors such as time-limit of identification and knowledge of the subject. Thus our approach of training with full semantic embedding is superior. 
+   \item in general the technical methodology of our model will be different too
 \end{itemize} 
 
 \newpage
 
-\textbf{NLP WORD EMBEDDING PAPERS} \\
-These papers provide important background on word embeddings. Main idea is to represent words in vector space such that distance between any two vectors reflects the similarity of those two words (semantically). 
+\textbf{PAPERS ON SEMANTIC KNOWLEDGE TRANSFER \& \\ZERO-SHOT LEARNING}
 
-\underline{Improving Word Representations via Global Context and Multiple Word Prototypes - Huang et al. 2012} \\
-\textit{Overview}\\
-Main point is that in order to cluster words vectors appropriately, need to consider both syntax and semantics. Most previous approaches have only done this in the context of the local problem, but employing a global data can provide more accurate resuls, as it would better capture semantics whilst still contolling also for syntax. A joint model is hence used. Indeed, the authors show that this joint model provides better correlation with human similarity judgement of words. \\
+These zero-shot learning papers are very much related to ours in the sense that they try to achieve generalization via word embeddings into unseen image classes. The DeViSE paper is probably the most similar though others relevant too. In fact, some of them already used this idea before the deep learning revolution.\\
 
-More specifically, 'the model jointly learns word representation while learning to discriminate the next word, given a short word sequence (local contexti, syntactic information) and a document of text the sequence appears in (global context, semantic information)'. Two standard neural networks are used to predict scores that reflect the likelihood of the most recent word occuring given the local and global context. Sum of the two scores creates a total score for the most recent word, which is then used to construct a hinge-loss type of function to discriminate against any other possible word that could have occured, which is then minimized.  \\
-\textit{Thoughts:}\\
-\begin{itemize}
-    \item This seems like a pre-cursor to GloVe
-\end{itemize}
+\underline{Large Scale Image Annotation: Learning to Rank with Joint Word-image Embeddings \cite{Weston2010}}
 
-\newpage
-\textbf{ZERO-SHOT LEARNING AND RELATED PAPERS} \\
-These zero-shot learning papers are very much related to ours in the sense that they try to achieve generalization via word embeddings into unseen image classes. The DeViSE paper is probably the most similar though others relevant too. In fact, some of them already used this idea before the deep learning revolution. \\
+\textit{Overview}
 
-\underline{Large Scale Image Annotation: Learning to Rank with Joint Word-image Embeddings - Weston et al. 2010} \\
-\textit{Overview}\\
 This is a pre-deep learning paper, on how to handle efficiently annotation of 'new' large scale data-sets such as ImageNet.  Approach is to learn to represent images and annotations jontly in a low dimensional embedding space, idea being that low-dimension at test time translated into faster model. Indeed, a pre-deep learning methods such as performing knn in image feature space suffer from the curse of dimensionality.  To do this they use a loss function that allow the model to learn-to-rank i.e. to optimize precision of k-top annotations. In practice, their model performs linear mapping into joint embedding space (i.e. annotations and images are multiplied by their own matrices of equal dimensions). \\
-\textit{Thoughts:} \\
+\textit{Thoughts:}
 \begin{itemize}
     \item while impressive at the time, no longer state-of-the-art, but their point about curse of dimensionality may still be important even for DL. Say if a DL model has a softmax of too high N, it becomes harder and harder to separate out different classes so word embedding may help here
-    \item The model used by the authors is just a linear matrix transformation. Thus DeViSE paper can be seen as a big improvment over this.
+    \item The model used by the authors is just a linear matrix transformation. Thus DeViSE paper can be seen as a big improvment over this. \\
   \end{itemize}
 
-\underline{Zero-shot Learning Through Cross-modal Transfer - Socher et al. 2013} \\
-\textit{Overview} \\
-Motivated by the idea that humans have the ability to identify unseen objects even if they know about that object from having read about it. The authords introduce a model that can predict both seen and unseen classes: 'without having ever seen a cat the model can say whether it is indeed a cat or another category it has seen during training'. Large unsupervised text data is used to create word embeddings and then images are mapped into this space using neural networks. Prediction of unknown classes works by determining whether the test image is on the same manifold as known examples - this is based on outlier detection. One advantage over previous works is that unsupervised text corpus can be used rather than a manually constructed word embedding space. \\
+\underline{Zero-shot Learning Through Cross-modal Transfer \cite{Socher}}
 
-The model used to create unsupervised word embedding is based on \cite{HuangWordemb} (see above), which can be seen as earlier version of GloVe. They perform this on Wikipedia text data to create word embeddings that capture local and global context. Image features are then computed in unsupervised fashion using orthogonal matching pursuit. With the word and image feature vectors available, a two layer neural network is trained on the images with known classes into the word embedding space. The authors then use t-sne to visually illustrate that if unseen classes are fed into the model, the predicted word vectors will not be close to the vectors of known classes (which are clustered in turn). The closest known classes to the zero-shot classes however give idea of their semantics. In practice, to accomplish above we need to first detect whether an image is of a known class or of unknown class, and for this purpose a binary novelty random variable is employed (this is becuase otherwise would never predict any of the unseen classes if only used training data of seen classes). An outlier detection (based on Gaussian distribution) to predict whether an image is of unseen class given its predicted word embedding vector. If image is predicted as seen, a softmax classifier is used to predict its label, whereas, if image is predicted as new, an isometric Gaussian is assumed around its word vector and its class is assigned based on likelihood i.e. distance betwen predicted word embedding and full-word embedding space that contains also the unseen classes (this is the classic zero-shot trick using word data). The equations in the paper make this much clearer so will add those. In training, CIFAR-10 image data is used with 2 classes omitted for testing. The results depend strongly on the threshold used to determine whether image is in an unseen or seen class.  \\
+\textit{Overview}
 
-Other interesting points: The authors show how the zero-shot learning can be framed in a fully bayesian way. They also compare the novelty detection in word embedding space as above, to doing novelty detection in image feature space and find the former superior as it adds the additional information from semantics. \\
+Motivated by the idea that humans have the ability to identify unseen objects even if they know about that object from having read about it. The authords introduce a model that can predict both seen and unseen classes: 'without having ever seen a cat the model can say whether it is indeed a cat or another category it has seen during training'. Large unsupervised text data is used to create word embeddings and then images are mapped into this space using neural networks. Prediction of unknown classes works by determining whether the test image is on the same manifold as known examples - this is based on outlier detection. One advantage over previous works is that unsupervised text corpus can be used rather than a manually constructed word embedding space.
 
-\textit{Thoughts:}\\
+The model used to create unsupervised word embedding is based on \cite{HuangWordemb} (see above), which can be seen as earlier version of GloVe. They perform this on Wikipedia text data to create word embeddings that capture local and global context. Image features are then computed in unsupervised fashion using orthogonal matching pursuit. With the word and image feature vectors available, a two layer neural network is trained on the images with known classes into the word embedding space. The authors then use t-sne to visually illustrate that if unseen classes are fed into the model, the predicted word vectors will not be close to the vectors of known classes (which are clustered in turn). The closest known classes to the zero-shot classes however give idea of their semantics. In practice, to accomplish above we need to first detect whether an image is of a known class or of unknown class, and for this purpose a binary novelty random variable is employed (this is becuase otherwise would never predict any of the unseen classes if only used training data of seen classes). An outlier detection (based on Gaussian distribution) to predict whether an image is of unseen class given its predicted word embedding vector. If image is predicted as seen, a softmax classifier is used to predict its label, whereas, if image is predicted as new, an isometric Gaussian is assumed around its word vector and its class is assigned based on likelihood i.e. distance betwen predicted word embedding and full-word embedding space that contains also the unseen classes (this is the classic zero-shot trick using word data). The equations in the paper make this much clearer so will add those. In training, CIFAR-10 image data is used with 2 classes omitted for testing. The results depend strongly on the threshold used to determine whether image is in an unseen or seen class.
+
+Other interesting points: The authors show how the zero-shot learning can be framed in a fully bayesian way. They also compare the novelty detection in word embedding space as above, to doing novelty detection in image feature space and find the former superior as it adds the additional information from semantics.
+
+\textit{Thoughts:}
 \begin{itemize}
     \item the zero-shot approach here may not be fully relevant to us but I still wrote it up so have a general idea of why word embeddings are used in these papers. Further, I do find this an interesting application and if we have time, may want to consider zero-shot learning
     \item no deep models used here really though they do call their two layer neural network a deep model, different times \dots no convolutions though
     \item hierarchical information is not used
     \item a major problem is that the threshold used to discriminate between known and unknown class creates an inherent trade-off between the ability to predict these two. The DeViSE model improves on this (see below)
-    \item a lot of useful references to go through from this paper, and some other intresting ideas not covered above may be worth exploring later
+    \item a lot of useful references to go through from this paper, and some other intresting ideas not covered above may be worth exploring later \\
 \end{itemize}
 
-\underline{DeViSE: A Deep Visual-Semantic Embedding Model} \\
-\textit{Overview} \\
-Typical object classification models treat all the categories unrelated, via N-way softmax. This leads to models that 'cannot transfer semantic information about learned labels to unseen words or phrases. Solution this paper proposes is to use both standard image data and then an unrelated large unannotated text data to learn semantic information. In particular, the model maps image inputs into this rich semantic embedding space. The results show similar performance to standard state-of-the-art DL models, but with a significant improvement in that much less 'semantically unreasonable' mistakes are made. Perhaps more importantly, they show this joint training allows the model to generalize to 20000 visual categories, despite having trained the model on just 1000 categories.  \\
+\underline{DeViSE: A Deep Visual-Semantic Embedding Model}
+
+\textit{Overview}
+
+Typical object classification models treat all the categories unrelated, via N-way softmax. This leads to models that 'cannot transfer semantic information about learned labels to unseen words or phrases. Solution this paper proposes is to use both standard image data and then an unrelated large unannotated text data to learn semantic information. In particular, the model maps image inputs into this rich semantic embedding space. The results show similar performance to standard state-of-the-art DL models, but with a significant improvement in that much less 'semantically unreasonable' mistakes are made. Perhaps more importantly, they show this joint training allows the model to generalize to 20000 visual categories, despite having trained the model on just 1000 categories.
 
 DeViSE extends work of Weston et al. (above) as it allows non-linearities and also capture semantics from text that's not contained in the image lables, hence allowing for zero-shot generalization. It also improves on the Socher et al. paper by using a deep model and avoid the trade-off which that paper has in predicting seen and unseen classes. That model also had several different models whilst this one uses a unified model that only uses embeddings.
 
+\newpage
+
+\textbf{PAPERS USING WORD HIERARCHIES IN IMAGE CLASSIFICATION}
+
+\underline{Learning and Using Taxonomies For Fast Visual Categorisation - Griffin and Perona 2008}
+
+\textit{Overview}
+
+Pre DL-era paper in which the authors attempt to move from linear computational cost in number of categories of one-vs-other classifier to logarithmic cost by considering a tree-like hierarchical classification. This is particularly importan for large number of labels, say $10^4$. The authors conjecture that humans are able to perform fast visual categorization by moving down a hierarchical taxonomy an hence avoid considering irrelevant classes e.g. to classify an 'object' as a dog first decide if something is an animal or not and after that if the animal is a dog or a cat. To do this need to create hierarchy of categories as a binary tree. This is done using Spatial Pyramid Matchin on the images and their labels.  
+
+\textit{Thoughts:}
+\begin{itemize}
+    \item hierarchy here is in the classification model though the idea is similar to ours that humans hold visual categories
+    \item the model here is very complex in that it requires several pre-processing steps e.g with SIFT so very different from DL approach
+    \item rather than using wordnet hierarchy they calculate hierarchy from images and their labels. Using wordnet embedding would gives us the ability to draw strength from categories not necessarily in our images (though if we use imagenet, they should mostly be there?)
+  \end{itemize}
 
 
-\newpage 
+
+\newpage
+
+\textbf{NLP WORD EMBEDDING PAPERS}
+
+These papers provide important background on word embeddings. Main idea is to represent words in vector space such that distance between any two vectors reflects the similarity of those two words (semantically). 
+
+\underline{Improving Word Representations via Global Context and Multiple Word Prototypes - Huang et al. 2012}
+
+\textit{Overview}
+
+Main point is that in order to cluster words vectors appropriately, need to consider both syntax and semantics. Most previous approaches have only done this in the context of the local problem, but employing a global data can provide more accurate resuls, as it would better capture semantics whilst still contolling also for syntax. A joint model is hence used. Indeed, the authors show that this joint model provides better correlation with human similarity judgement of words.
+
+More specifically, 'the model jointly learns word representation while learning to discriminate the next word, given a short word sequence (local contexti, syntactic information) and a document of text the sequence appears in (global context, semantic information)'. Two standard neural networks are used to predict scores that reflect the likelihood of the most recent word occuring given the local and global context. Sum of the two scores creates a total score for the most recent word, which is then used to construct a hinge-loss type of function to discriminate against any other possible word that could have occured, which is then minimized.
+\textit{Thoughts:}
+\begin{itemize}
+    \item This seems like a pre-cursor to GloVe
+\end{itemize}
+
+\newpage
 
 \textbf{MULTI-LABEL CLASSIFICATION PAPERS} \\
 According to current plan, we are concerned with typical single-label classification. Nevertheless, multi-label image classification is relevant to us since those papers have to explicitly try to learn relationships between many related categories in objects. Different papers below approach this in different ways and have somewhat differing aims. They do share our goal of trying enforce some way of semantic understanding into DL papers. I do sometimes feel that multi-label classification is 'under rated'; it's much closer to how I imagine that humans process visual data. \\
