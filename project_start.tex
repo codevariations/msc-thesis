@@ -284,6 +284,15 @@ Is it really a reasonable assumption that semantically similar words should be c
 
 In Bayesian framework, the use of embedding would probably corresond to some prior that is the wordnet graph
 
+\newpage
+
+\chapter{Implementation Ideas}
+\begin{itemize}
+\item which loss function to compare predicted and ground-truth embedding vectors. Dot product hinge loss as in DeVisE? 
+\item at test time, how to predict labels i.e. to find nearest neighbour? Some tree or hashing e.g. DeViSE
+\item which baselines to use? Standard inception-v3, random embedding, word2vec embedding, 
+\item what evaluations to make? resonableness of errors
+\end{itemize}
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
