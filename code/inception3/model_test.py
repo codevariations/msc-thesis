@@ -1,4 +1,5 @@
 import torch
+import torchvision
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
@@ -8,7 +9,7 @@ import torchvision.models as models
 from torchvision import transforms, datasets
 import matplotlib.pyplot as plt
 import os
-
+import numpy as np
 
 #load pre-trained model insead
 #inception3 =  models.inception_v3(pretrained=True)
@@ -37,12 +38,18 @@ class_names = img_datasets['train'].classes
 
 #input some data
 img_in, imb_label = next(iter(dataloaders['train']))
-plt.imshow(img_in)
 
+#plot it
+def imshow(inp, title=None):
+    inp = inp.numpy().transpose((1, 2, 0))
+    inp = np.clip(inp, 0, 1)
+    plt.imshow(inp)
+    if title is not None:
+        plt.title(title)
 
-
-
-
+out = torchvision.utils.make_grid(img_in)
+imshow(out)
+plt.show()
 
 
 
