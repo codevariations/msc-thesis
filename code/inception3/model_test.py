@@ -10,10 +10,8 @@ import torchvision.models as models
 from torchvision import transforms, datasets
 import matplotlib.pyplot as plt
 import os
+import copy
 import numpy as np
-
-#load pre-trained model insead
-#inception3 =  models.inception_v3(pretrained=True)
 
 #define data loader
 data_transforms = {
@@ -60,7 +58,7 @@ def train_model(model, criterion, optimizer, scheduler, n_epochs=25):
     best_top_acc = 0.0 
     best_five_acc = 0.0 
 
-    for epoch in range(num_epochs):
+    for epoch in range(n_epochs):
         print('Epoch {}/{}'.format(epoch, n_epochs-1))
         print('-'*10)
 
@@ -114,9 +112,43 @@ def train_model(model, criterion, optimizer, scheduler, n_epochs=25):
     model.load_state_dict(best_model_ws)
     return model
 
+#visualize model prediction
+def visualize_pred(model, n_imgs=6):
+    was_training = model.training
+    model.eval()
+    imgs_so_far = 0 
+    fig = plt.figure()
+
+    with torch.no_grad():
+        for i, (inputs, labels) in enumarate(dataloaders['val']):
+            outputs = model(inputs)
+            _, pred = torch.max(outputs, 1)
+
+            for j in range(inputs.size()[0]):
+                imgs_so_far += 1
+                ax = plt.subplot(n_imgs//2, 2, imgs_so_far)
+                ax.axis('off')
+                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
+                imshow(inputs.cpu().data[j])
+
+                if imgs_so_far == n_imgs:
+                    model.train(mode=was_training)
+                    return
+        model.train(mode=was_training)
 
 
+#load pre-trained model 
+model =  models.inception_v3(pretrained=True)
+n_feats = model.fc.in_features
+model.fc = nn.Linear(n_feats, 2)
+criterion = nn.CrossEntropyLoss()
 
+optimizer_m = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_m, step_size=7, gamma=0.1)
+
+model = train_model(model, criterion, optimizer_m, exp_lr_scheduler, 
+       n_epochs=25)
 
 
 
