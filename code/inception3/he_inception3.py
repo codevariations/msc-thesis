@@ -38,7 +38,7 @@ class HEInception3(nn.Module):
 
     def __init__(self, num_classes=1000, num_emb_dims=10, aux_logits=True,
             transform_input=True):
-        super(Inception3, self).__init__()
+        super(HEInception3, self).__init__()
         self.aux_logits = aux_logits
         self.transform_input = transform_input
         self.Conv2d_1a_3x3 = BasicConv2d(3, 32, kernel_size=3, stride=2)
