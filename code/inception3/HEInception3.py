@@ -56,12 +56,14 @@ class HEInception3(nn.Module):
         self.Mixed_6e = InceptionC(768, channels_7x7=192)
         if aux_logits:
         #Adjust the auxillary to predict embedding shape
-            self.AuxLogits = InceptionAux(768, num_classes*num_emb_dims)
+            self.AuxLogits = InceptionAux(768, num_classes, num_emb_dims)
         self.Mixed_7a = InceptionD(768)
         self.Mixed_7b = InceptionE(1280)
         self.Mixed_7c = InceptionE(2048)
         #Adjust the FC to predict into embedding shape
         self.dense = nn.Linear(2048, num_classes*num_emb_dims)
+        self.n_classes = num_classes
+        self.n_emb_dims = num_emb_dims
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
@@ -129,7 +131,7 @@ class HEInception3(nn.Module):
         # 2048
         x = self.dense(x)
         # 1000*num_emb_dim (num_classes*num_emb_dim)
-        x = x.view(num_classes, num_emb_dims)
+        x = x.view(-1, self.n_classes, self.n_emb_dims)
         # num_classes x num_embd_dims
         if self.training and self.aux_logits:
             return x, aux
@@ -313,13 +315,15 @@ class InceptionE(nn.Module):
 
 class InceptionAux(nn.Module):
 
-    def __init__(self, in_channels, num_classes):
+    def __init__(self, in_channels, num_classes, num_emb_dims):
         super(InceptionAux, self).__init__()
         self.conv0 = BasicConv2d(in_channels, 128, kernel_size=1)
         self.conv1 = BasicConv2d(128, 768, kernel_size=5)
         self.conv1.stddev = 0.01
-        self.dense = nn.Linear(768, num_classes)
+        self.dense = nn.Linear(768, num_classes*num_emb_dims)
         self.dense.stddev = 0.001
+        self.n_classes = num_classes
+        self.n_emb_dims = num_emb_dims
 
     def forward(self, x):
         # 17 x 17 x 768
@@ -333,7 +337,7 @@ class InceptionAux(nn.Module):
         # 768
         x = self.dense(x)
         # 1000 * num_emb_dims
-        x = x.view(num_classes, num_emb_dims)
+        x = x.view(-1, self.n_classes, self.n_emb_dims)
         # 1000 x num_emb_dims
         return x
 
