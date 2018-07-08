@@ -36,7 +36,7 @@ def he_inception_v3(pretrained=False, **kwargs):
 
 class HEInception3(nn.Module):
 
-    def __init__(self, num_classes=1000, num_emb_dims=10, aux_logits=True,
+    def __init__(self, num_classes=1000, num_emb_dims=5, aux_logits=True,
             transform_input=True):
         super(HEInception3, self).__init__()
         self.aux_logits = aux_logits
@@ -61,7 +61,7 @@ class HEInception3(nn.Module):
         self.Mixed_7b = InceptionE(1280)
         self.Mixed_7c = InceptionE(2048)
         #Adjust the FC to predict into embedding shape
-        self.dense = nn.Linear(2048, num_classes*num_emb_dims)
+        self.dense = nn.Linear(2048, num_emb_dims)
         self.n_classes = num_classes
         self.n_emb_dims = num_emb_dims
 
@@ -130,9 +130,7 @@ class HEInception3(nn.Module):
         x = x.view(x.size(0), -1)
         # 2048
         x = self.dense(x)
-        # 1000*num_emb_dim (num_classes*num_emb_dim)
-        x = x.view(-1, self.n_classes, self.n_emb_dims)
-        # num_classes x num_embd_dims
+        # num_emb_dim
         if self.training and self.aux_logits:
             return x, aux
         return x
@@ -320,7 +318,7 @@ class InceptionAux(nn.Module):
         self.conv0 = BasicConv2d(in_channels, 128, kernel_size=1)
         self.conv1 = BasicConv2d(128, 768, kernel_size=5)
         self.conv1.stddev = 0.01
-        self.dense = nn.Linear(768, num_classes*num_emb_dims)
+        self.dense = nn.Linear(768, num_emb_dims)
         self.dense.stddev = 0.001
         self.n_classes = num_classes
         self.n_emb_dims = num_emb_dims
@@ -336,9 +334,7 @@ class InceptionAux(nn.Module):
         x = x.view(x.size(0), -1)
         # 768
         x = self.dense(x)
-        # 1000 * num_emb_dims
-        x = x.view(-1, self.n_classes, self.n_emb_dims)
-        # 1000 x num_emb_dims
+        # num_emb_dims
         return x
 
 

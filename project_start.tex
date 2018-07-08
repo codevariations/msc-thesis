@@ -71,6 +71,11 @@ Summarise your report concisely.
 
 Humans are able to extract rich semantic information from visual scenes. For instance, upon viewing a picture of a dog, we may also be able to identify it as a specific breed such as a golden retriever. Further, our understanding of the image benefits from semantic knowledge that is not captured explicitly in the visual features of a specific image. For example, we also know that the dog belongs in the category of mammals which, in turn, are animals and thus living entities. While this type of hierarchical semantic visual understanding comes to us effortlessly, it remains a challenging task for computer vision. In fact, most image classification models are trained on data sets with single, mutually exlusive labels and thus the learnt feature representations do not account, for example, for both cat and dog being four-legged animals. Why is this a problem? Generalization?  An exception to this is the area of knowledge transfer and related tasks such as zero-shot learning in which the aim is to predict labels of previously unseen classes of images; a popular approach for zero-shot learning is to borrown strength from, say text data, to create a semantic space that embed all the possible labels of images including those not seen previously. Mapping between images and the semantic space is then learned using the 'seen' images. Once this mapping is learnt, it can be used to transform previously unseen images into the semantic space and then apply some distance measure to label it as the category thats cloest in the embedding space. We postulate that the same idea could also be employed in the simple image classification tasks to achieve better generalization performance. In particular, we will train a deep learning model for image classification against a hierarchical semantic embedding derived from the WordNet database which, as we will show, will correspond to regularizing the model weights to account for these semantic relationships. We will use the recently developed poincare embeddings as the resulting embedding space can capture both the similarity between the possible labels as well as the hierarchical semantic relationships encoded by WordNet graphical model. The learnt model is then transferred to perform standard image classification by adding a final softmax classification layer and fine tuning this agains the ImageNet database. Our results show \dots hopefully some improvements over training the model only against ImageNet which illustrates the benefit of incorporatig semantic knowledge.. \\
 
+
+Enforcing hierarchical labels should also provide more robust representations that is more akin to evidence that we represent objects by their components \cite{Biederman1989} because e.g. Dog and Cat and share many visual similarities, thus they should borrow strength from both of them. 
+
+
+
 \newpage
 
 \textbf{PAPERS ON PSYCHOLOGY OF VISUAL PERCEPTION \& SEMANTICS} \\ 
@@ -292,6 +297,18 @@ In Bayesian framework, the use of embedding would probably corresond to some pri
 \item at test time, how to predict labels i.e. to find nearest neighbour? Some tree or hashing e.g. DeViSE
 \item which baselines to use? Standard inception-v3, random embedding, word2vec embedding, 
 \item what evaluations to make? resonableness of errors
+\end{itemize}
+
+\newpage
+
+\chapter{Deep Learning in Computer Vision}
+
+Upon observing almost any visual scene, humans are able to effortlessly cut it up into segments of distinct objects \cite{Rosch1976}. This is a remarkable ability considering that the world we live in can present us with an infinite amount of visual variation to our retinas and yet we are able to easily recognize tens of thousands of distinct categories \cite{Biederman1989} with invariance to various factors such as lighting, shade, orientation and partial occlusion \cite{DiCarlo2012}. Replicating this type of performance in artificial object recognition has been one of the main focuses of computer vision researchers over the past several decades.
+
+
+\begin{itemize}
+    \item deep learning considered is supervised
+    \item it has been shown that representations learned by modern DNN are starting to approach those more similar to those learnt by the human IT cortext \cite{Cadieu2014}. Same paper: key to human visual object recognition is the representation learnt in the cortical ventral stream from visual signals from the eyes through the visual cortext from primary visual area V1, culiminating in the IT cortext. 
 \end{itemize}
 
 \bibliographystyle{ieeetr}
