@@ -66,7 +66,6 @@ out, out2 = model(inp)
 #        z = th.sqrt(th.pow(x, 2) - 1)
 #        return th.log(x+z)
 
-
 pdb.set_trace()
 
 
