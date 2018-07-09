@@ -21,7 +21,10 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+
+from poincare_model import PoincareDistance as poincDist
 import pdb
+
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -72,21 +75,13 @@ best_prec1 = 0
 
 
 def main():
-    global args, best_prec1, poinc_emb
+    global args, best_prec1, poinc_emb, imgnet_poinc_wgt, imgnet_poinc_labels
     args = parser.parse_args()
 
     #load poincare embedding
-    wnid2noun = pd.read_csv(
-              '/home/hermanni/thesis/msc-thesis/code/inception3/wnid2noun.csv')
-    poinc_emb = torch.load('nouns.pth')
-    emb_names_clean = [i.split('.')[0] for i in poinc_emb['objects']]
-    emb_names_clean = [i.replace('_',' ') for i in emb_names_clean]
-    poinc_emb['objects'] = emb_names_clean
-    poinc_names_df = pd.DataFrame(poinc_emb['objects'])
-    poinc_names_df.rename(columns={0: 'noun'}, inplace=True)
-    poinc_names_wnid =  poinc_names_df.merge(wnid2noun, on='noun', how='left')
+    poinc_emb = torch.load(
+              '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
 
-    pdb.set_trace()
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -171,6 +166,13 @@ def main():
                     transforms.ToTensor(),
                   normalize,]))
 
+    imgnet_classes = train_dataset.classes
+
+    #create poincare embedding that only contains imagenet synsets
+    imgnet2poinc_idx = [poinc_emb['objects'].index(i) for i in imgnet_classes]
+    imgnet_poinc_wgt = poinc_emb['model']['lt.weight'][[imgnet2poinc_idx]]
+    imgnet_poinc_labels = [poinc_emb['objects'][i] for i in imgnet2poinc_idx]
+
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(
                       train_dataset)
@@ -239,10 +241,24 @@ def train(train_loader, model, criterion, optimizer, epoch):
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
         target = target.cuda(args.gpu, non_blocking=True)
-        target_names = [idx2class[i.item()] for i in target]
+        target_ids = [idx2class[i.item()] for i in target]
+        target_emb_idx = [poinc_emb['objects'].index(i) for i in target_ids]
+        target_embs = poinc_emb['model']['lt.weight'][[target_emb_idx]]
+        target_embs = target_embs.cuda(args.gpu, non_blocking=True)
 
         # compute output
         output = model(input)
+
+        #simulate loss function
+        poincdist = poincDist()
+        dist2wrong = poincdist(output.repeat(1, 1000).view(-1, 10),
+                  imgnet_poinc_wgt.repeat(64, 1).cuda(args.gpu,
+                  non_blocking=True))
+        dist2right = poincdist(output.repeat(1, 1000).view(-1, 10),
+                   target_embs.repeat(1, 1000).view(-1, 10))
+
+
+
         pdb.set_trace()
 #        loss = criterion(output, target)
 #
