@@ -11,7 +11,7 @@ def poincare_emb_hinge_loss(pred_embs, target_embs, all_embs,
     dist2wrong = poincdist(pred_embs.repeat(1,
                            num_classes).view(-1, emb_size),
                            all_embs.repeat(batch_size,
-                               2).cuda(non_blocking=True))
+                               1).cuda(non_blocking=True))
     #calculate distance to correct embeddings
     dist2correct = poincdist(pred_embs.repeat(1,
                              num_classes).view(-1, emb_size),

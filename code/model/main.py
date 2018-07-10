@@ -22,8 +22,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
-from poincare_model import PoincareDistance as poincDist
-from custom_loss import PoincareEmbHingeLoss
+from cl2 import PoincareEmbHingeLoss
 import pdb
 
 
@@ -129,8 +128,7 @@ def main():
 
 
     # define loss function (criterion) and optimizer
-    criterion = PoincareEmbHingeLoss(n_classes=1000, emb_size=10,
-                                     margin=0.1, batch_size=args.batch_size)
+    criterion = PoincareEmbHingeLoss(batch_size=args.batch_size)
 
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()),
@@ -252,31 +250,18 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output = model(input)
-
-        #simulate loss function
-        poincdist = poincDist()
-        dist2wrong = poincdist(output.repeat(1, 1000).view(-1, 10),
-                  imgnet_poinc_wgt.repeat(64, 1).cuda(args.gpu,
-                  non_blocking=True))
-        dist2correct = poincdist(output.repeat(1, 1000).view(-1, 10),
-                   target_embs.repeat(1, 1000).view(-1, 10))
-        torch.div(torch.sum(torch.clamp(dist2correct.sub(
-                  dist2wrong).add(0.1), min=0.0)).add(64*0.1), 64)
-
-
-        pdb.set_trace()
-#        loss = criterion(output, target)
-#
+        loss = criterion(output, target_embs)
+        print(loss)
 #        # measure accuracy and record loss
 #        prec1, prec5 = accuracy(output, target, topk=(1, 5))
 #        losses.update(loss.item(), input.size(0))
 #        top1.update(prec1[0], input.size(0))
 #        top5.update(prec5[0], input.size(0))
 #
-#        # compute gradient and do SGD step
-#        optimizer.zero_grad()
-#        loss.backward()
-#        optimizer.step()
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 #
 #        # measure elapsed time
 #        batch_time.update(time.time() - end)
