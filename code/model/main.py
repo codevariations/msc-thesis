@@ -12,6 +12,7 @@ import pandas as pd
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -250,8 +251,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output = model(input)
-        loss = criterion(output, target_embs)
-        print(loss)
+        pdb.set_trace()
+       # loss = criterion(output, target_embs)
+       # print(loss)
 #        # measure accuracy and record loss
 #        prec1, prec5 = accuracy(output, target, topk=(1, 5))
 #        losses.update(loss.item(), input.size(0))
@@ -259,9 +261,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
 #        top5.update(prec5[0], input.size(0))
 #
         # compute gradient and do SGD step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+       # optimizer.zero_grad()
+       # loss.backward()
+       #  optimizer.step()
 #
 #        # measure elapsed time
 #        batch_time.update(time.time() - end)
@@ -357,6 +359,9 @@ class PoincareVGG(nn.Module):
             f = self.fc(f)
         f = f.view(f.size(0), -1)
         y = self.classifier(f)
+        y_norm = y.pow(2).sum(dim=1, keepdim=True).pow(0.5)
+        y_normsq = y_norm.pow(2)
+        y_normsqplus = torch.add(y_normsq, 1)
         return y
 
 
