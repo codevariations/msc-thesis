@@ -23,6 +23,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 
 from poincare_model import PoincareDistance as poincDist
+from custom_loss import PoincareEmbHingeLoss
 import pdb
 
 
@@ -128,7 +129,8 @@ def main():
 
 
     # define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda(args.gpu)
+    criterion = PoincareEmbHingeLoss(n_classes=1000, emb_size=10,
+                                     margin=0.1, batch_size=args.batch_size)
 
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()),
@@ -230,6 +232,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     # switch to train mode
     model.train()
+
+    #needed for converting class idx to IDs
     class2idx = train_loader.dataset.class_to_idx
     idx2class = {v: k for k, v in class2idx.items()}
 
@@ -242,8 +246,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
             input = input.cuda(args.gpu, non_blocking=True)
         target = target.cuda(args.gpu, non_blocking=True)
         target_ids = [idx2class[i.item()] for i in target]
-        target_emb_idx = [poinc_emb['objects'].index(i) for i in target_ids]
-        target_embs = poinc_emb['model']['lt.weight'][[target_emb_idx]]
+        target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
+        target_embs = imgnet_poinc_wgt[[target_emb_idx]]
         target_embs = target_embs.cuda(args.gpu, non_blocking=True)
 
         # compute output
@@ -254,9 +258,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
         dist2wrong = poincdist(output.repeat(1, 1000).view(-1, 10),
                   imgnet_poinc_wgt.repeat(64, 1).cuda(args.gpu,
                   non_blocking=True))
-        dist2right = poincdist(output.repeat(1, 1000).view(-1, 10),
+        dist2correct = poincdist(output.repeat(1, 1000).view(-1, 10),
                    target_embs.repeat(1, 1000).view(-1, 10))
-
+        torch.div(torch.sum(torch.clamp(dist2correct.sub(
+                  dist2wrong).add(0.1), min=0.0)).add(64*0.1), 64)
 
 
         pdb.set_trace()
