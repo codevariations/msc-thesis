@@ -362,7 +362,8 @@ class PoincareVGG(nn.Module):
         y_norm = y.pow(2).sum(dim=1, keepdim=True).pow(0.5)
         y_normsq = y_norm.pow(2)
         y_normsqplus = torch.add(y_normsq, 1)
-        return y
+        y_unitnorm = torch.div(y, y_norm)
+        return torch.div(torch.mul(y_unitnorm, y_normsq), y_normsqplus)
 
 
 class AverageMeter(object):

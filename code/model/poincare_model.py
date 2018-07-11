@@ -64,6 +64,19 @@ class PoincareDistance(Function):
         gv = grad(v, u, ctx.sqvnorm, ctx.squnorm, ctx.sqdist)
         return g.expand_as(gu) * gu, g.expand_as(gv) * gv
 
+class PoincareDistance2(nn.Module):
+    def __init__(self, boundary=0.99999):
+        super().__init__()
+        self.boundary = boundary
+
+    def forward(U, V):
+        squnorm = th.clamp(th.sum(U.pow(2), dim=1), 0, self.boundary)
+        sqvnorm = th.clamp(th.sum(V.pow(2), dim=1), 0, self.boundary)
+        sqdist = th.sum(th.pow(u - v, 2), dim=-1)
+        x = sqdist / ((1 - squnorm) * (1 - sqvnorm)) * 2 + 1
+        # arcosh
+        z = th.sqrt(th.pow(x, 2) - 1)
+        return th.log(x + z)
 
 class EuclideanDistance(nn.Module):
     def __init__(self, radius=1, dim=None):
