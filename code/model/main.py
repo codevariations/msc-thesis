@@ -134,9 +134,9 @@ def main():
 
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()),
-                                args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+                                       args.lr,
+                                       momentum=args.momentum,
+                                       weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -252,9 +252,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output = model(input)
-        pdb.set_trace()
-       # loss = criterion(output, target_embs)
-       # print(loss)
+        loss = criterion(output, target_embs)
+        print(loss)
 #        # measure accuracy and record loss
 #        prec1, prec5 = accuracy(output, target, topk=(1, 5))
 #        losses.update(loss.item(), input.size(0))
@@ -262,9 +261,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
 #        top5.update(prec5[0], input.size(0))
 #
         # compute gradient and do SGD step
-       # optimizer.zero_grad()
-       # loss.backward()
-       #  optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 #
 #        # measure elapsed time
 #        batch_time.update(time.time() - end)
@@ -344,7 +343,7 @@ class PoincareVGG(nn.Module):
         self.eps = 1e-5
 
         #freeze weights except final layer 
-        self.unfreeze(False)
+        self.unfreeze(True)
 
     def unfreeze(self, unfreeze):
         for p in self.features.parameters():

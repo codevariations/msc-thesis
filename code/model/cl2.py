@@ -10,7 +10,7 @@ class PoincareEmbHingeLoss(nn.Module):
     def __init__(self, batch_size):
         super().__init__()
         self.bsize = batch_size
-        self.poincdist = PoincareDistance2()
+        self.poincdist = EuclideanDistance()
 
     def forward(self, X, Y):
         dist = self.poincdist(X, Y)
