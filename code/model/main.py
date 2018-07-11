@@ -24,6 +24,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 
 from cl2 import PoincareEmbHingeLoss
+from poincare_model import PoincareDistance2
 import pdb
 
 
@@ -336,11 +337,11 @@ class PoincareVGG(nn.Module):
 
     def __init__(self, vgg_model, n_emb_dims):
         super(PoincareVGG, self).__init__()
-
         self.features = vgg_model.features
         self.fc = nn.Sequential(*list(
                                 vgg_model.classifier.children())[:-1])
         self.classifier = nn.Sequential(nn.Linear(4096, n_emb_dims))
+        self.eps = 1e-5
 
         #freeze weights except final layer 
         self.unfreeze(False)
@@ -363,7 +364,8 @@ class PoincareVGG(nn.Module):
         y_normsq = y_norm.pow(2)
         y_normsqplus = torch.add(y_normsq, 1)
         y_unitnorm = torch.div(y, y_norm)
-        return torch.div(torch.mul(y_unitnorm, y_normsq), y_normsqplus)
+        return torch.add(torch.div(torch.mul(y_unitnorm,
+                         y_normsq), y_normsqplus), -self.eps)
 
 
 class AverageMeter(object):

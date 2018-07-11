@@ -69,14 +69,16 @@ class PoincareDistance2(nn.Module):
         super().__init__()
         self.boundary = boundary
 
-    def forward(U, V):
-        squnorm = th.clamp(th.sum(U.pow(2), dim=1), 0, self.boundary)
-        sqvnorm = th.clamp(th.sum(V.pow(2), dim=1), 0, self.boundary)
-        sqdist = th.sum(th.pow(u - v, 2), dim=-1)
-        x = sqdist / ((1 - squnorm) * (1 - sqvnorm)) * 2 + 1
+    def forward(self, U, V):
+        squnorm = th.clamp(th.sum(U.pow(2), dim=1, keepdim=True), 0, self.boundary)
+        sqvnorm = th.clamp(th.sum(V.pow(2), dim=1, keepdim=True), 0, self.boundary)
+        sqdist = th.sum(U.sub(V).pow(2), dim=1, keepdim=True)
+        denominator = th.mul(th.add(th.neg(squnorm), 1),
+                                th.add(th.neg(sqvnorm), 1))
+        dist = th.add(th.mul(sqdist.div(denominator), 2), 1)
         # arcosh
-        z = th.sqrt(th.pow(x, 2) - 1)
-        return th.log(x + z)
+        z = th.sqrt(dist.pow(2).add(-1))
+        return th.log(th.add(dist, z))
 
 class EuclideanDistance(nn.Module):
     def __init__(self, radius=1, dim=None):
