@@ -1,22 +1,24 @@
 import torch
+from torch import nn
 from poincare_model import PoincareDistance
 import pdb
 from torch.autograd import Function
 
-def poincare_emb_hinge_loss(pred_embs, target_embs, all_embs,
-                            num_classes, emb_size, margin, batch_size):
-    poincdist = PoincareDistance()
+def poincare_emb_hinge_loss(pred_embs, target_embs, all_embs, margin):
+    batch_size = pred_embs.size(0)
+    n_emb_dims = pred_embs.size(1)
+    n_classes = all_embs.size(0)
     #calculate distance of a predicted embedding to all
     #the embeddings
-    dist2wrong = poincdist(pred_embs.repeat(1,
-                           num_classes).view(-1, emb_size),
-                           all_embs.repeat(batch_size,
-                               1).cuda(non_blocking=True))
+    dist2wrong = PoincareDistance.apply(pred_embs.repeat(1,
+                                        n_classes).view(-1, n_emb_dims),
+                                        all_embs.repeat(batch_size,
+                                        1).cuda(non_blocking=True))
     #calculate distance to correct embeddings
-    dist2correct = poincdist(pred_embs.repeat(1,
-                             num_classes).view(-1, emb_size),
-                             target_embs.repeat(1,
-                             num_classes).view(-1, emb_size))
+    dist2correct = PoincareDistance.apply(pred_embs.repeat(1,
+                                          n_classes).view(-1, n_emb_dims),
+                                          target_embs.repeat(1,
+                                          n_classes).view(-1, n_emb_dims))
     #ranking hinge loss to move such that closes to correct
     #embedding
     hinge_loss = torch.sum(torch.clamp(dist2correct.sub(
@@ -25,32 +27,48 @@ def poincare_emb_hinge_loss(pred_embs, target_embs, all_embs,
     #is zero so margin will still be added. This is a hack to really just
     #calculate loss over incorrect labels
     hinge_l_adj_margin = hinge_loss.add(-margin*batch_size)
-    #average by over observations in a batch
+    #average over observations in a batch
     return  torch.div(hinge_l_adj_margin, batch_size)
 
+def poincare_dist_to_label_emb(pred_embs, all_embs):
+    batch_size = pred_embs.size(0)
+    n_emb_dims = pred_embs.size(1)
+    n_classes = all_embs.size(0)
+    #calculate distance of a predicted embedding to all possible true
+    #embeddings
+    return PoincareDistance.apply(pred_embs.repeat(1,
+                                  n_classes).view(-1, n_emb_dims),
+                                  all_embs.repeat(batch_size,
+                                  1).cuda(non_blocking=True)).view(
+                                  batch_size, -1)
 
 def _assert_no_grad(tensor):
     assert not tensor.requires_grad
 
 
-class PoincareEmbHingeLoss(Function):
-    def __init__(self, n_classes, emb_size, margin, batch_size):
+class PoincareEmbHingeLoss(nn.Module):
+    def __init__(self, margin=0.1):
         super().__init__()
-        self.nclasses = n_classes
-        self.nemb = emb_size
         self.marg = margin
-        self.bsize = batch_size
 
-    def forward(self, predicted_embeddings,
-                target_embeddings, all_embeddings):
-
-        _assert_no_grad(target_embeddings)
-        return poincare_emb_hinge_loss(predicted_embeddings, target_embeddings,
-                                       all_embeddings, self.nclasses,
-                                       self.nemb, self.marg, self.bsize)
+    def forward(self, pred_embs, target_embs, all_embs):
+        _assert_no_grad(target_embs)
+        return poincare_emb_hinge_loss(pred_embs, target_embs,
+                                       all_embs, self.marg)
 
 
+class PoincareXEntropyLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.xeloss = nn.CrossEntropyLoss()
 
+    def forward(self, pred_embs, target_idx, all_embs):
+        _assert_no_grad(target_idx)
+        scores = poincare_dist_to_label_emb(pred_embs, all_embs)
+        #since smaller distance is good need to inver the exponent in
+        #softmax
+        neg_scores = -1 * scores
+        return self.xeloss(neg_scores, target_idx)
 
 
 

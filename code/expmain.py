@@ -1,7 +1,7 @@
 import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1, 2, 3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 import random
 import shutil
@@ -23,7 +23,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
-from custom_loss import PoincareXEntropyLoss
+from cl2 import PoincareEmbHingeLoss
 from poincare_model import PoincareDistance
 import pdb
 
@@ -130,7 +130,8 @@ def main():
 
 
     # define loss function (criterion) and optimizer
-    criterion = PoincareXEntropyLoss()
+    criterion = PoincareEmbHingeLoss(batch_size=args.batch_size)
+
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()),
                                        args.lr,
@@ -155,7 +156,7 @@ def main():
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val_white')
+    valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -204,22 +205,22 @@ def main():
             train_sampler.set_epoch(epoch)
         adjust_learning_rate(optimizer, epoch)
 
-        # train the model 
+        # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch)
 
-        # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion)
-
-        # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'arch': args.arch,
-            'state_dict': model.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+#        # evaluate on validation set
+#        prec1 = validate(val_loader, model, criterion)
+#
+#        # remember best prec@1 and save checkpoint
+#        is_best = prec1 > best_prec1
+#        best_prec1 = max(prec1, best_prec1)
+#        save_checkpoint({
+#            'epoch': epoch + 1,
+#            'arch': args.arch,
+#            'state_dict': model.state_dict(),
+#            'best_prec1': best_prec1,
+#            'optimizer' : optimizer.state_dict(),
+#        }, is_best)
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
@@ -243,101 +244,93 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
-
         target = target.cuda(args.gpu, non_blocking=True)
         target_ids = [idx2class[i.item()] for i in target]
         target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
         target_embs = imgnet_poinc_wgt[[target_emb_idx]]
         target_embs = target_embs.cuda(args.gpu, non_blocking=True)
-
         # compute output
         output = model(input)
-        loss = criterion(output, target, imgnet_poinc_wgt)
+        loss = criterion(output, target_embs)
+        acc = accuracy(output, imgnet_poinc_wgt, target)
+        print(loss, acc)
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output, imgnet_poinc_wgt, target, topk=(1, 5))
+#        prec1, prec5 = accuracy(output, target, topk=(1, 5))
         losses.update(loss.item(), input.size(0))
-        top1.update(prec1.item(), input.size(0))
-        top5.update(prec5.item(), input.size(0))
-
+#        top1.update(prec1[0], input.size(0))
+#        top5.update(prec5[0], input.size(0))
+#
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        if i % args.print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                  'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                   epoch, i, len(train_loader), batch_time=batch_time,
-                   data_time=data_time, loss=losses, top1=top1, top5=top5))
-
-
-def validate(val_loader, model, criterion):
-    batch_time = AverageMeter()
-    losses = AverageMeter()
-    top1 = AverageMeter()
-    top5 = AverageMeter()
-
-    # switch to evaluate mode
-    model.eval()
-
-    #needed for converting class idx to IDs
-    class2idx = val_loader.dataset.class_to_idx
-    idx2class = {v: k for k, v in class2idx.items()}
-
-    with torch.no_grad():
-        end = time.time()
-        for i, (input, target) in enumerate(val_loader):
-            if args.gpu is not None:
-                input = input.cuda(args.gpu, non_blocking=True)
-            target = target.cuda(args.gpu, non_blocking=True)
-
-            target_ids = [idx2class[i.item()] for i in target]
-            target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
-            target_embs = imgnet_poinc_wgt[[target_emb_idx]]
-            target_embs = target_embs.cuda(args.gpu, non_blocking=True)
-
-            # compute output
-            output = model(input)
-            loss = criterion(output, target, imgnet_poinc_wgt)
-            # measure accuracy and record loss
-            prec1, prec5  = accuracy(output, imgnet_poinc_wgt, target, topk=(1, 5))
-            losses.update(loss.item(), input.size(0))
-            top1.update(prec1.item(), input.size(0))
-            top5.update(prec5.item(), input.size(0))
-
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-
-            if i % args.print_freq == 0:
-                print('Test: [{0}/{1}]\t'
-                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                       i, len(val_loader), batch_time=batch_time, loss=losses,
-                       top1=top1, top5=top5))
-
-        print(' * Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'
-              .format(top1=top1, top5=top5))
-
-    return top1.avg
-
-
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
-    torch.save(state, filename)
-    if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
-
-
+#
+#        # measure elapsed time
+#        batch_time.update(time.time() - end)
+#        end = time.time()
+#
+#        if i % args.print_freq == 0:
+#            print('Epoch: [{0}][{1}/{2}]\t'
+#                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+#                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+#                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+#                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+#                  'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+#                   epoch, i, len(train_loader), batch_time=batch_time,
+#                   data_time=data_time, loss=losses, top1=top1, top5=top5))
+#
+#
+#def validate(val_loader, model, criterion):
+#    batch_time = AverageMeter()
+#    losses = AverageMeter()
+#    top1 = AverageMeter()
+#    top5 = AverageMeter()
+#
+#    # switch to evaluate mode
+#    model.eval()
+#
+#    with torch.no_grad():
+#        end = time.time()
+#        for i, (input, target) in enumerate(val_loader):
+#            if args.gpu is not None:
+#                input = input.cuda(args.gpu, non_blocking=True)
+#            target = target.cuda(args.gpu, non_blocking=True)
+#
+#            # compute output
+#            output = model(input)
+#            loss = criterion(output, target)
+#
+#            # measure accuracy and record loss
+#            prec1, prec5 = accuracy(output, target, topk=(1, 5))
+#            losses.update(loss.item(), input.size(0))
+#            top1.update(prec1[0], input.size(0))
+#            top5.update(prec5[0], input.size(0))
+#
+#            # measure elapsed time
+#            batch_time.update(time.time() - end)
+#            end = time.time()
+#
+#            if i % args.print_freq == 0:
+#                print('Test: [{0}/{1}]\t'
+#                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+#                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+#                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+#                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+#                       i, len(val_loader), batch_time=batch_time, loss=losses,
+#                       top1=top1, top5=top5))
+#
+#        print(' * Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'
+#              .format(top1=top1, top5=top5))
+#
+#    return top1.avg
+#
+#
+#def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+#    torch.save(state, filename)
+#    if is_best:
+#        shutil.copyfile(filename, 'model_best.pth.tar')
+#
+#
 
 class PoincareVGG(nn.Module):
 
@@ -349,17 +342,15 @@ class PoincareVGG(nn.Module):
         self.classifier = nn.Sequential(nn.Linear(4096, n_emb_dims))
         self.eps = 1e-5
 
-        #freeze weights except classifier layer 
-        self.unfreeze_features(False)
-        self.unfreeze_fc(True)
+        #freeze weights except final layer 
+        self.unfreeze(False)
 
-    def unfreeze_features(self, unfreeze):
+    def unfreeze(self, unfreeze):
         for p in self.features.parameters():
             p.requires_grad = unfreeze
-
-    def unfreeze_fc(self, unfreeze):
-        for p in self.fc.parameters():
-            p.requires_grad = unfreeze
+        if hasattr(self, 'fc'):
+            for p in self.fc.parameters():
+                p.requires_grad = unfreeze
 
     def forward(self, x):
         f = self.features(x)
@@ -425,14 +416,9 @@ def accuracy(output, all_embs, targets, topk=(1,)):
     with torch.no_grad():
         maxk = max(topk)
         preds = prediction(output, all_embs, knn=maxk)
-        batch_size = output.size(0)
-        res = []
-        for k in topk:
-            i = k
-            preds_tmp = preds[:, :i]
-            correct_tmp = preds_tmp.eq(targets.view(batch_size, -1).repeat(1, i))
-            res.append(torch.sum(correct_tmp).float() / batch_size)
-        return res
+        correct = preds.eq(targets).sum()
+        return correct.float().div(targets.size(0))
+
 
 if __name__ == '__main__':
     main()

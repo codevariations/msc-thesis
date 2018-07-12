@@ -350,7 +350,7 @@ class PoincareVGG(nn.Module):
         self.eps = 1e-5
 
         #freeze weights except classifier layer 
-        self.unfreeze_features(False)
+        self.unfreeze_features(True)
         self.unfreeze_fc(True)
 
     def unfreeze_features(self, unfreeze):
