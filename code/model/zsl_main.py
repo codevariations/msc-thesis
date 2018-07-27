@@ -1,7 +1,7 @@
 import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
 
 import random
 import shutil
@@ -128,15 +128,6 @@ def main():
         else:
             model = torch.nn.DataParallel(model).cuda()
 
-
-    # define loss function (criterion) and optimizer
-    criterion = PoincareXEntropyLoss()
-    optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
-                                       model.parameters()),
-                                       args.lr,
-                                       momentum=args.momentum,
-                                       weight_decay=args.weight_decay)
-
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
@@ -145,7 +136,6 @@ def main():
             args.start_epoch = checkpoint['epoch']
             best_prec1 = checkpoint['best_prec1']
             model.load_state_dict(checkpoint['state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:
@@ -154,25 +144,9 @@ def main():
     cudnn.benchmark = True
 
     # Data loading code
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val_white')
+    valdir = args.data
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-
-    train_dataset = datasets.ImageFolder(
-                  traindir,
-                  transforms.Compose([
-                    transforms.RandomResizedCrop(224),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(),
-                  normalize,]))
-
-    imgnet_classes = train_dataset.classes
-
-    #create poincare embedding that only contains imagenet synsets
-    imgnet2poinc_idx = [poinc_emb['objects'].index(i) for i in imgnet_classes]
-    imgnet_poinc_wgt = poinc_emb['model']['lt.weight'][[imgnet2poinc_idx]]
-    imgnet_poinc_labels = [poinc_emb['objects'][i] for i in imgnet2poinc_idx]
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(
@@ -180,117 +154,38 @@ def main():
     else:
         train_sampler = None
 
-    train_loader = torch.utils.data.DataLoader(
-                 train_dataset, batch_size=args.batch_size,
-                 shuffle=(train_sampler is None),
-                 num_workers=args.workers, pin_memory=True,
-                 sampler=train_sampler)
-
     val_loader = torch.utils.data.DataLoader(
                datasets.ImageFolder(valdir, transforms.Compose([
                      transforms.Resize(256),
                      transforms.CenterCrop(224),
                      transforms.ToTensor(),
                      normalize,])),
-               batch_size=args.batch_size, shuffle=False,
+               batch_size=args.batch_size, shuffle=True,
                num_workers=args.workers, pin_memory=True)
+    val_classes = val_loader.dataset.classes
 
-    if args.evaluate:
-        validate(val_loader, model, criterion)
-        return
+    #create poincare embedding with all synsets
+    imgnet2poinc_idx = [poinc_emb['objects'].index(i) for i in val_classes]
+    imgnet_poinc_wgt = poinc_emb['model']['lt.weight'][[imgnet2poinc_idx]]
+    imgnet_poinc_labels = [poinc_emb['objects'][i] for i in imgnet2poinc_idx]
 
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch)
-
-        # train the model 
-        train(train_loader, model, criterion, optimizer, epoch)
-
-        # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion)
-
-        # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'arch': args.arch,
-            'state_dict': model.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+    #finally, run evaluation 
+    validate(val_loader, model)
+    return
 
 
-def train(train_loader, model, criterion, optimizer, epoch):
+### Functions 
+
+def validate(val_loader, model):
     batch_time = AverageMeter()
-    data_time = AverageMeter()
-    losses = AverageMeter()
     top1 = AverageMeter()
+    top2 = AverageMeter()
     top5 = AverageMeter()
-
-    # switch to train mode
-    model.train()
-
-    #needed for converting class idx to IDs
-    class2idx = train_loader.dataset.class_to_idx
-    idx2class = {v: k for k, v in class2idx.items()}
-
-    end = time.time()
-    for i, (input, target) in enumerate(train_loader):
-        # measure data loading time
-        data_time.update(time.time() - end)
-
-        if args.gpu is not None:
-            input = input.cuda(args.gpu, non_blocking=True)
-
-        target = target.cuda(args.gpu, non_blocking=True)
-        target_ids = [idx2class[i.item()] for i in target]
-        target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
-        target_embs = imgnet_poinc_wgt[[target_emb_idx]]
-        target_embs = target_embs.cuda(args.gpu, non_blocking=True)
-
-        # compute output
-        output = model(input)
-        loss = criterion(output, target, imgnet_poinc_wgt)
-        # measure accuracy and record loss
-        prec1, prec5 = accuracy(output, imgnet_poinc_wgt, target, topk=(1, 5))
-        losses.update(loss.item(), input.size(0))
-        top1.update(prec1.item(), input.size(0))
-        top5.update(prec5.item(), input.size(0))
-
-        # compute gradient and do SGD step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        if i % args.print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                  'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                   epoch, i, len(train_loader), batch_time=batch_time,
-                   data_time=data_time, loss=losses, top1=top1, top5=top5))
-
-
-def validate(val_loader, model, criterion):
-    batch_time = AverageMeter()
-    losses = AverageMeter()
-    top1 = AverageMeter()
-    top5 = AverageMeter()
+    top10 = AverageMeter()
+    top20 = AverageMeter()
 
     # switch to evaluate mode
     model.eval()
-
-    #needed for converting class idx to IDs
-    class2idx = val_loader.dataset.class_to_idx
-    idx2class = {v: k for k, v in class2idx.items()}
 
     with torch.no_grad():
         end = time.time()
@@ -299,20 +194,18 @@ def validate(val_loader, model, criterion):
                 input = input.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
 
-            target_ids = [idx2class[i.item()] for i in target]
-            target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
-            target_embs = imgnet_poinc_wgt[[target_emb_idx]]
-            target_embs = target_embs.cuda(args.gpu, non_blocking=True)
-
             # compute output
             output = model(input)
-            loss = criterion(output, target, imgnet_poinc_wgt)
             # measure accuracy and record loss
-            prec1, prec5  = accuracy(output, imgnet_poinc_wgt, target, topk=(1, 5))
-            losses.update(loss.item(), input.size(0))
+            prec1, prec2, prec5, prec10, prec20  = accuracy(output,
+                                                            imgnet_poinc_wgt,
+                                                            target, topk=(1, 2,
+                                                             5, 10, 20))
             top1.update(prec1.item(), input.size(0))
+            top2.update(prec2.item(), input.size(0))
             top5.update(prec5.item(), input.size(0))
-
+            top10.update(prec10.item(), input.size(0))
+            top20.update(prec20.item(), input.size(0))
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
@@ -320,22 +213,22 @@ def validate(val_loader, model, criterion):
             if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                       'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                       i, len(val_loader), batch_time=batch_time, loss=losses,
-                       top1=top1, top5=top5))
+                      'Prec@2 {top2.val:.3f} ({top2.avg:.3f})\t'
+                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})\t'
+                      'Prec@10 {top10.val:.3f} ({top10.avg:.3f})\t'
+                      'Prec@20 {top20.val:.3f} ({top20.avg:.3f})'.format(
+                       i, len(val_loader), batch_time=batch_time,
+                       top1=top1, top2=top2, top5=top5, top10=top10,
+                       top20=top20))
 
-        print(' * Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'
-              .format(top1=top1, top5=top5))
+        print(' * Prec@1 {top1.avg:.3f} Prec@2 {top2.avg:.3f}\t'
+                'Prec@5 {top5.avg:.3f} Prec@10 {top10.avg:.3f}\t'
+                'Prec@20 {top20.avg:.3f}'.format(top1=top1, top2=top2,
+                                                 top5=top5, top10=top10,
+                                                 top20=top20))
 
-    return top1.avg
-
-
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
-    torch.save(state, filename)
-    if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+    return top1.avg, top2.avg, top5.avg, top10.avg, top20.avg
 
 
 
@@ -394,24 +287,17 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def adjust_learning_rate(optimizer, epoch):
-    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 30))
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
-
 def prediction(output, all_embs, knn=1):
     """Predicts the nearest class based on poincare distance"""
     with torch.no_grad():
         batch_size = output.size(0)
         n_emb_dims = output.size(1)
         n_classes = all_embs.size(0)
-        expand_output = output.repeat(1, n_classes).view(-1, n_emb_dims)
-        expand_all_embs = all_embs.repeat(batch_size, 1)
-        dists_to_all = PoincareDistance.apply(expand_output,
-                                              expand_all_embs.cuda(args.gpu,
-                                                  non_blocking=True))
+        dists_to_all = PoincareDistance.apply(output.repeat(1,
+                                              n_classes).view(-1, n_emb_dims),
+                                              all_embs.repeat(batch_size,
+                                              1).cuda(args.gpu,
+                                                      non_blocking=True))
         topk_per_batch = torch.topk(dists_to_all.view(batch_size, -1),
                                      k=knn, dim=1,
                                      largest=False)[1]
