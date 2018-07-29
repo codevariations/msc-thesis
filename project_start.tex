@@ -301,13 +301,34 @@ In Bayesian framework, the use of embedding would probably corresond to some pri
 
 \newpage
 
-\chapter{Deep Learning in Computer Vision}
+\chapter{Artificial Neural Networks \& Deep Learning in Computer Vision}
 
-Upon observing almost any visual scene, humans are able to effortlessly cut it up into segments of distinct objects \cite{Rosch1976}. This is a remarkable ability considering that the world we live in can present us with an infinite amount of visual variation to our retinas and yet we are able to easily recognize tens of thousands of distinct categories \cite{Biederman1989} with invariance to various factors such as lighting, shade, orientation and partial occlusion \cite{DiCarlo2012}. Replicating this type of performance in artificial object recognition has been one of the main focuses of computer vision researchers over the past several decades.
+Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf(x)$ is a vector describing some input features and $\mathbf{w}$ model weights. Further, in the simplest form of these models, each input $\mathbf{x}$ would have a binary target label $y$ and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could 
+linearly separate the data into the two classes based on the input features.
+
+
+
+
+
+Upon observing almost any visual scene, humans are able to effortlessly cut it up into segments of distinct objects \cite{Rosch1976}. This is a remarkable ability considering that the world we live in can present us with an infinite amount of visual variation to our retinas and yet we are able to easily recognize tens of thousands of distinct object categories \cite{Biederman1989} with invariance to various factors such as lighting, shade, orientation and partial occlusion \cite{DiCarlo2012}. Replicating this type of performance in artificial object recognition has been one of the main focuses of computer vision researchers over the past several decades.
+
+
+\dots activation saturates which is reminiscent of how the brain functions and and these models are thus also often known as artifical neural networks \cite{Goodfellow2016}
+
+Early artificial neural networks, like the Perceptron \cite{Rosenblatt1958}, were essentially just linear models of the form $f(\mathbf{x}, \mathbf{w}) = \mathbf{x}^t \mathbf{w}$, that were able to perform binary classification tasks, in linearly separable setting, by changing the weights of the model in order to adjust the classification boundary. 
+
+simplest example of a deep learning model is that of multi-layer perceptron. 
+
+
+Despite its recent surgent in popularity, DL has a long history.
+
+
 
 
 \begin{itemize}
-    \item deep learning considered is supervised
+    \item deep learning considered is supervised - this is an important tenet as it allows learn from experience and learn from experience, more akin to how humans learns. This is integral in allowing computers learn to solve problems that are not so easily solved by just a string of rules
+    \item DL allows to understand world through a hierarchy of concepts. 
+    \item Representations are important e.g. can be as simple as some feature based on the color specturm could easily separate objects of different colors. It becomes difficult however to know -- raw pixel values may not be very informative. An integral part of deep learning is representation learning in which rather than learning mapping from features to output, we learn mapping from raw input into appropriate features and then from features into output. \cite{Goodfellow2016}. The representations learned in DL a hierarchical which is why they have been so succesful for visual tasks.
     \item it has been shown that representations learned by modern DNN are starting to approach those more similar to those learnt by the human IT cortext \cite{Cadieu2014}. Same paper: key to human visual object recognition is the representation learnt in the cortical ventral stream from visual signals from the eyes through the visual cortext from primary visual area V1, culiminating in the IT cortext. 
 \end{itemize}
 
