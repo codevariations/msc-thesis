@@ -27,6 +27,10 @@ PROOF:
 $\Box$ \end{quotation}}
 
 
+\graphicspath{
+  {/home/hege/Documents/Thesis/msc-thesis/}
+  {/home/hege/Documents/Thesis/msc-thesis/figures/}
+}
 
 \newcommand{\nats}{\mbox{\( \mathbb N \)}}
 \newcommand{\rat}{\mbox{\(\mathbb Q\)}}
@@ -303,48 +307,36 @@ In Bayesian framework, the use of embedding would probably corresond to some pri
 
 \chapter{Artificial Neural Networks \& Deep Learning in Computer Vision}
 
-Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf{x}$ is a vector describing some input features and $\mathbf{w}$ model weights. Further, in the simplest form of these models, each input $\mathbf{x}$ would have a binary target label $y$ and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could linearly separate the data into the two classes based on the input features. These early models were largely restricted by their assuming linear separability and there was also no computationally feasible way of training the models at the time \cite{Goodfellow2016}, \cite{JurgenSchmidhuber2015}. 
+Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf{x}$ is a vector describing some input covariate and $\mathbf{w}$ model weights. Much like in linear regression, the aim is to learn a mapping $f(\mathbf{w}, \mathbf{x}) = y$ that defines the relationship between the input $\mathbf{x}$ and some category $y$ it belongs to. In a simple problem,  $y$ would be binary and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could linearly separate the data into the two classes based on the input features. These early models were largely restricted by their assuming linear separability and there was also no computationally feasible way of training the models at the time \cite{Goodfellow2016}, \cite{JurgenSchmidhuber2015} but they form the basis for
+nearly all Artificial Neural Networks (ANNs). 
 
-Several steps were taken to increase to complexity of these models and to allow for non-linearities, many of them initially inspired to some degree by biological neurons \cite{Goodfellow16}. For instance, real neurons typically only fire once action potential exceeds a specific threshold \cite{Hodgkin1990}. In ANNs, a reminiscent behaviour is seeked by using activation functions on top of a neuron output, most typically in the form of Rectified Linear Units (ReLU), which apply the following non-linearity: $f(\mathbf{x}, \mathbf{w})=max\{0, \mathbf{x}^t \mathbf{w}\}$. Another insights borrowed from neuroscience was that it was actually groups of neurons acting together that could elicit complex behaviour and representations \cite{Goodfellow2016}; this led to ANNs with several layers of neurons and numerous neurons in each layer, and a ReLU non-linearity on top of each layer. 
+Several steps were taken to increase to complexity of these models and to allow for non-linearities, many of them initially inspired to some degree by biological neurons \cite{Goodfellow16}. For instance, real neurons typically only fire once action potential exceeds a specific threshold \cite{Hodgkin1990}. In ANNs, a reminiscent behaviour is attained via activation functions on top of a neuron outputs, most typically in the form of Rectified Linear Units (ReLU), which apply the following non-linearity: $f(\mathbf{x}, \mathbf{w})=max\{0, \mathbf{x}^t \mathbf{w}\}$. Another insights borrowed from neuroscience was that intelligence stems from groups of neurons acting together rather than from the behaviour of individual neurons \cite{Goodfellow2016}; this idea is behind deep ANNs where several layers of neurons are connected to each other and numerous neurons are present in each layer. Below equations and Figure \ref{fig:mlp} give a simplified example of an ANN with two hidden layers:
 
-\[
-\begin{bmatrix}
-    H5\\
-    H6\\
-    H7\\ 
-    H8
-  \end{bmatrix}
-  =
-  \begin{bmatrix}
-    \max\{0, h5\} \\
-    \max\{0, h6\}\\
-    \max\{0, h7\}\\ 
-    \max\{0, h8\}
-  \end{bmatrix}
-\]
+\begin{align} \label{mlp_eq}
+  \mathbf{H_1} &= max\{0, \mathbf{W}\mathbf{X} + \mathbf{B}\} \\
+  \mathbf{H_2} &= max\{0, \mathbf{V}\mathbf{H_1} + \mathbf{C}\} \\ 
+  \mathbf{F} &= \mathbf{Z} \mathbf{H_{2}} + \mathbf{D} 
+\end{align}
+where $\mathbf{X}$ is an $D\times N$ input data matrix that holds the $N$ different observations in columns and $D$ is the dimension of a single observation, which for image data is often a flattened array of the image pixels. This matrix representation of input allows several datapoints to be fed through the network simultaneously, which is what is done in practice. $\mathbf{W}$, $\mathbf{V}$ and $\mathbf{Z}$ are the weights matrices of the two hidden layers and output layer respectively. The number of rows in each of these matrices is the number of neurons in that layer, whilst the number of columns corresponds to dimensionality of output from the previous layer. Notice also that constant bias matrices $\mathbf{B}$, $\mathbf{C}$, and $\mathbf{D}$ are added to the neuron outputs. These bias matrices are akin to intercepts in regression analysis and increase the representation ability of the model. Usually all the columns of the matrices are identical such that the same bias values are added to each input observation. We can see that mathematically these matrix operations are just affine transformations on the input, followed by ReLUs, which are applied elementwise. The resulting output of each neuron is thus a matrix, here $\mathbf{H1}$ and $\mathbf{H2}$, where each row corresponds to an output from a specific neuron, calculated separately in the columns for each input vector. Notice also that ReLUs are not added on the output, rather the output layer transforms the representations of the hidden layer into a desired shape of output. For instance, for binary classification $\mathbf{F}$ would be of $2 \times N$, and the two output values for each input would reflect the relative likelihood of the two labels.
+
+\begin{figure}[h!]
+  \centering
+	\includegraphics[width=0.5\textwidth]{mlp}
+	\caption{A simple Feed Forward ANN with two hidden layers. This figure illustrates a graphical model for Equation \ref{mlp_eq} - 3.3 as well as explicitly showing the matrix operations performed by the different neurons on a single vector input. The output dimension is set arbitraily to be a $2\times1$ vector, which could for instance be used as class scores in binary classification; in practice, the dimension will be problem dependent.}
+	\label{fig:mlp}
+\end{figure}
+
+In a typical classification problem we have $n$ possible labels for each input and wish to predict a probability distribution over them. In these applications the outputs of ANN are transformed into 0 to 1 range. More formally, consider that the output from above ANN for a single input $\mathbf{x}$ is the $n \times 1$ vector $\mathbf{f}$; we then require, that each element of $\mathbf{f}$ is between 0 and 1 and that $\sum_1^n \text{f}_i = 1$. The most common way of doing this is to assume that the output of the ANN are unnormalized (predicted) class log-probabilities, that is $f_i = \log \hat{P}(y = i | \mathbf{x})$ \cite{Goodfellow2016}. By taking exponents and normalizing across possible labels predicted class probabilities are calculated as per below - this is known as the softmax function:
+
+\begin{align} \label{softmax_eq}
+  \text{softmax}(\mathbf{f})_i = \frac{\exp (f_i)}{\sum_j \text{exp}(f_j)}
+\end{align}
 
 
-\[\begin{bmatrix}
-   f_1\\
-   f_2
- \end{bmatrix} 
-    =
-\begin{bmatrix}
-   z_1 & z_2 & z_3 & z_4 \\
-   z_5 & z_6 & z_7 & z_8
- \end{bmatrix}
-  \begin{bmatrix}
-    H5 \\
-    H6 \\
-    H7 \\ 
-    H8
-  \end{bmatrix}
-  +
-  \begin{bmatrix}
-    d_1 \\
-    d_2 
-  \end{bmatrix}
-\]
+
+
+
+
 
 
 convolution
