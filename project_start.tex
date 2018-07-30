@@ -303,11 +303,64 @@ In Bayesian framework, the use of embedding would probably corresond to some pri
 
 \chapter{Artificial Neural Networks \& Deep Learning in Computer Vision}
 
-Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf(x)$ is a vector describing some input features and $\mathbf{w}$ model weights. Further, in the simplest form of these models, each input $\mathbf{x}$ would have a binary target label $y$ and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could 
-linearly separate the data into the two classes based on the input features.
+Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf{x}$ is a vector describing some input features and $\mathbf{w}$ model weights. Further, in the simplest form of these models, each input $\mathbf{x}$ would have a binary target label $y$ and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could linearly separate the data into the two classes based on the input features. These early models were largely restricted by their assuming linear separability and there was also no computationally feasible way of training the models at the time \cite{Goodfellow2016}, \cite{JurgenSchmidhuber2015}. 
+
+Several steps were taken to increase to complexity of these models and to allow for non-linearities, many of them initially inspired to some degree by biological neurons \cite{Goodfellow16}. For instance, real neurons typically only fire once action potential exceeds a specific threshold \cite{Hodgkin1990}. In ANNs, a reminiscent behaviour is seeked by using activation functions on top of a neuron output, most typically in the form of Rectified Linear Units (ReLU), which apply the following non-linearity: $f(\mathbf{x}, \mathbf{w})=max\{0, \mathbf{x}^t \mathbf{w}\}$. Another insights borrowed from neuroscience was that it was actually groups of neurons acting together that could elicit complex behaviour and representations \cite{Goodfellow2016}; this led to ANNs with several layers of neurons and numerous neurons in each layer, and a ReLU non-linearity on top of each layer. 
+
+\[
+\begin{bmatrix}
+    H5\\
+    H6\\
+    H7\\ 
+    H8
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    \max\{0, h5\} \\
+    \max\{0, h6\}\\
+    \max\{0, h7\}\\ 
+    \max\{0, h8\}
+  \end{bmatrix}
+\]
 
 
+\[\begin{bmatrix}
+   f_1\\
+   f_2
+ \end{bmatrix} 
+    =
+\begin{bmatrix}
+   z_1 & z_2 & z_3 & z_4 \\
+   z_5 & z_6 & z_7 & z_8
+ \end{bmatrix}
+  \begin{bmatrix}
+    H5 \\
+    H6 \\
+    H7 \\ 
+    H8
+  \end{bmatrix}
+  +
+  \begin{bmatrix}
+    d_1 \\
+    d_2 
+  \end{bmatrix}
+\]
 
+
+convolution
+Max-pooling 
+ReLU
+fully connected 
+softmax
+backprop
+loss function XE loss
+optimization,
+SGD
+minibatches
+learning rate annealing
+output one hot-encoded
+GPUs
+Graphical model view
 
 
 Upon observing almost any visual scene, humans are able to effortlessly cut it up into segments of distinct objects \cite{Rosch1976}. This is a remarkable ability considering that the world we live in can present us with an infinite amount of visual variation to our retinas and yet we are able to easily recognize tens of thousands of distinct object categories \cite{Biederman1989} with invariance to various factors such as lighting, shade, orientation and partial occlusion \cite{DiCarlo2012}. Replicating this type of performance in artificial object recognition has been one of the main focuses of computer vision researchers over the past several decades.
