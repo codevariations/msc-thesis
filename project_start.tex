@@ -332,6 +332,9 @@ In a typical classification problem we have $n$ possible labels for each input a
   \text{softmax}(\mathbf{f})_i = \frac{\exp (f_i)}{\sum_j \text{exp}(f_j)}
 \end{align}
 
+The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1986}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet these could efficiently be represented by combining three color features with the three shape features \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
+
+So far we have described the basic ANN architecture and now we move on to how the models are trained. The methods described here are not constrained to feedforward networks, and are indeed used to also train many of the most novel deep learning architectures.   
 
 
 
