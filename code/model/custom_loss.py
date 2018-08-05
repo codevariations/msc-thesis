@@ -1,8 +1,15 @@
 import torch
 from torch import nn
-from poincare_model import PoincareDistance
+import torch.backends.cudnn as cudnn
+from poincare_model import PoincareDistance, PoincareDistance2
 import pdb
 from torch.autograd import Function
+
+cudnn.fastest =True
+
+pdist = torch.nn.DataParallel(PoincareDistance)
+
+
 
 def poincare_emb_hinge_loss(pred_embs, target_embs, all_embs, margin):
     batch_size = pred_embs.size(0)
@@ -30,22 +37,6 @@ def poincare_emb_hinge_loss(pred_embs, target_embs, all_embs, margin):
     #average over observations in a batch
     return  torch.div(hinge_l_adj_margin, batch_size)
 
-def poincare_dist_to_label_emb(pred_embs, all_embs):
-    batch_size = pred_embs.size(0)
-    n_emb_dims = pred_embs.size(1)
-    n_classes = all_embs.size(0)
-    #calculate distance of a predicted embedding to all possible true
-    #embeddings
-    return PoincareDistance.apply(pred_embs.repeat(1,
-                                  n_classes).view(-1, n_emb_dims),
-                                  all_embs.repeat(batch_size,
-                                  1).cuda(non_blocking=True)).view(
-                                  batch_size, -1)
-
-def _assert_no_grad(tensor):
-    assert not tensor.requires_grad
-
-
 class PoincareEmbHingeLoss(nn.Module):
     def __init__(self, margin=0.1):
         super().__init__()
@@ -56,14 +47,32 @@ class PoincareEmbHingeLoss(nn.Module):
         return poincare_emb_hinge_loss(pred_embs, target_embs,
                                        all_embs, self.marg)
 
+def poincare_dist_to_label_emb(pred_embs, all_embs):
+    batch_size = pred_embs.size(0)
+    n_emb_dims = pred_embs.size(1)
+    n_classes = all_embs.size(0)
+    pdist = torch.nn.DataParallel(PoincareDistance2()).cuda()
+    #calculate distance of a predicted embedding to all possible true
+    #embedding
+    return pdist(pred_embs.repeat(1,
+                                  n_classes).view(-1, n_emb_dims),
+                                  all_embs.repeat(batch_size,
+                                  1).cuda(non_blocking=True)).view(
+                                  batch_size, -1)
+
+def _assert_no_grad(tensor):
+    assert not tensor.requires_grad
+
+
 
 class PoincareXEntropyLoss(nn.Module):
     def __init__(self):
         super().__init__()
-        self.xeloss = nn.CrossEntropyLoss()
+        self.xeloss = nn.CrossEntropyLoss().cuda()
 
     def forward(self, pred_embs, target_idx, all_embs):
         _assert_no_grad(target_idx)
+        _assert_no_grad(all_embs)
         scores = poincare_dist_to_label_emb(pred_embs, all_embs)
         #since smaller distance is good need to inver the exponent in
         #softmax
