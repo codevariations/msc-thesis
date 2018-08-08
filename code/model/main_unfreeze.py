@@ -1,7 +1,7 @@
 import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1, 2, 3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
 
 import random
 import shutil
@@ -131,12 +131,13 @@ def main():
 
     # define loss function (criterion) and optimizer
     criterion = PoincareXEntropyLoss()
-    optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
-                                       model.parameters()),
-                                       args.lr,
-                                       momentum=args.momentum,
-                                       weight_decay=args.weight_decay)
-
+    optimizer = torch.optim.SGD([{'params': model.features.parameters(),
+                                  'lr': 1e-4},
+                                 {'params': model.fc.parameters()},
+                                 {'params': model.classifier.parameters()}],
+                                 lr=args.lr,
+                                 momentum=args.momentum,
+                                 weight_decay=args.weight_decay)
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
@@ -202,7 +203,8 @@ def main():
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch)
+        if epoch in [30, 60, 90]:
+            adjust_learning_rate(optimizer, epoch)
 
         # train the model 
         train(train_loader, model, criterion, optimizer, epoch)
@@ -332,10 +334,10 @@ def validate(val_loader, model, criterion):
     return top1.avg
 
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best, filename='checkpoint_ufi.pth.tar'):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(filename, 'model_best_ufi.pth.tar')
 
 
 
@@ -396,9 +398,8 @@ class AverageMeter(object):
 
 def adjust_learning_rate(optimizer, epoch):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 30))
     for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+        param_group['lr'] = param_group['lr']*0.1
 
 
 def prediction(output, all_embs, knn=1):

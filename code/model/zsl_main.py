@@ -1,7 +1,7 @@
 import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
 
 import random
 import shutil
@@ -18,11 +18,13 @@ import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch.optim
 import torch.utils.data
+from torch.utils.data.sampler import Sampler
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
+from cust_loader import CustImageFolder
 from custom_loss import PoincareXEntropyLoss
 from poincare_model import PoincareDistance
 import pdb
@@ -143,32 +145,35 @@ def main():
 
     cudnn.benchmark = True
 
+    #load all class ids sorted on hops
+    labels_hop_order = pd.read_csv('21k_wnids.csv')
+    wnids_21k = labels_hop_order.iloc[:, 1].tolist()
+    wnids_20k = wnids_21k[1000:]
+    wnids_1k = wnids_21k[:999]
+    wnids_2hop = wnids_21k[1000:2549]
+    wnids_3hop = wnids_21k[2549:8860]
+    wnids_2h_1k = wnids_21k[:2549]
+    wnids_3h_1k = wnids_21k[:8860]
+
+
     # Data loading code
     valdir = args.data
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-
-    if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(
-                      train_dataset)
-    else:
-        train_sampler = None
-
-    val_loader = torch.utils.data.DataLoader(
-               datasets.ImageFolder(valdir, transforms.Compose([
-                     transforms.Resize(256),
-                     transforms.CenterCrop(224),
-                     transforms.ToTensor(),
-                     normalize,])),
-               batch_size=args.batch_size, shuffle=True,
-               num_workers=args.workers, pin_memory=True)
+    img_data = CustImageFolder(valdir, wnids_20k, transforms.Compose([
+                                    transforms.Resize(256),
+                                    transforms.CenterCrop(224),
+                                    transforms.ToTensor(),
+                                    normalize,]))
+    val_loader = torch.utils.data.DataLoader(img_data,
+                batch_size=args.batch_size,
+                shuffle=True, num_workers=args.workers, pin_memory=True)
     val_classes = val_loader.dataset.classes
 
     #create poincare embedding with all synsets
     imgnet2poinc_idx = [poinc_emb['objects'].index(i) for i in val_classes]
     imgnet_poinc_wgt = poinc_emb['model']['lt.weight'][[imgnet2poinc_idx]]
     imgnet_poinc_labels = [poinc_emb['objects'][i] for i in imgnet2poinc_idx]
-
     #finally, run evaluation 
     validate(val_loader, model)
     return
@@ -209,7 +214,6 @@ def validate(val_loader, model):
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
-
             if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -305,7 +309,6 @@ def prediction(output, all_embs, knn=1):
             return topk_per_batch.view(-1)
         return topk_per_batch
 
-
 def accuracy(output, all_embs, targets, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
@@ -319,6 +322,25 @@ def accuracy(output, all_embs, targets, topk=(1,)):
             correct_tmp = preds_tmp.eq(targets.view(batch_size, -1).repeat(1, i))
             res.append(torch.sum(correct_tmp).float() / batch_size)
         return res
+
+class TestSampler(Sampler):
+    def __init__(self, mask):
+        self.mask = mask
+
+    def __iter__(self):
+        return (self.indices[i] for i in torch.nonzero(self.mask))
+
+    def __len__(self):
+        return len(self.mask)
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     main()

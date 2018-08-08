@@ -1,7 +1,7 @@
 import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
 
 import random
 import shutil
@@ -82,7 +82,7 @@ def main():
 
     #load poincare embedding
     poinc_emb = torch.load(
-            '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
+            '/home/hermanni/thesis/msc-thesis/code/model/nouns_200.pth')
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -114,7 +114,7 @@ def main():
         orig_vgg = models.__dict__[args.arch]()
 
     #Change model to project into poincare space
-    model = PoincareVGG(orig_vgg, n_emb_dims=10)
+    model = PoincareVGG(orig_vgg, n_emb_dims=200)
 
     if args.gpu is not None:
         model = model.cuda(args.gpu)
@@ -249,7 +249,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
         target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
         target_embs = imgnet_poinc_wgt[[target_emb_idx]]
         target_embs = target_embs.cuda(args.gpu, non_blocking=True)
-
         # compute output
         output = model(input)
         loss = criterion(output, target, imgnet_poinc_wgt)
@@ -258,10 +257,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
         losses.update(loss.item(), input.size(0))
         top1.update(prec1.item(), input.size(0))
         top5.update(prec5.item(), input.size(0))
-
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
+        print(time.time() -end)
         optimizer.step()
 
         # measure elapsed time
@@ -423,6 +422,7 @@ def prediction(output, all_embs, knn=1):
 def accuracy(output, all_embs, targets, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
+        hh0=time.time()
         maxk = max(topk)
         preds = prediction(output, all_embs, knn=maxk)
         batch_size = output.size(0)
@@ -432,6 +432,7 @@ def accuracy(output, all_embs, targets, topk=(1,)):
             preds_tmp = preds[:, :i]
             correct_tmp = preds_tmp.eq(targets.view(batch_size, -1).repeat(1, i))
             res.append(torch.sum(correct_tmp).float() / batch_size)
+        print(time.time() - hh0)
         return res
 
 if __name__ == '__main__':
