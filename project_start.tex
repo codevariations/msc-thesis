@@ -329,24 +329,34 @@ where $\mathbf{X}$ is an $D\times N$ input data matrix that holds the $N$ differ
 In a typical classification problem we have $n$ possible labels for each input and wish to predict a probability distribution over them. In these applications the outputs of ANN are transformed into 0 to 1 range. More formally, consider that the output from above ANN for a single input $\mathbf{x}$ is the $n \times 1$ vector $\mathbf{f}$; we then require, that each element of $\mathbf{f}$ is between 0 and 1 and that $\sum_1^n \text{f}_i = 1$. The most common way of doing this is to assume that the output of the ANN are unnormalized (predicted) class log-probabilities, that is $f_i = \log \hat{P}(y = i | \mathbf{x})$ \cite{Goodfellow2016}. By taking exponents and normalizing across possible labels predicted class probabilities are calculated as per below - this is known as the softmax function:
 
 \begin{align} \label{softmax_eq}
-  \text{softmax}(\mathbf{f})_i = \frac{\exp (f_i)}{\sum_j \text{exp}(f_j)}
+  \text{softmax}(\mathbf{f})_i = \frac{\exp (f_i)}{\sum_j \text{exp}(f_j)}=q_i
 \end{align}
 
-The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1986}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet these could efficiently be represented by combining three color features with the three shape features \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
+where $q_i \in [0,1]$ captures the predicted probability that the input into the ANN belongs to class $i$. One reason for the softmax layer's popularity is that it is easily compatabile with the cross entropy loss function defined as $L_i=-\sum_i p_i \log q_i$ \cite{Shannon1948}. In simple image classification tasks where the classes are mutually exclusive we have $p_i=0 \forall i\ne C$ and $p_i=1$ for $i=C$ denoting the correct class. Plugging Equation \ref{softmax_eq} into this equation gives:
 
-So far we have described the basic ANN architecture and now we move on to how the models are trained. The methods described here are not constrained to feedforward networks, and are indeed used to also train many of the most novel deep learning architectures.   
+\begin{align} \label{XEloss}
+  L_i  = -\log \left(\frac{\exp (f_C)}{\sum_j \text{exp}(f_j)}\right) = -f_C + \log\left(\sum_j \text{exp}(f_j)\right)
+\end{align}
+which is the loss incurred from one observation, and is clearly continuous and differentiable. The sequence of computation leading from model inputs all the way to the output of scalar loss is known as the forward pass. Usually forward pass is computed simultaneously for several inputs, known as a mini-batch, in which case the average loss across the mini-batch is typically used. 
+
+The aim of training an ANN is based on learnng model weights that minimize some appropriate loss function, such as the cross-entropy loss above. Most supervised deep learning models, including the basic feedforward-network described above, are nowadays trained using the back-propagation algorithm \cite{Linnainmaa1976} \cite{Rumelhart1985}. The main idea of this algorithm is to use the chain rule to decompose the gradient of a loss function so that it can be efficiently passed back through the network. More formally, if $\nabla_{\theta}L(\theta)$ denotes the gradient of the loss with respect to all model parameters, then applying the chain rule we get:
+
+\begin{align} \label{BP_eq}
+  \nabla_{\theta}L(\theta) = \left(\frac{\partial \mathbf{f}}{\partial \mathbf{\theta}}\right)^{\top}
+\end{align}
 
 
 
 
+
+
+CNNs
+The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1986}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet all the possibilities could efficiently be represented by combining three color neurons with three shape neurons \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
 
 
 
 convolution
 Max-pooling 
-ReLU
-fully connected 
-softmax
 backprop
 loss function XE loss
 optimization,
