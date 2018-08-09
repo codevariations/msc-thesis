@@ -348,12 +348,13 @@ where $y_i$ is the real label of the observation, $x_i$ the input data, the diff
 \begin{align} \label{bp_crule}
   \frac{\partial L}{\partial x_i} = \frac{\partial L}{\partial f^{(m)}}\frac{\partial f^{(m)}}{\partial f^{(m-1)}} \dots \frac{\partial f^{(1)}}{\partial x_i}
 \end{align}
-  
+These computations are done in the opposite order of the forward-pass operations; hence back-propagation. Above example is simplistic since usually in addition to inputs from preceding layer, each layer has also its own paramets which can be also be thought as inputs to that layer. The general idea of the chain rule still works in that situation as well, now however the gradient flow bifurcates at each layer; part of gradients flow into tha earlier layer while the others flow back into parameters; this is explained in more depth in Figure \ref{fig:backprop}.
 
-
-\begin{align} \label{BP_eq}
-  \nabla_{\theta}L(\theta) = \left(\frac{\partial \mathbf{f}}{\partial \mathbf{\theta}}\right)^{\top}
-\end{align}
+\begin{figure}
+  \centering
+	\includegraphics[width=\textwidth]{backprop}
+	\caption{A simple example of forward (top) and backward passes (bottom) for a simple two-layer ANN, which illustrates how gradients flowing to early layers are calculated by multiplying the local gradient of a given layer with the gradient that flows back from the next layer}\label{fig:backprop}
+\end{figure}
 
 
 
