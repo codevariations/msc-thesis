@@ -353,16 +353,27 @@ These computations are done in the opposite order of the forward-pass operations
 \begin{figure}
   \centering
 	\includegraphics[width=\textwidth]{backprop}
-	\caption{A simple example of forward (top) and backward passes (bottom) for a simple two-layer ANN, which illustrates how gradients flowing to early layers are calculated by multiplying the local gradient of a given layer with the gradient that flows back from the next layer}\label{fig:backprop}
+	\caption{A simple example of forward (top) and backward passes (bottom) for a simple two-layer ANN, which illustrates how gradients flowing to early layers are calculated by multiplying the local gradient of a given layer with the gradient that flows back from the next layer}
+	\label{fig:backprop}
 \end{figure}
 
 After gradients are calculated using back-propagation, they are used by an optimization algorithm to change the model's parameters with the aim of minimizing the loss function. Here we consider stochastic gradient descent (SGD) \cite{Robbins1951} which is likely the most widely used optimization algorithm in deep learning. This algorithm is called stochastic because at each learning iteration only a subset, known as mini-batch, of the data is use to calculate gradients and to perform parameter updates; it has been shown that SGD converges much faster than calculating gradients always on all available data; the time per update for the algorithm is independet of size of data as long as batch size is held constant \cite{Goodfellow2016}. The parameter updates are based on moving 'downhill' i.e. in the direction of negative gradients:
 
 \begin{align} \label{sgd_eq}
-  \pmb{\theta}=\pmb{\theta} - \eta \nabla_{(\theta)}L(\mathbf{X}, \mathbf{y})
+  \pmb{\theta}_{(t+1)}=\pmb{\theta}_{(t)} - \eta \nabla_{\theta_{(t)}}L(\mathbf{X}, \mathbf{y})
 \end{align}
 
-Most deep learning models are very sensitive to the choice of learning rate $\eta$; if it is too high, we are likely to miss minima and conversly there is a risk of local minima and slow training time when the parameter is set too small. Usually learning rate is reduced linearly with training, or in bigger steps at regular intervals, to reduce the impact of noise when we are near a minimum \cite{Goodfellow2016}. 
+Most deep learning models are very sensitive to the choice of learning rate $\eta$; if it is too high, we are likely to miss minima and conversly there is a risk of local minima and slow training time when the parameter is set too small. Usually learning rate is reduced linearly with training, or in bigger steps at regular intervals, to reduce the impact of noise when we are near a minimum \cite{Goodfellow2016}.
+
+Another common addition to the vanilla SGD is momentum \cite{Rumelhart1985}, which can accelerate learning when there is a lot of noise from SGD or when the Hessian of the loss (matrix of 2nd order derivatives) is ill-conditioned as shown in Figure \ref{fig:momentum}. ADD ALGO + PHYSICS COMPARISON
+
+\begin{figure}
+  \centering
+	\includegraphics[width=0.5\textwidth]{momentum}
+	\caption{Example of ill conditioned Hessian and how momentum speeds up learning by accumulating the gradients of previous iterations such that velocity towards centre (lower loss) is established (shown in yellow). SGD without momentum keeps jumpin across the loss surface as if in a downward sloping canyon, but failing to utilize the slope (blue trace). The contours depict different levels of loss that decreases inwards}
+	\label{fig:momentum}
+\end{figure}
+
 
 CNNs
 The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1986}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet all the possibilities could efficiently be represented by combining three color neurons with three shape neurons \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
@@ -371,12 +382,6 @@ The ANN model we have described thus far is known as Feedforward Network or a Fu
 
 convolution
 Max-pooling 
-backprop
-loss function XE loss
-optimization,
-SGD
-minibatches
-learning rate annealing
 output one hot-encoded
 GPUs
 Graphical model view
