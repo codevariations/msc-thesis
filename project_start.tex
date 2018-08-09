@@ -338,8 +338,18 @@ where $q_i \in [0,1]$ captures the predicted probability that the input into the
   L_i  = -\log \left(\frac{\exp (f_C)}{\sum_j \text{exp}(f_j)}\right) = -f_C + \log\left(\sum_j \text{exp}(f_j)\right)
 \end{align}
 which is the loss incurred from one observation, and is clearly continuous and differentiable. The sequence of computation leading from model inputs all the way to the output of scalar loss is known as the forward pass. Usually forward pass is computed simultaneously for several inputs, known as a mini-batch, in which case the average loss across the mini-batch is typically used. 
+The aim of training an ANN is based on learnng model weights that minimize some appropriate loss function, such as the cross-entropy loss above. Most supervised deep learning models, including the basic feedforward-network described above, are nowadays trained using the back-propagation algorithm \cite{Linnainmaa1976} \cite{Rumelhart1985}. The main idea of this algorithm is to use the chain rule to decompose the gradient of a loss function so that it can be efficiently passed back through the network. More formally, assume the loss of an ANN is produced by a sequence of $m$ nested operation:
 
-The aim of training an ANN is based on learnng model weights that minimize some appropriate loss function, such as the cross-entropy loss above. Most supervised deep learning models, including the basic feedforward-network described above, are nowadays trained using the back-propagation algorithm \cite{Linnainmaa1976} \cite{Rumelhart1985}. The main idea of this algorithm is to use the chain rule to decompose the gradient of a loss function so that it can be efficiently passed back through the network. More formally, if $\nabla_{\theta}L(\theta)$ denotes the gradient of the loss with respect to all model parameters, then applying the chain rule we get:
+\begin{align} \label{bp_eq1}
+  L(y_i, x_i) = f^{(m)}(y_i, f^{(m-1)}(\dots f^{(2)}(f^{(1)}(x_i))))
+\end{align}
+where $y_i$ is the real label of the observation, $x_i$ the input data, the different $f^{(i)}$ may for example represent different types of layers. Employing the chain rule recursively, a simple decomposition gives:
+
+\begin{align} \label{bp_crule}
+  \frac{\partial L}{\partial x_i} = \frac{\partial L}{\partial f^{(m)}}\frac{\partial f^{(m)}}{\partial f^{(m-1)}} \dots \frac{\partial f^{(1)}}{\partial x_i}
+\end{align}
+  
+
 
 \begin{align} \label{BP_eq}
   \nabla_{\theta}L(\theta) = \left(\frac{\partial \mathbf{f}}{\partial \mathbf{\theta}}\right)^{\top}
