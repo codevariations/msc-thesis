@@ -406,21 +406,25 @@ Unlike fully connected neurons in feedforward networks, convolutional layer has 
 	\label{fig:conv}
 \end{figure}
 
-The reason why convolutions have proved so effective for image data is that natural visual scenes present strong local correlations - the world we view is not just a collection of randomly ordered pixels. Additionally, these visual features can appear at essentially anywhere in our visual scenes; thus the need for convolution layers to scan across the whole image \cite{Lecun2015}. Further, CNNs usually have several layers of convolutions on top of each other. When such deep CNNs are trained on image data, the kernels across the different layers usually learn a hierarchy of visual features, such that the early layers detect edges and corners, which are then used by middle layers to create contours and parts of objects, and finally later layers build up more complex representations, possibly of complete objects \cite{Zeiler2014}. This shares some similarities with mammals' visual cortex in which earlier (V1) cells respond to edges and bars of different orientations \cite{Hubeld1962} and later ones like V4 and the IT cortext to more complex shapes \cite{Kobatake1994}. This idea of distributed hierarchical representations is crucial to our research. First, the abiliy to learn fundamental visual features, such as edges, should help to generalize models to novel visual scenes. 
+The reason why convolutions have proved so effective for image data is that natural visual scenes present strong local correlations - the world we view is not just a collection of randomly ordered pixels. Additionally, these visual features can appear at essentially anywhere in our visual scenes; thus the need for convolution layers to scan across the whole image \cite{Lecun2015}. Further, CNNs usually have several layers of convolutions on top of each other. When such deep CNNs are trained on image data, the kernels across the different layers usually learn a hierarchy of visual features, such that the early layers detect edges and corners, which are then used by middle layers to create contours and parts of objects, and finally later layers build up more complex representations, possibly of complete objects \cite{Zeiler2014}. This shares some similarities with mammals' visual cortex in which earlier (V1) cells respond to edges and bars of different orientations \cite{Hubeld1962} and later ones like V4 and the IT cortext to more complex shapes \cite{Kobatake1994}. This idea of distributed hierarchical representations is crucial to our research. First, the abiliy to learn fundamental visual features, such as edges, should help to generalize models to novel visual scenes. Second, generalization is also improved by hierarchy of features: for example, if a CNN only trained on images of cats and apples, is shown a picture of a dog, it would be more likely to classify it as a cat than apple which is arguably the closer of the two. In the next chapter we show how an extension of this idea can be explotited to perform more accurate predictions for previously unseen classes of objects.
 
 Convolution layers in CNNs are normally followed up by max-pooling functions. Usually this is just the $max()$ function applied to a grid output of its preceding convolution output. For example, in Figure \ref{fig:conv} the max-pooling would only pass through the value of 25. The benefit of such down-samplign is local invariance: visual objects are not completely rigid and by passing on only the largest value, we are likely to produce the same output even if the values of the square changed around a bit \cite{Lecun2015} (imagine a letter that's slightly rotated between different views).
 
+One of the most important features of CNNs is that they can be trained end-to-end using back-propagation and SGD. A consequence of paramount importance is that the type of visual features which convolution kernels learn to represent is fully determined by what best fits the data. This is in sharp contrast to earlier computer vision feature extraction techniques \cite{Prince2012} such as SIFT \cite{Lowe1999} in which manually designed features are used. Following the breakthrough performance of the seminal AlexNet CNN \cite{Krizhevsky2012} at the ImageNet 2012 competition, deep CNNs of various designs have become state-of-the-art in virtually all machine vision classification and detection tasks \cite{JurgenSchmidhuber2015}.
+
+In addition to convolution and pooling layers, CNNs involve several other important architectural designs \dots depth cite paper that shows importance of depth, then cite , --> (millions of params?) -- > relus, dense --> can overfit --> dropout
 
 
-\textbf{Other architectural considerations}\\
+
+
+In order to train such large networks\dots gpus, and large data sets..
+
 Modern deep CNNs can have up to hundreds of layers with billions of weights. Training these would have taken ages, now GPUs.
 
 
 
 
-Max-pooling 
 GPUs
-Graphical model view
 fine tuning 
 pre trained networks
 
