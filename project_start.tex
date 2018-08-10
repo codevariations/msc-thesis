@@ -8,6 +8,9 @@
 \usepackage{latexsym}
 \usepackage{a4wide}
 \usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 
 \newtheorem{theorem}{THEOREM}
 \newtheorem{lemma}[theorem]{LEMMA}
@@ -326,6 +329,8 @@ where $\mathbf{X}$ is an $D\times N$ input data matrix that holds the $N$ differ
 	\label{fig:mlp}
 \end{figure}
 
+The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1985}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet all the possibilities could efficiently be represented by combining three color neurons with three shape neurons \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
+
 In a typical classification problem we have $n$ possible labels for each input and wish to predict a probability distribution over them. In these applications the outputs of ANN are transformed into 0 to 1 range. More formally, consider that the output from above ANN for a single input $\mathbf{x}$ is the $n \times 1$ vector $\mathbf{f}$; we then require, that each element of $\mathbf{f}$ is between 0 and 1 and that $\sum_1^n \text{f}_i = 1$. The most common way of doing this is to assume that the output of the ANN are unnormalized (predicted) class log-probabilities, that is $f_i = \log \hat{P}(y = i | \mathbf{x})$ \cite{Goodfellow2016}. By taking exponents and normalizing across possible labels predicted class probabilities are calculated as per below - this is known as the softmax function:
 
 \begin{align} \label{softmax_eq}
@@ -348,6 +353,7 @@ where $y_i$ is the real label of the observation, $x_i$ the input data, the diff
 \begin{align} \label{bp_crule}
   \frac{\partial L}{\partial x_i} = \frac{\partial L}{\partial f^{(m)}}\frac{\partial f^{(m)}}{\partial f^{(m-1)}} \dots \frac{\partial f^{(1)}}{\partial x_i}
 \end{align}
+
 These computations are done in the opposite order of the forward-pass operations; hence back-propagation. Above example is simplistic since usually in addition to inputs from preceding layer, each layer has also its own paramets which can be also be thought as inputs to that layer. The general idea of the chain rule still works in that situation as well, now however the gradient flow bifurcates at each layer; part of gradients flow into tha earlier layer while the others flow back into parameters; this is explained in more depth in Figure \ref{fig:backprop}. By representing ANNs as computational graphs, and using the chain rule similar to above, it becomes easy to see how backpropagation can be used to send appropriate gradients to right places even in complex network architectures. Importantly, backpropagation does this efficiently since at each operation all upstream gradients are collated and then passed on to one layer down, which is a lot more efficient than considering every single path through an ANN individually. To see this, consider Figure \ref{fig:mlp}: using back-propagation we can start from the output and, for instance, calculate the derivative of the output layer with respect to $H5$ neuron only once, and then pass this derivative to all neurons $H1$ - $H4$ simultaneously, which requires a lot less computation than considering all the paths that involve $H5$ separately. 
 
 \begin{figure}
@@ -365,7 +371,7 @@ After gradients are calculated using back-propagation, they are used by an optim
 
 Most deep learning models are very sensitive to the choice of learning rate $\eta$; if it is too high, we are likely to miss minima and conversly there is a risk of local minima and slow training time when the parameter is set too small. Usually learning rate is reduced linearly with training, or in bigger steps at regular intervals, to reduce the impact of noise when we are near a minimum \cite{Goodfellow2016}.
 
-Another common addition to the vanilla SGD is momentum \cite{Rumelhart1985}, which can accelerate learning when there is a lot of noise from SGD or when the Hessian of the loss (matrix of 2nd order derivatives) is ill-conditioned as shown in Figure \ref{fig:momentum}. ADD ALGO + PHYSICS COMPARISON
+Another common addition to the vanilla SGD is momentum \cite{Rumelhart1985}, which can accelerate learning when there is a lot of noise from SGD or when the Hessian of the loss (matrix of 2nd order derivatives) is ill-conditioned as shown in Figure \ref{fig:momentum}. SGD with momentum ammends the original SGD by introducing a velocity term that accumulates gradients from previous iterations with an exponential decay. Rumelhart and Hinton \cite{Rumelhart1985} described momentum as if dropping a ball-bearing on loss surface and letting momentum drive the ball. Further, the loss landscape can be imagined to be immersed in a liquid with a specified level of viscosity that defines how quickly the momentum fades. Algorithm \ref{alg:sgd_mom} gives an example of full SGD momentum algorithm for learning model parameters. In practice, back-propagation and optimization can nowadays be done automatically by modern deep learning libraries such as PyTorch \cite{Paszke2017} and Tensorflow \cite{Abadi2015}. 
 
 \begin{figure}
   \centering
@@ -374,17 +380,49 @@ Another common addition to the vanilla SGD is momentum \cite{Rumelhart1985}, whi
 	\label{fig:momentum}
 \end{figure}
 
+\begin{algorithm}
+  \caption{SGD with momentum (following \cite{Goodfellow2016})} \label{alg:sgd_mom}
+\begin{algorithmic}
+  \Require Learning rate $\eta$, Momentum decay parameter $\alpha$
+  \Require Initial parameters $\pmb{\theta}$, initial velocity $\nu$
+  \While{Convergence not met}
+  \State Sample a minibatch of m observations from training data $\{\mathbf{x}_1, \dots, \mathbf{x}_m \}$ and their
+  \State Get corresponding targets from training data $\{\mathbf{y}_1, \dots, \mathbf{y}_m \}$ 
+  \State Compute gradient for the minibatch: $\mathbf{g} \leftarrow \frac{1}{m} \nabla_{\theta}\sum_i L(f(\mathbf{x}_i| \pmb{\theta}), \mathbf{y}_i)$
+  \State Update velocity: $\pmb{\nu} \leftarrow \alpha \pmb{\nu} - \eta\mathbf{g}$
+  \State Updata parameters: $\pmb{\theta} \leftarrow \pmb{\theta} + \pmb{\nu}$
+  \EndWhile
+\end{algorithmic}
+\end{algorithm}
 
-CNNs
-The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1986}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet all the possibilities could efficiently be represented by combining three color neurons with three shape neurons \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
+So far we have considered only simple feedforward ANNs with fully connected layers. Most of the ground-breaking accomplishments over the past decade in deep learning have however been achieved with convolutional neural networks (CNNs) \cite{Le} of some sort. This is particularly true for computer vision tasks such as image classifiction \cite{JurgenSchmidhuber2015}. In fact, the term deep learning is often used synonymously with CNNs that have a large number of layers.
+
+Unlike fully connected neurons in feedforward networks, convolutional layer has neurons, usually called kernels, which are connected only to some parts of the input it receives from its preceding layer - together many such neurons span the entire input data. Furthermore, there is weight sharing between the kernels to allow for the recognition of a particular feature anywhere in the input space \cite{Lecun2015}; convolution layers are thus particularly suited for data with locally correlated structures such as images. Consider an input image of 225x225, a typical convolution filter may have size 3x3 and, after having been trained on image data, could have learnt feature mapping that represents particular visual feature such as a vertical edge. This filter is then replicated over the entire 225x225 input range so that the model can detect that particular feature anywhere in the image. Usually each layer has a multitude of such kernels to detect different features in the input data. Mathematically, this feature detection corresponds to the convolution operation between input data $X$ and convolution kernels $K$, which for discrete 2D data is given as $S(i, j) = (X \ast K)=(i, j) \sum_m \sum_n X(i-m, j-n)K(m, n)$ \cite{Goodfellow2016} where $i$ and $j$ denotes a particular image pixel location and $m$ and $n$ those of the kernel. Figure \ref{fig:conv} gives a brief toy example to illustrate this process. 
+  
+\begin{figure}
+  \centering
+	\includegraphics[width=0.7\textwidth]{conv}
+	\caption{A simple example of the computations performed by a single 2x2 convolution kernel on a 4x4 input. Assuming stride length of two squares, the kernel will see each of the four corners and performs a convolution operation on each of them. This is shown explicitly for the bottom left green square. The computation is hence essentially a dot product similarity metric between the kernel and the local image areas.}
+	\label{fig:conv}
+\end{figure}
+
+The reason why convolutions have proved so effective for image data is that natural visual scenes present strong local correlations - the world we view is not just a collection of randomly ordered pixels. Additionally, these visual features can appear at essentially anywhere in our visual scenes; thus the need for convolution layers to scan across the whole image \cite{Lecun2015}. Further, CNNs usually have several layers of convolutions on top of each other. When such deep CNNs are trained on image data, the kernels across the different layers usually learn a hierarchy of visual features, such that the early layers detect edges and corners, which are then used by middle layers to create contours and parts of objects, and finally later layers build up more complex representations, possibly of complete objects \cite{Zeiler2014}. This shares some similarities with mammals' visual cortex in which earlier (V1) cells respond to edges and bars of different orientations \cite{Hubeld1962} and later ones like V4 and the IT cortext to more complex shapes \cite{Kobatake1994}. This idea of distributed hierarchical representations is crucial to our research. First, the abiliy to learn fundamental visual features, such as edges, should help to generalize models to novel visual scenes. 
+
+Convolution layers in CNNs are normally followed up by max-pooling functions. Usually this is just the $max()$ function applied to a grid output of its preceding convolution output. For example, in Figure \ref{fig:conv} the max-pooling would only pass through the value of 25. The benefit of such down-samplign is local invariance: visual objects are not completely rigid and by passing on only the largest value, we are likely to produce the same output even if the values of the square changed around a bit \cite{Lecun2015} (imagine a letter that's slightly rotated between different views).
 
 
 
-convolution
+\textbf{Other architectural considerations}\\
+Modern deep CNNs can have up to hundreds of layers with billions of weights. Training these would have taken ages, now GPUs.
+
+
+
+
 Max-pooling 
-output one hot-encoded
 GPUs
 Graphical model view
+fine tuning 
+pre trained networks
 
 
 Upon observing almost any visual scene, humans are able to effortlessly cut it up into segments of distinct objects \cite{Rosch1976}. This is a remarkable ability considering that the world we live in can present us with an infinite amount of visual variation to our retinas and yet we are able to easily recognize tens of thousands of distinct object categories \cite{Biederman1989} with invariance to various factors such as lighting, shade, orientation and partial occlusion \cite{DiCarlo2012}. Replicating this type of performance in artificial object recognition has been one of the main focuses of computer vision researchers over the past several decades.
@@ -403,7 +441,6 @@ Despite its recent surgent in popularity, DL has a long history.
 
 
 \begin{itemize}
-    \item deep learning considered is supervised - this is an important tenet as it allows learn from experience and learn from experience, more akin to how humans learns. This is integral in allowing computers learn to solve problems that are not so easily solved by just a string of rules
     \item DL allows to understand world through a hierarchy of concepts. 
     \item Representations are important e.g. can be as simple as some feature based on the color specturm could easily separate objects of different colors. It becomes difficult however to know -- raw pixel values may not be very informative. An integral part of deep learning is representation learning in which rather than learning mapping from features to output, we learn mapping from raw input into appropriate features and then from features into output. \cite{Goodfellow2016}. The representations learned in DL a hierarchical which is why they have been so succesful for visual tasks.
     \item it has been shown that representations learned by modern DNN are starting to approach those more similar to those learnt by the human IT cortext \cite{Cadieu2014}. Same paper: key to human visual object recognition is the representation learnt in the cortical ventral stream from visual signals from the eyes through the visual cortext from primary visual area V1, culiminating in the IT cortext. 
