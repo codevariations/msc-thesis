@@ -71,6 +71,8 @@ Summarise your report concisely.
 \tableofcontents
 \setcounter{page}{1}
 
+\chapter{Notes}
+discuss how first trained on small data set
 
 
 \chapter{Intro/Literature Review Notes}
@@ -371,7 +373,7 @@ Despite the many successes of deep learning in various computer vision tasks, mo
 
 Standard deep learning models used for image classification do not exploit this semantic taxonomy since they are trained against one-hot encoded target vectors. For example, the ImageNet data set \cite{JiaDeng2009} contains a large number of different dog breeds and their training label vectors will have 1 for the dimension a given breed and 0 for all the other possible image classes. It follows that label vectors for different breeds are thus orthogonal and normally a model trained on this data will therefore not accomodate for the fact that the two breeds do infact belong to the same higher level categories of dogs, animals and so forth. 
 
-Our research is motivated by above observations. We conjecture that we can help deep learning models to learn much better representations that generalize better by teaching them hierarchical taxonomies. There have recently been a few relevant papers exploring this idea.
+Our research is motivated by above observations. We conjecture that we can help deep learning models to learn much better representations that generalize better by teaching them hierarchical taxonomies. There have recently been a few relevant papers exploring this idea. Wang and Cottrell \cite{Wang2015} trained a CNN on two-level hierarchical labels of the ImageNet 2012 data \cite{Russakovsky2015} and found that this leads to an improved performance on the standard top-5 classification accuracy. The two levels they use are the 'basic level' and the 'subordinate level'; for example, a 'fox' is the basic level of its subordinate 'red fox'. The 'basic level' concept follows from Rosch \textit{et al.} \cite{Rosch1976} who identified it as the level at which an object is typically identified by humans; subordinate classification usually occurs subsequently. Another simiar study \cite{Lei2018} constructs a data set which mostly has coarse labeled images (similar to the basic level) and only some fine grained examples. The authors show that this weakly-supervised training improves the validation accuracy of the fine grained classes. 
 
 
 \underline{Pictures and Names: Making the Connection \cite{Joliceur1984}}
