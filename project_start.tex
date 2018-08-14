@@ -375,11 +375,14 @@ Standard deep learning models used for image classification do not exploit this 
 
 Our research is motivated by above observations. We conjecture that we can help deep learning models to learn much better representations that generalize better by teaching them hierarchical taxonomies. There have recently been a few relevant papers exploring this idea. Wang and Cottrell \cite{Wang2015} trained a CNN on two-level hierarchical labels of the ImageNet 2012 data \cite{Russakovsky2015} and found that this leads to an improved performance on the standard top-5 classification accuracy. The two levels they use are the 'basic level' and the 'subordinate level'; for example, a 'fox' is the basic level of its subordinate 'red fox'. The 'basic level' concept follows from Rosch \textit{et al.} \cite{Rosch1976} who identified it as the level at which an object is typically identified by humans at first; afterwards object may also be identified at a lower lever called 'subordinate' level. Another simiar study \cite{Lei2018} construct a dataset which mostly has coarse labeled images (similar to the basic level) and only some fine grained examples. The authors show that their custom CNN that uses both hierarchies can predit fine-level labels better than a model that's only trained one fine level. This suggests that the fine-grained model is able to borrow strength from coarse labels and consequently generalize better. Peterson \textit{et al.} extended this line of research by exploring the type of representations learnt by a CNN trained on both 'basic' and 'sub-ordinate' labels. First, the authors found that including the basic-level labels in pre-training or fine-tuning led to a much more clustered representation of the feature spaces extracted from the final layer of the CNN (e.g. the features vectors of different breeds of dogs were now bundeled up together whilst if trained on just subordinate labels, then there was no clustering of similar categories). The features also had learn separate hierarchies for natural and man made objects. Finally, the authors illustrate the generalization power of these representations by running a zero-shot learning experiment in which the model sees only few examples of either sub- or basic-level objects and then tries to find all other images from the data set belonging to the given label. Interestingly, the results show that the supplementary basic-level training has led to a bias to label objects at this level which is congruent with corresponding studies in humans \cite{Xu2000}.
 
+Despite the important contribution of above works, they are limited in that they only consider two levels of a semantic taxonomy. It has been shown that in reality we posses a much more complex multi-level semantic hierarchy and the level at which we identify visual objects depends various factors such as the time allowed for identification and knowledge of the subject \cite{Joliceur1984}. In this paper we exploit a fully set of hierarchical taxonomy via semantic embeddings built on a large-scale lexical database WordNet \cite{Princeton2010}.
+
+Above works illustrate the implicit connction between text and visual data processing in humans. The two were shown to be explicitly linked by Joliceur \textit{et al.}
 
 
 
 
-
+Mention low accuracy and difficulty of task for zero-shot learnig.
 
 
 
@@ -395,23 +398,6 @@ This extends the work of \cite{Rosch1976}. The authors find that the basic level
   \item in general the close relationship between semantic and visual identification corroborates our aim of using semantic embedding. 
   \item one concern is that we are limited by the lowest level of labels in the imagenet labels, however otherwise model training, unlike humans, is not restricted by classification time and ability to recall detailed labels and thus we should be able to incorporate all the possible semantic knowledge \\
 \end{itemize}
-
-
-
- \textit{Thoughts:}
-\begin{itemize}
-    \item This is probably the most relevant papers to ours, though I dont actually think it's too similar because they use only two levels of labels so focus on just basic/subordinate, so I dont really see this as hierarchical. It's quite different from how we are going to do with word2vec or some other embedding that allows a much richer relationship between the words rather than just a 'vertical' link between two categories.
-    \item They approach quite strongly from psychology point of view and dont even talk about the accuracy of the model. I think I will have more ML focus than this and will definitely look at the models' performance
-    \item I do like the psychology approach in that if we think of AI more generally then I suppose we wish to achieve human-like semantic understanding and one could argue that this paper perhaps has some of that going on
-    \item I am tempted to also use InceptionV3 in case we do wish to repeat any of their experiments, and for the reason it was used here which is that it's near state-of-the-art and pretty quick to train
-    \item Find it bit weird that they define the model's feature space to be just the final layer: '..we pose multi-level labeling problem simply as learning a set of independent softmax classifiers that are unconnected to each other and fully connected to the final representation layer of deep CNN  while other alternative approaches exist for defining the network architecture and loss function, this approach provides a single embedding space for all images, which allows us to inspect the representations with classic psychological methods such as hierarchical clustering.' Not the biggest fan of this approach as would expect also hierarchy of representations through out the network (c.f. human visual cortex)
-   \item further, with above in mind the authors only fine-tune the final layer: 'For fine-tuning models, we freeze all but the weights in the last block of the model to speed up training'. If we wish to look a representation across hierarchy of layers, we cant do this. Hopefully this wont be too much computation\dots
-   \item the t-sne and dendrograms of representations i do like so might consider something similar
-   \item their human similarity judgement experiment is nice but am not very convinced by their results. Would be cool to top them but not sure how realistic it is to get hands on that data since they collected using Amazon MTurk which costs some moneys
-   \item Their generalization experiment with basic level bias is also unconvincing to me. They only have two levels of labels with one more general than the other, and a model where features are hierarchical so it doesnt surprise me that the higher level subsumes the lower. If they would have three levels and would generalize to the middle level, then that would be pretty cool. Need to think if this experiment is going to be relevant to us
-   \item with regards to \cite{Rosch1976},\cite{Joliceur1984} this paper also doesnt address that level of identification depends on factors such as time-limit of identification and knowledge of the subject. Thus our approach of training with full semantic embedding is superior. 
-   \item in general the technical methodology of our model will be different too
-\end{itemize} 
 
 
 \bibliographystyle{ieeetr}
