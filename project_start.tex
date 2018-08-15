@@ -59,8 +59,6 @@ The report may be freely copied and distributed provided the source is explicitl
 MSc. Computational Statistics and Machine Learning\\ \\
 Supervisor: Prof. Bradley Love}
 
-
-
 \begin{document}
  
 \onehalfspacing
@@ -72,17 +70,17 @@ Summarise your report concisely.
 \setcounter{page}{1}
 
 \chapter{Notes}
-discuss how first trained on small data set
-
+\begin{itemize}
+    \item discuss how first trained on small data set
+    \item one problem is that we are training only transformation to the leafs of the nodes. I wonder if we could includ basic level labels since those are the ones humans learn first and also some suggest on average capture most distinction (see the two papers)
+    \item look at yolo 9000 for wordnet explanation
+    \item Do I clearly state that CNNs are the state-of-the-art on image classification, give some example of current results / super human performance or when they wont competitions first time
+\end{itemize}
 
 \chapter{Intro/Literature Review Notes}
 
 Humans are able to extract rich semantic information from visual scenes. For instance, upon viewing a picture of a dog, we may also be able to identify it as a specific breed such as a golden retriever. Further, our understanding of the image benefits from semantic knowledge that is not captured explicitly in the visual features of a specific image. For example, we also know that the dog belongs in the category of mammals which, in turn, are animals and thus living entities. While this type of hierarchical semantic visual understanding comes to us effortlessly, it remains a challenging task for computer vision. In fact, most image classification models are trained on data sets with single, mutually exlusive labels and thus the learnt feature representations do not account, for example, for both cat and dog being four-legged animals. Why is this a problem? Generalization?  An exception to this is the area of knowledge transfer and related tasks such as zero-shot learning in which the aim is to predict labels of previously unseen classes of images; a popular approach for zero-shot learning is to borrown strength from, say text data, to create a semantic space that embed all the possible labels of images including those not seen previously. Mapping between images and the semantic space is then learned using the 'seen' images. Once this mapping is learnt, it can be used to transform previously unseen images into the semantic space and then apply some distance measure to label it as the category thats cloest in the embedding space. We postulate that the same idea could also be employed in the simple image classification tasks to achieve better generalization performance. In particular, we will train a deep learning model for image classification against a hierarchical semantic embedding derived from the WordNet database which, as we will show, will correspond to regularizing the model weights to account for these semantic relationships. We will use the recently developed poincare embeddings as the resulting embedding space can capture both the similarity between the possible labels as well as the hierarchical semantic relationships encoded by WordNet graphical model. The learnt model is then transferred to perform standard image classification by adding a final softmax classification layer and fine tuning this agains the ImageNet database. Our results show \dots hopefully some improvements over training the model only against ImageNet which illustrates the benefit of incorporatig semantic knowledge.. \\
 
-
-\newpage
-
-\textbf{PAPERS ON PSYCHOLOGY OF VISUAL PERCEPTION \& SEMANTICS} \\ 
 \newpage
 
 \textbf{PAPERS ON SEMANTIC KNOWLEDGE TRANSFER \& \\ZERO-SHOT LEARNING}
@@ -174,30 +172,6 @@ Pre DL-era paper in which the authors attempt to move from linear computational 
   \end{itemize}
 
 
-
-\newpage
-
-\textbf{NLP WORD EMBEDDING PAPERS}
-
-These papers provide important background on word embeddings. Main idea is to represent words in vector space such that distance between any two vectors reflects the similarity of those two words (semantically). 
-
-\underline{Improving Word Representations via Global Context and Multiple Word Prototypes - Huang et al. 2012}
-
-\textit{Overview}
-
-Main point is that in order to cluster words vectors appropriately, need to consider both syntax and semantics. Most previous approaches have only done this in the context of the local problem, but employing a global data can provide more accurate resuls, as it would better capture semantics whilst still contolling also for syntax. A joint model is hence used. Indeed, the authors show that this joint model provides better correlation with human similarity judgement of words.
-
-More specifically, 'the model jointly learns word representation while learning to discriminate the next word, given a short word sequence (local contexti, syntactic information) and a document of text the sequence appears in (global context, semantic information)'. Two standard neural networks are used to predict scores that reflect the likelihood of the most recent word occuring given the local and global context. Sum of the two scores creates a total score for the most recent word, which is then used to construct a hinge-loss type of function to discriminate against any other possible word that could have occured, which is then minimized.
-\textit{Thoughts:}
-\begin{itemize}
-    \item This seems like a pre-cursor to GloVe
-\end{itemize}
-
-\newpage
-
-\textbf{MULTI-LABEL CLASSIFICATION PAPERS} \\
-According to current plan, we are concerned with typical single-label classification. Nevertheless, multi-label image classification is relevant to us since those papers have to explicitly try to learn relationships between many related categories in objects. Different papers below approach this in different ways and have somewhat differing aims. They do share our goal of trying enforce some way of semantic understanding into DL papers. I do sometimes feel that multi-label classification is 'under rated'; it's much closer to how I imagine that humans process visual data. \\
-
 \underline{YOLO 9000 - Redmon and Farhadi 2016} \\ 
 \textit{Overview} \\
 This is a object detection paper so in a way quite different from ours i.e. it tries to predict locations of all objects in the images and then label those. This paper is relevant to us due to its use of hierarchical labelling, which the authors use to combine distinct datasets of unequal hierarchy into one dataset, so their purpose of hierarchies is though very different from ours. More specifically, in this paper the authors combine imaages from classification data sets and object detection (includes localization and possible multiple objects). Problem is that imagenet has very specific labels (c.f. subordinate in above paper) whilst detection data set has only very generic labels e.g. dog (c.f. basic labels above paper). Need a coherent way to marge these different level labels, to create the joint data set. Also, say 'norfolk terrier' and 'dog' may not be mutually exclusive in photos thus cant merge using just a single softmax like in DL typically. Thus the authors instead create a hierarchical tree of the imagenet labels (which are based on WordNet). To classify with their hierarchical tree, predict conditional probabilities at each node i.e. probability of each hyponym of that synset given that synset. e.g. P(norfolk terrier|terrier), P(Yorkshire terrier| terrier). Can then calculate marginal probabilities by traversing upwards through the graph. This allows the authors to combine COCO and ImageNet data sets and efficiently do detection on over 9000 labels with only marginal performance drop. The authors also show that with the hierarchical model, the performance of the model degrades gracefully when it sees for instance a dog but isnt certain about the breed of the dog \\ \\
@@ -229,21 +203,6 @@ Results: state-of-the-art on multi-label since can weed out labels that can't po
     \item bit like the nearest neighbour label prediction here, we should attempt also to predict into the embedding space after training the model. I really wonder if we could thus train on single label data but actually somehow accomplish multi-label predictions (based on predicted embedding space). I guess this would be kind of what the zero-shot learning papers (see the section on those papers) attempt to do using word embeddings. 
   \end{itemize}
 
-
-
-\newpage
-\textbf{Other relevant papers and intro stuff} \\
-Computer vision researchers have already long before the advent of deep learning, been interested in multi-label classification as it would greatly enhanc our ability, for example to search and reterieve large quantities of image data \cite{MakadiaBaseline}. Further, multilabel classification much closer corresponds to how humans perceive complex visual scenes and thus developing models with rich semantic ability would be a valuable step for development of artificial intelligence technology such as autonomous vehicles. Multi-label classification already of interest before deep learning: \cite{tagprop}.  \\
-
-Similarly, word embeddings have been used extensively to capture image semantics much before deep learning. As an example \cite{MonayPLSA} perform unsupervised image auto-annotation with a probabilistic model in which a joint latent space is used to represent co-occurence of image features and words. More specifically, the authors constraint the latent space to be mainly defined by word-features as they argue that the semantic relationships between words is richer than that of image features, and second, co-occurence of words in text is semantically more meaningful than that of visual features. The authors' first point may be less relevant for the state-of-the-art today as convolutional neural networks have shown the ability to build complex fvisual features. Nevertheless, if we train model that captures full semantic relationships in large sample text, this should be richer still; for instance, ImageNet is represented by a Directed Graph rather than just a tree hierarchy. The second point too remains apt, image feature co-occurence indeed may not mean much (though deeper layer ones do probably more so in CNNs). The presence of varying background and other objects, makes it difficult to maintain semantic similarity on the basis of visual features alone.  \\
-
-How is multi-label classification different from semantic segmentation / object detection? Not trying to locate/bound any object but rather concerned with labeling. Why would we need something other than YOLO9000 (Redmon and Farhadi 2016). Further, in our approach we are not trying to perform multi-label classification, rather we still perform single label classification but trying to benefit from semantic dependencies in training\dots \\
-
-
-Is it really a reasonable assumption that semantically similar words should be close to each other in image space. Perhaps true for e.g. cat and a dog. But what about sheep, clouds or snakes and cables. Should they be close to each other in an optimal embedding space? 
-
-In Bayesian framework, the use of embedding would probably corresond to some prior that is the wordnet graph
-
 \newpage
 
 \chapter{Implementation Ideas}
@@ -252,17 +211,18 @@ In Bayesian framework, the use of embedding would probably corresond to some pri
 \item at test time, how to predict labels i.e. to find nearest neighbour? Some tree or hashing e.g. DeViSE
 \item which baselines to use? Standard inception-v3, random embedding, word2vec embedding, 
 \item what evaluations to make? resonableness of errors
+\item contrast method vs word2vec method
 \end{itemize}
 
 \newpage
 
-\chapter{Artificial Neural Networks \& Deep Learning in Computer Vision}
+\chapter{Background}
 
-Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf{x}$ is a vector describing some input covariate and $\mathbf{w}$ model weights. Much like in linear regression, the aim is to learn a mapping $f(\mathbf{w}, \mathbf{x}) = y$ that defines the relationship between the input $\mathbf{x}$ and some category $y$ it belongs to. In a simple problem,  $y$ would be binary and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could linearly separate the data into the two classes based on the input features. These early models were largely restricted by their assuming linear separability and there was also no computationally feasible way of training the models at the time \cite{Goodfellow2016}, \cite{JurgenSchmidhuber2015} but they form the basis for
-nearly all Artificial Neural Networks (ANNs). 
+\section{Artificial Neural Networks \\ \& Deep Learning}
+
+Even though deep learning is often viewed as a new technique, in reality the recent breakthroughs are underpinned by decades, if not centuries of related research. For instance, earliest artificial neural networks, such as Rosenblatt's Perceptron \cite{Rosenblatt1958} from the 1950s, are closely related to linear regressions dating back to Gauss \cite{JurgenSchmidhuber2015}; these models are all of the form $f(\mathbf{x}, \mathbf{w})=\mathbf{x}^t \mathbf{w}$ where $\mathbf{x}$ is a vector describing some input covariate and $\mathbf{w}$ model weights. Much like in linear regression, the aim is to learn a mapping $f(\mathbf{w}, \mathbf{x}) = y$ that defines the relationship between the input $\mathbf{x}$ and some category $y$ it belongs to. In a simple problem,  $y$ would be binary and the weights $\mathbf{w}$ would be learnt such that the resulting hyperplane could linearly separate the data into the two classes based on the input features. These early models were largely restricted by their assuming linear separability and there was also no computationally feasible way of training the models at the time \cite{Goodfellow2016}, \cite{JurgenSchmidhuber2015} but they form the basis for nearly all Artificial Neural Networks (ANNs). 
 
 Several steps were taken to increase to complexity of these models and to allow for non-linearities, many of them initially inspired to some degree by biological neurons \cite{Goodfellow16}. For instance, real neurons typically only fire once action potential exceeds a specific threshold \cite{Hodgkin1990}. In ANNs, a reminiscent behaviour is attained via activation functions on top of a neuron outputs, most typically in the form of Rectified Linear Units (ReLU), which apply the following non-linearity: $f(\mathbf{x}, \mathbf{w})=max\{0, \mathbf{x}^t \mathbf{w}\}$. ReLUs also improve the representational capacity of a network by imposing sparsity which can make it easier to disentangle the data \cite{Glorot2011} and hence lead to faster convergence of training \cite{Krizhevsky2012}.
-
 
 Another insights borrowed from neuroscience was that intelligence stems from groups of neurons acting together rather than from the behaviour of individual neurons \cite{Goodfellow2016}; this idea is behind deep ANNs where several layers of neurons are connected to each other and numerous neurons are present in each layer. Below equations and Figure \ref{fig:mlp} give a simplified example of an ANN with two hidden layers:
 
@@ -281,6 +241,8 @@ where $\mathbf{X}$ is an $D\times N$ input data matrix that holds the $N$ differ
 \end{figure}
 
 The ANN model we have described thus far is known as Feedforward Network or a Fully Connected Network, which refers to all neurons being connected to all other neurons in the preceding and succeeding layers. This is an important point as it fascilitates a hierarchical structure in which neurons in the later layers may combine features from earlier layers to create more complex features in turn. Relatedly, this architecture enables distributed representation in which several types features can be combined in different ways to represent an exponential number of different inputs \cite{Hinton1985}. As an example, if we had squares, rectangles and circles and each of them could be either red, green or blue, then we have 9 possible visual objects, yet all the possibilities could efficiently be represented by combining three color neurons with three shape neurons \cite{Goodfellow2016}. \textbf{see goodfellow ch 15}.
+
+\subsection{Training ANNs}
 
 In a typical classification problem we have $n$ possible labels for each input and wish to predict a probability distribution over them. In these applications the outputs of ANN are transformed into 0 to 1 range. More formally, consider that the output from above ANN for a single input $\mathbf{x}$ is the $n \times 1$ vector $\mathbf{f}$; we then require, that each element of $\mathbf{f}$ is between 0 and 1 and that $\sum_1^n \text{f}_i = 1$. The most common way of doing this is to assume that the output of the ANN are unnormalized (predicted) class log-probabilities, that is $f_i = \log \hat{P}(y = i | \mathbf{x})$ \cite{Goodfellow2016}. By taking exponents and normalizing across possible labels predicted class probabilities are calculated as per below - this is known as the softmax function:
 
@@ -346,6 +308,8 @@ Another common addition to the vanilla SGD is momentum \cite{Rumelhart1985}, whi
 \end{algorithmic}
 \end{algorithm}
 
+\subsection{Convolutional Neural Networks (CNNs)}
+
 So far we have considered only simple feedforward ANNs with fully connected layers. Most of the ground-breaking accomplishments over the past decade in deep learning have however been achieved with convolutional neural networks (CNNs) \cite{Le} of some sort. This is particularly true for computer vision tasks such as image classifiction \cite{JurgenSchmidhuber2015}. In fact, the term deep learning is often used synonymously with CNNs that have a large number of layers.
 
 Unlike fully connected neurons in feedforward networks, convolutional layer has neurons, usually called kernels, which are connected only to some parts of the input it receives from its preceding layer - together many such neurons span the entire input data. Furthermore, there is weight sharing between the kernels to allow for the recognition of a particular feature anywhere in the input space \cite{Lecun2015}; convolution layers are thus particularly suited for data with locally correlated structures such as images. Consider an input image of 225x225, a typical convolution filter may have size 3x3 and, after having been trained on image data, could have learnt feature mapping that represents particular visual feature such as a vertical edge. This filter is then replicated over the entire 225x225 input range so that the model can detect that particular feature anywhere in the image. Usually each layer has a multitude of such kernels to detect different features in the input data. Mathematically, this feature detection corresponds to the convolution operation between input data $X$ and convolution kernels $K$, which for discrete 2D data is given as $S(i, j) = (X \ast K)=(i, j) \sum_m \sum_n X(i-m, j-n)K(m, n)$ \cite{Goodfellow2016} where $i$ and $j$ denotes a particular image pixel location and $m$ and $n$ those of the kernel. Figure \ref{fig:conv} gives a brief toy example to illustrate this process. 
@@ -367,9 +331,21 @@ In addition to convolution and pooling layers, CNNs involve several other import
 
 Many of the theoretical concepts of modern deep CNNs have been around for several decades \cite{JurgenSchmidhuber2015}. The reason for their recent surge in popularity is to a large extent that they have become a lot easier and faster to train as our computers have gotten more powerful and our datasets much larger. In particular, the ability to train deep models on Graphical Processing Units (GPUs) has cut training times by at least an order of magnitude \cite{Lecun2015}. However, we have only been able reap the benefits of faster compute and better models because of 'big data'. It has been suggested that CNNs with around 5000 labels per training category can on average start to match human performance \cite{Goodfellow2016} - over the past decade we have seen the advent of datasets that have up to tens of millions of training examples \cite{Russakovsky2015i}, \cite{JiaDeng2009}, \cite{Netzer2011}.
 
-\newpage
+\section{Exploiting Semantic Information in Computer Vision}
+
+\subsection{Background from the Human Visual System}
 
 Despite the many successes of deep learning in various computer vision tasks, most of these rely on well defined training and testing envionments and do not generalize well beyond them; we are thus stil far from general human-level performance. Upon observing almost any visual scene, humans are able to effortlessly cut it up into segments of distinct objects \cite{Rosch1976}, even if we have never seen the scene before. This is a remarkable ability considering that the world we live in can present us with an infinite amount of visual variation to our retinas and yet we are able to easily recognize tens of thousands of distinct object categories \cite{Biederman1989} with invariance to various factors such as movement, lighting, shade, orientation and partial occlusion \cite{DiCarlo2012}. Rosch \textit{et al.} \cite{Rosch1976} argue that this is because of the non-random, and hierarchical, structure of visual objects, for instance no breed of dogs will have wings but they will often share many features such as four legs with certain type of paws. In general entities that are closer to each other in a hierarchical semantic taxonomy will also typically share more visual features; dogs and birds are still more alike than dogs and vehicles since both belong to a higher level category of animals which all share certain visual attributes.
+
+The use of semantic hierarchies in computer vision dates back to early work on image retrieval \cite{Aslandogan1997}, \cite{Zhao2001}, \cite{Grosky2002} \cite{Barnard2001}, where it has been, for example, used to expand potential query terms and to impose a more general association between image features and corresonding labels. These ideas were subsequently utilized to improve image annotation and classification \cite{Srikanth2005}, \cite{Marszaek2007} \cite{Griffin2013}. For example, Marszalek and Schmid \cite{Marszaek2007} use the WordNet database to create a lexical hierarchy of their image labels and train an SVM classifier \cite{Scholkopf2002} that acts at each node of the hierarchy. The resulting model proves very flexible and performs well under uncertainty - if the model is unsure about what dog breed is in an image, it can then move up one level and just predict a 'dog'. It should be noted that the dataset used here by the paper is very simple by today's standards.  
+
+
+
+
+
+
+
+
 
 Standard deep learning models used for image classification do not exploit this semantic taxonomy since they are trained against one-hot encoded target vectors. For example, the ImageNet data set \cite{JiaDeng2009} contains a large number of different dog breeds and their training label vectors will have 1 for the dimension a given breed and 0 for all the other possible image classes. It follows that label vectors for different breeds are thus orthogonal and normally a model trained on this data will therefore not accomodate for the fact that the two breeds do infact belong to the same higher level categories of dogs, animals and so forth. The chosen level of hierarchy such one-hot encoded labels represent is also usually arbitrary; should an image be labelled a dog or a labrador retriever? However, optimally both would be taken into account, we argue. 
 
@@ -377,27 +353,13 @@ Our research is motivated by above observations. We conjecture that we can help 
 
 Despite the important contribution of above works, they are limited in that they only consider two levels of a semantic taxonomy. It has been shown that in reality we posses a much more complex multi-level semantic hierarchy and the level at which we identify visual objects depends various factors such as the time allowed for identification and knowledge of the subject \cite{Joliceur1984}. In this paper we exploit a fully set of hierarchical taxonomy via semantic embeddings built on a large-scale lexical database WordNet \cite{Princeton2010}.
 
-Above works illustrate the implicit connction between text and visual data processing in humans. The two were shown to be explicitly linked by Joliceur \textit{et al.}
+Above works illustrate the implicit connection between text and visual data processing in humans. Joliceur \textit{et al.} \cite{Joliceur1984} explored the dependence of our visual system on semantic understanding in more depth and illustrated this with several experiments. For instance, upon viewing a picture of a chair we can use our semantic knowledge base to generalize it to the category of furnitures even though the image itself doesnt reveal that such an abstraction even exists. Similary, we can seamlessly access our visual memory to imagine semantic concepts, even ones we may never have seen such as 'a dog wearing ice skates'. Our approach of combining deep learning and semantic embeddings is motivated by these observations. Two areas in which this strategy has been applied already are multi-label classificaiton and zero-shot learning.
+
+\subsection{Semantic Embeddings in Computer Vision}
 
 
 
 
-Mention low accuracy and difficulty of task for zero-shot learnig.
-
-
-
-\underline{Pictures and Names: Making the Connection \cite{Joliceur1984}}
-
-\textit{Overview}
-
-This extends the work of \cite{Rosch1976}. The authors find that the basic level is a level at which identification is fastests on average. In fact, it is found that humans will work through taxonomy by first classifying an object at basic level and after that at a subordinate level. The classification we perform is thus time-dependent. Further the authors find that the same process is used to name text and visual data, which implies that there is an important link between our perception of visual scenes and semantic knowledge. More specifically, humans are able to use semantic knowledge to generalize to superordinate categories from seen objects. For example, upon seeing an image of a chair, we can say that this belongs to a broader category of furniture eventhough the image alone doesn't reveal that such higher level of abstraction exists. On the other hand, upon hearing about 'an office chair with wheels' we can easily access our visual memory to imagine what this would look like. Thus there is a strong link between our visual and semantic processes. Another important contribution of this work is that whilst basic level is indeed the level where usually identification is first made, this is not true always, especially when you have atypical examples: penguin for instance would be first identified as penguing rather than a bird which is the basic-level. In general, classification is also constrained by the subject knowledge, for instance a bird-watcher may identify a bird as a Robin but most people will just call it a 'bird'. 
-
-\textit{Thoughts:}
-\begin{itemize}
-  \item it is interesting that usually subordinate classification depends on the basic level. DL should thus take account of hierarchical semantic information optimally.
-  \item in general the close relationship between semantic and visual identification corroborates our aim of using semantic embedding. 
-  \item one concern is that we are limited by the lowest level of labels in the imagenet labels, however otherwise model training, unlike humans, is not restricted by classification time and ability to recall detailed labels and thus we should be able to incorporate all the possible semantic knowledge \\
-\end{itemize}
 
 
 \bibliographystyle{ieeetr}
