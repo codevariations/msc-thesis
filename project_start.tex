@@ -83,6 +83,7 @@ I would like to\dots
     \item look at yolo 9000 for wordnet explanation
     \item Do I clearly state that CNNs are the state-of-the-art on image classification, give some example of current results / super human performance or when they wont competitions first time
     \item applications of zero-shot learning and better representation. e.g. autonomous vehicles need to make deductions. 
+    \item benthos example on wikipedia
 \end{itemize}
 
 \chapter{Intro/Literature Review Notes}
@@ -94,39 +95,6 @@ Despite the many successes of deep learning in various computer vision tasks, mo
 \newpage
 
 \textbf{PAPERS ON SEMANTIC KNOWLEDGE TRANSFER \& \\ZERO-SHOT LEARNING}
-
-These zero-shot learning papers are very much related to ours in the sense that they try to achieve generalization via word embeddings into unseen image classes. The DeViSE paper is probably the most similar though others relevant too. In fact, some of them already used this idea before the deep learning revolution.\\
-
-\underline{Large Scale Image Annotation: Learning to Rank with Joint Word-image Embeddings \cite{Weston2010}}
-
-\textit{Overview}
-
-This is a pre-deep learning paper, on how to handle efficiently annotation of 'new' large scale data-sets such as ImageNet.  Approach is to learn to represent images and annotations jontly in a low dimensional embedding space, idea being that low-dimension at test time translated into faster model. Indeed, a pre-deep learning methods such as performing knn in image feature space suffer from the curse of dimensionality.  To do this they use a loss function that allow the model to learn-to-rank i.e. to optimize precision of k-top annotations. In practice, their model performs linear mapping into joint embedding space (i.e. annotations and images are multiplied by their own matrices of equal dimensions). \\
-\textit{Thoughts:}
-\begin{itemize}
-    \item while impressive at the time, no longer state-of-the-art, but their point about curse of dimensionality may still be important even for DL. Say if a DL model has a softmax of too high N, it becomes harder and harder to separate out different classes so word embedding may help here
-    \item The model used by the authors is just a linear matrix transformation. Thus DeViSE paper can be seen as a big improvment over this. \\
-  \end{itemize}
-
-\underline{Zero-shot Learning Through Cross-modal Transfer \cite{Socher}}
-
-\textit{Overview}
-
-Motivated by the idea that humans have the ability to identify unseen objects even if they know about that object from having read about it. The authords introduce a model that can predict both seen and unseen classes: 'without having ever seen a cat the model can say whether it is indeed a cat or another category it has seen during training'. Large unsupervised text data is used to create word embeddings and then images are mapped into this space using neural networks. Prediction of unknown classes works by determining whether the test image is on the same manifold as known examples - this is based on outlier detection. One advantage over previous works is that unsupervised text corpus can be used rather than a manually constructed word embedding space.
-
-The model used to create unsupervised word embedding is based on \cite{HuangWordemb} (see above), which can be seen as earlier version of GloVe. They perform this on Wikipedia text data to create word embeddings that capture local and global context. Image features are then computed in unsupervised fashion using orthogonal matching pursuit. With the word and image feature vectors available, a two layer neural network is trained on the images with known classes into the word embedding space. The authors then use t-sne to visually illustrate that if unseen classes are fed into the model, the predicted word vectors will not be close to the vectors of known classes (which are clustered in turn). The closest known classes to the zero-shot classes however give idea of their semantics. In practice, to accomplish above we need to first detect whether an image is of a known class or of unknown class, and for this purpose a binary novelty random variable is employed (this is becuase otherwise would never predict any of the unseen classes if only used training data of seen classes). An outlier detection (based on Gaussian distribution) to predict whether an image is of unseen class given its predicted word embedding vector. If image is predicted as seen, a softmax classifier is used to predict its label, whereas, if image is predicted as new, an isometric Gaussian is assumed around its word vector and its class is assigned based on likelihood i.e. distance betwen predicted word embedding and full-word embedding space that contains also the unseen classes (this is the classic zero-shot trick using word data). The equations in the paper make this much clearer so will add those. In training, CIFAR-10 image data is used with 2 classes omitted for testing. The results depend strongly on the threshold used to determine whether image is in an unseen or seen class.
-
-Other interesting points: The authors show how the zero-shot learning can be framed in a fully bayesian way. They also compare the novelty detection in word embedding space as above, to doing novelty detection in image feature space and find the former superior as it adds the additional information from semantics.
-
-\textit{Thoughts:}
-\begin{itemize}
-    \item the zero-shot approach here may not be fully relevant to us but I still wrote it up so have a general idea of why word embeddings are used in these papers. Further, I do find this an interesting application and if we have time, may want to consider zero-shot learning
-    \item no deep models used here really though they do call their two layer neural network a deep model, different times \dots no convolutions though
-    \item hierarchical information is not used
-    \item a major problem is that the threshold used to discriminate between known and unknown class creates an inherent trade-off between the ability to predict these two. The DeViSE model improves on this (see below)
-    \item a lot of useful references to go through from this paper, and some other intresting ideas not covered above may be worth exploring later \\
-\end{itemize}
-
 \underline{DeViSE: A Deep Visual-Semantic Embedding Model - Frome et al. 2013}
 
 \textit{Overview}
@@ -311,20 +279,27 @@ Despite the important contribution of above works, they are limited in that they
 \subsection{Semantic Embeddings and Zero-shot Learning}
 Above studies illustrate the implicit connection between text and visual data processing in humans. Joliceur \textit{et al.} \cite{Joliceur1984} explored the dependence of our visual system on semantic understanding in more depth and illustrated this with several experiments. For instance, upon viewing a picture of a chair we can use our semantic knowledge base to generalize it to the category of furniture even though the image itself doesn't reveal that such an abstraction even exists. Similary, we can seamlessly access our visual memory to imagine semantic concepts, even ones we may never have seen such as 'a cat wearing ice skates'.
 
-Zero-shot learning (ZSL) \cite{Palatucci2009} is concerned with making predictions about previously unseen classes of images. Formally if a classifier $f$ is trained on features $X_{TR}$ and training labels $Y_{TR}$ such that $f:X_{TR} \rightarrow Y_{TR}$, then in ZSL for the possible class labels we have that $Y_{TR} \cup Y_{ZSL} = \emptyset$ where $Y_{ZSL}$ represents the test labels of any ZSL dataset. A fundamental idea in this area was to exploit the semantic relatedness of visually linked categories \cite{Monay2004}, \cite{Weston2010}, \cite{Palatucci2009} by projecting input data into a lower dimensional semantic embedding space. This can be represnted by the following equations \cite{Palatucci2009}:
-
+Zero-shot learning (ZSL) \cite{Palatucci2009} is concerned with making predictions about previously unseen classes of images. Formally if a classifier $f$ is trained on features $X_{TR}$ and training labels $Y_{TR}$ such that $f:X_{TR} \rightarrow Y_{TR}$, then in ZSL for the possible class labels we have that $Y_{TR} \cup Y_{ZSL} = \emptyset$ where $Y_{ZSL}$ represents the test labels of any ZSL dataset. A fundamental idea in this area was to exploit the semantic relatedness of visually linked categories \cite{Monay2004}, \cite{Weston2010}, \cite{Palatucci2009} by projecting input data into a lower dimensional semantic embedding space. This can be represnted by the following equations \cite{Palatucci2009} (see Figure \ref{fig:zsl} for a graphical explanation):
 \begin{align} \label{zsl_eq}
   \mathcal{S} &: X^d \rightarrow F^P \\
   \mathcal{L} &: F^P \rightarrow Y
 \end{align}
-Here we assume that we have a full collection of all pairs $\{f, y\}_{1:M}$ of both seen and unseen classes where $f$ is the point in the semantic embedding space $F^P$ that corresponds to the label $y$. In the training phase we can take the data for the seen classes $\{X, y\}_{1:N}$, where $N<<M$, and replace each $y$ with its embedding vector $f$ and thus learn the mapping $\mathcal{S}$. Labels for objects of unseen classes can then be predicted by first mapping them into $F^P$ through $\mathcal{S}$ and then employing $\mathcal{L}$ to find the most appropriate $y$ based on the predicted semantic embedding; this could for instance be a nearest neighbor classifier. The trick is thus having the semantic embedding space $F^P$ to contain vectors for all seen and unseen classes. To be clear, the term 'zero-shot' thus refers to the trained model never having seen $M-N$ of the classes but in our semantic knowledge base we do know about the existence of those zero-shot classes and their names. The challenge is thus in how to construct the semantic embedding space and what type of model to use use to learn $\mathcal{S}$; the following paragraphs will cover the existing approaches.
+Here we assume that we have a full collection of all pairs $\{f, y\}_{1:M}$ of both seen and unseen classes where $f$ is the point in the semantic embedding space $F^P$ that corresponds to the label $y$. In the training phase we can take the data for the seen classes $\{X, y\}_{1:N}$, where $N<<M$, and replace each $y$ with its embedding vector $f$ and thus learn the mapping $\mathcal{S}$. Labels for objects of unseen classes can then be predicted by first mapping them into $F^P$ through $\mathcal{S}$ and then employing $\mathcal{L}$ to find the most appropriate $y$ based on the predicted semantic embedding; this could for instance be a nearest neighbor classifier. The trick is thus having the semantic embedding space $F^P$ to contain vectors for all seen and unseen classes. To be clear, the term 'zero-shot' thus refers to the trained model never having seen $M-N$ of the classes but in our semantic knowledge base we do know about the existence of those zero-shot classes and their names. The challenge is thus in how to construct the semantic embedding space and what type of model to use to learn $\mathcal{S}$; the following paragraphs will cover the existing approaches.
 
 \begin{figure}
   \centering
 	\includegraphics[width=\textwidth]{zsl}
-	\caption{A graphical illustration of zero-shot learning where the left square contains all input images. Red ones are the training classes whcih are used to learn a mapping $\mathcal{S}:X^d \rightarrow F^P$. The circle represents the semantic embedding space. Note how we can access embedding vector for also classes we dont have visual training data for. Upon seeing a novel image (yellow square) we predict its embedding vector (yellow dot) and then find nearest plausible classe (here fox) using some function $\mathcal{L}$. Novel data is hence classified as a fox even though the model has never seen one before}
+	\caption{A graphical illustration of zero-shot learning where the left square contains all input images. Red ones are the training classes whcih are used to learn a mapping $\mathcal{S}:X^d \rightarrow F^P$. The circle represents the semantic embedding space. Note how we can access embedding vector for also classes we dont have visual training data for. Upon seeing a novel image (yellow square) we predict its embedding vector (yellow dot) and then find nearest plausible classe (here fox) using some function $\mathcal{L}$. Novel image is hence classified as a fox even though the model has never seen one before}
 	\label{fig:zsl}
 \end{figure}
+
+In one of the early works on the topic, Socher \textit{et al.} \cite{Socher} created word embedding vectors for all seen and unseen class labels from freely available Wikipedia data using a methodology \cite{Huang2012} that uses local and global context of the words to place similar words next to each other in the embedding space. A two-layer feedforward network was then used to learn a mapping from images features into the embedding manifold. Outlier detection was used to determine if the predicted embedding was one of the known or unknown classes. Only 8 known classes and 2 unknown classes were considered however. To address this and other limitations, Frome \textit{et al.} \cite{Frome2013} developed the Deep Visual-Semantic Embedding Model (DeViSE), which was trained on 1000 classes of the ImageNet dataset and its ZSL abilities were tested on the remaining 20,000 classes. This model structure is similar to ours in that it takes a pre-trained deep learning model, AlexNet (which won the 2012 ImageNet competition) \cite{Krizhevsky2012}, and then removes the softmax layer and replaces it with a projection layer that attempts to predict the word vector embedding of each image label. The word embeddings, in turn, were extracted from a skip-gram model trained on 5.4billion words of text from Wikipedia. The skip-gram model \cite{Mikolov2013}, \cite{Mikolov} learns to place vectors of similar terms near to each other by attempting to predict adjacent words. This model succesfully used the semantic information to make correct guesses on thousands of unseen classes, and it still provides a good baseline for new methods as we will show in our results section. 
+
+The authors of DeViSE worried however that the model was overfitting the transformation from the image representations into the semantic feature space. To overcome this they introduced another novel model called Convex Combination of Semantic Embeddings (ConSE) \cite{Norouzi2013}. The idea is as follows: take a previously unseen image class and simply feed this into a pretrained deep learning model which has been trained on, say 1000 classes. The model will consequently try to predict this new image as one of the known thousand classes and outputs respective 1000 predicted class probabilities $p_0 (y | \mathbf{x})$ such that $\sum_{y=1}^{1000} p_0 (y | \mathbf{x}) = 1$. The predicted semantic embedding for the new class can then be taken as the convex combination of the known classes weighed by the predicted probabilities from the previous step. More formally \cite{Norouzi2013}:
+\begin{align}
+  f(x) = \frac{1}{Z}\sum_1^T p(\hat{y}(\mathbf{x}, t)| \mathbf{x}) \cdot \mathcal{L}(\hat{y}(\mathbf{x}, t))
+\end{align}
+where $\hat{y}(\mathbf{x}, t)$ is the $t^{th}$ most likely class-label for image $\mathbf{x}$ out of the known labels, with $p()$ giving the respective probability. $\mathcal{L}$ maps each of these labels deterministically to their embedding. This model was shown to generalize slightly better to novel classes than DeViSE when both used the same image features and embedding vectors. 
 
 
 
