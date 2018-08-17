@@ -313,11 +313,18 @@ Above studies illustrate the implicit connection between text and visual data pr
 
 Zero-shot learning (ZSL) \cite{Palatucci2009} is concerned with making predictions about previously unseen classes of images. Formally if a classifier $f$ is trained on features $X_{TR}$ and training labels $Y_{TR}$ such that $f:X_{TR} \rightarrow Y_{TR}$, then in ZSL for the possible class labels we have that $Y_{TR} \cup Y_{ZSL} = \emptyset$ where $Y_{ZSL}$ represents the test labels of any ZSL dataset. A fundamental idea in this area was to exploit the semantic relatedness of visually linked categories \cite{Monay2004}, \cite{Weston2010}, \cite{Palatucci2009} by projecting input data into a lower dimensional semantic embedding space. This can be represnted by the following equations \cite{Palatucci2009}:
 
-\begin{align*}
+\begin{align} \label{zsl_eq}
   \mathcal{S} &: X^d \rightarrow F^P \\
   \mathcal{L} &: F^P \rightarrow Y
-\end{align*}
-Here we assume that we have a full collection of all pairs $\{f, y\}_{1:M}$ of both seen and unseen classes where $f$ is the point in the semantic embedding space $F^P$ that corresponds to the label $y$. In the training phase we can take the data for the seen classes $\{X, y\}_{1:N}$, where $N<<M$, and replace each $y$ with its embedding vector $f$ and thus learn the mapping $\mathcal{S}$. Labels for objects of unseen classes can then be predicted by first mapping them into $F^P$ through $\mathcal{S}$ and then employing $\mathcal{L}$ to find the most appropriate $y$ based on the predicted semantic embedding; this could for instance be a nearest neighbor classifier. The trick is thus having the semantic embedding space $F^P$ to contain vectors for all seen and unseen classes. To be clear, the term 'zero-shot' thus refers to the trained model never having seen $M-N$ of the classes but in our semantic knowledge base we do know about the existence of those zero-shot classes and their names. The challenge is thus in how to construct the semantic embedding space and what type of model to use use to learn $\mathcal{S}$.
+\end{align}
+Here we assume that we have a full collection of all pairs $\{f, y\}_{1:M}$ of both seen and unseen classes where $f$ is the point in the semantic embedding space $F^P$ that corresponds to the label $y$. In the training phase we can take the data for the seen classes $\{X, y\}_{1:N}$, where $N<<M$, and replace each $y$ with its embedding vector $f$ and thus learn the mapping $\mathcal{S}$. Labels for objects of unseen classes can then be predicted by first mapping them into $F^P$ through $\mathcal{S}$ and then employing $\mathcal{L}$ to find the most appropriate $y$ based on the predicted semantic embedding; this could for instance be a nearest neighbor classifier. The trick is thus having the semantic embedding space $F^P$ to contain vectors for all seen and unseen classes. To be clear, the term 'zero-shot' thus refers to the trained model never having seen $M-N$ of the classes but in our semantic knowledge base we do know about the existence of those zero-shot classes and their names. The challenge is thus in how to construct the semantic embedding space and what type of model to use use to learn $\mathcal{S}$; the following paragraphs will cover the existing approaches.
+
+\begin{figure}
+  \centering
+	\includegraphics[width=\textwidth]{zsl}
+	\caption{A graphical illustration of zero-shot learning where the left square contains all input images. Red ones are the training classes whcih are used to learn a mapping $\mathcal{S}:X^d \rightarrow F^P$. The circle represents the semantic embedding space. Note how we can access embedding vector for also classes we dont have visual training data for. Upon seeing a novel image (yellow square) we predict its embedding vector (yellow dot) and then find nearest plausible classe (here fox) using some function $\mathcal{L}$. Novel data is hence classified as a fox even though the model has never seen one before}
+	\label{fig:zsl}
+\end{figure}
 
 
 
