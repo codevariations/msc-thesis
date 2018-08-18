@@ -84,6 +84,9 @@ I would like to\dots
     \item Do I clearly state that CNNs are the state-of-the-art on image classification, give some example of current results / super human performance or when they wont competitions first time
     \item applications of zero-shot learning and better representation. e.g. autonomous vehicles need to make deductions. 
     \item benthos example on wikipedia
+    \item Is this really zero-shot learning since we are using knowledge
+    \item see DEvise for motivating ZSL
+    \item one motivatin is that it's expensive to get labelled data
 \end{itemize}
 
 \chapter{Intro/Literature Review Notes}
@@ -93,30 +96,6 @@ Humans are able to extract rich semantic information from visual scenes. For ins
 Despite the many successes of deep learning in various computer vision tasks, most of these rely on well defined training and testing envionments and do not generalize well beyond them; we are thus stil far from general human-level performance.
 
 \newpage
-
-\textbf{PAPERS ON SEMANTIC KNOWLEDGE TRANSFER \& \\ZERO-SHOT LEARNING}
-\underline{DeViSE: A Deep Visual-Semantic Embedding Model - Frome et al. 2013}
-
-\textit{Overview}
-
-Typical object classification models treat all the categories unrelated, via N-way softmax. This leads to models that 'cannot transfer semantic information about learned labels to unseen words or phrases. Solution this paper proposes is to use both standard image data and then an unrelated large unannotated text data to learn semantic information. In particular, the model maps image inputs into this rich semantic embedding space. The results show similar performance to standard state-of-the-art DL models, but with a significant improvement in that much less 'semantically unreasonable' mistakes are made. Perhaps more importantly, they show this joint training allows the model to generalize to 20000 visual categories, despite having trained the model on just 1000 categories.
-
-DeViSE extends work of Weston et al. (above) as it allows non-linearities and also capture semantics from text that's not contained in the image lables, hence allowing for zero-shot generalization. It also improves on the Socher et al. paper by using a deep model and avoid the trade-off which that paper has in predicting seen and unseen classes. Socher et al. also combine several different models whilst this one uses a unified model that only uses embeddings. Several other previous papers have used WordNet to build semantic representations; they authors here use a large unannotated text data which they claim is superior.
-
-The modelling approach begins by first training the skip-gram model which predicts the adjacent terms in the text for each word and then creates an embedding on this. This model was trained on 5.4 billion word Wikipedia data set. Image-labels were then mapped into this vector representation. Next, a DNN was used to map images into this embedding space by removing the final softmax layer and instead using a similarity metric. More precisely, a combination of dot-product similarity and hinge rank loss was used (following Weston et al.); this was found to be better than L2 loss. During model testing, image is projected into the embedding space and the nearest label is found using a hashing technique. The corresponding image-net synset is then found for this embedding.
-
-The model is then used to perform zero-shot learning and compared against few baselines: state-of-the-art DL model and the authors' DeViSE model but using random embeddings rather than learnt word embeddings. The authors claim better results than standard DNN on standard classification task on imagenet, though I am really not convinced by this as the differences are tiny and doubt statistically significant. However, on zero-shot learning, DeViSE does really seem superior. 
-
-\textit{Thoughts:}
-
-\begin{itemize}
-\item quite similar to our approach as we will also look to map image labels into word embedding space 
-\item we will also follow this by removing the softmax layer from our choice of DNN and instead use some similarity metric
-\item we need to thus think what will be our final loss we will use, probably try several different
-\item need to think how to perform testing since predictions just give embedding location. Not sure if the hashing technique is the best way to do this. 
-\item I really dont see why the use of the wikipedia data is superior to wordnet. Since wordnet seems to already correspond to how humans build a taxonomy of visual objects (see earlier 'psychology papers') then surely that would be the preferred approach? In particular, the wikipedia text is clearly larger but will have a lot of noise, and more importantly it may not be predictive of the relationship of how visual features correlate. For instance, the words 'bird' and 'sky' are likely to end up near each other based on the wikipedia data, but the two dont visually resemble each other so perhaps it's not good for them to be close if the aim is to influence what visual features are to be learnt. \\
-\end{itemize}
-
 \underline{Zero-shot Recognition via Semantic Embeddings and Knowledge Graphs - Wang et al. 2018}
 
 \textit{Overview}
@@ -134,17 +113,6 @@ This paper's novel contribution is to use both implicit knowledge representation
 
 \newpage
 
-\chapter{Implementation Ideas}
-\begin{itemize}
-\item which loss function to compare predicted and ground-truth embedding vectors. Dot product hinge loss as in DeVisE? 
-\item at test time, how to predict labels i.e. to find nearest neighbour? Some tree or hashing e.g. DeViSE
-\item which baselines to use? Standard inception-v3, random embedding, word2vec embedding, 
-\item what evaluations to make? resonableness of errors
-\item contrast method vs word2vec method
-\item is this truly zero-shot learning since we are using knowledge 
-\end{itemize}
-
-\newpage
 
 \chapter{Background}
 
@@ -279,7 +247,7 @@ Despite the important contribution of above works, they are limited in that they
 \subsection{Semantic Embeddings and Zero-shot Learning}
 Above studies illustrate the implicit connection between text and visual data processing in humans. Joliceur \textit{et al.} \cite{Joliceur1984} explored the dependence of our visual system on semantic understanding in more depth and illustrated this with several experiments. For instance, upon viewing a picture of a chair we can use our semantic knowledge base to generalize it to the category of furniture even though the image itself doesn't reveal that such an abstraction even exists. Similary, we can seamlessly access our visual memory to imagine semantic concepts, even ones we may never have seen such as 'a cat wearing ice skates'.
 
-Zero-shot learning (ZSL) \cite{Palatucci2009} is concerned with making predictions about previously unseen classes of images. Formally if a classifier $f$ is trained on features $X_{TR}$ and training labels $Y_{TR}$ such that $f:X_{TR} \rightarrow Y_{TR}$, then in ZSL for the possible class labels we have that $Y_{TR} \cup Y_{ZSL} = \emptyset$ where $Y_{ZSL}$ represents the test labels of any ZSL dataset. A fundamental idea in this area was to exploit the semantic relatedness of visually linked categories \cite{Monay2004}, \cite{Weston2010}, \cite{Palatucci2009} by projecting input data into a lower dimensional semantic embedding space. This can be represnted by the following equations \cite{Palatucci2009} (see Figure \ref{fig:zsl} for a graphical explanation):
+Zero-shot learning (ZSL) \cite{Palatucci2009} is concerned with making predictions about previously unseen classes of images. Formally if a classifier $f$ is trained on features $X_{TR}$ and training labels $Y_{TR}$ such that $f:X_{TR} \rightarrow Y_{TR}$, then in ZSL for the possible class labels we have that $Y_{TR} \cap Y_{ZSL} = \emptyset$ where $Y_{ZSL}$ represents the test labels of any ZSL dataset. A fundamental idea in this area was to exploit the semantic relatedness of visually linked categories \cite{Monay2004}, \cite{Weston2010}, \cite{Palatucci2009} by projecting input data into a lower dimensional semantic embedding space. This can be represnted by the following equations \cite{Palatucci2009} (see Figure \ref{fig:zsl} for a graphical explanation):
 \begin{align} \label{zsl_eq}
   \mathcal{S} &: X^d \rightarrow F^P \\
   \mathcal{L} &: F^P \rightarrow Y
@@ -297,12 +265,11 @@ In one of the early works on the topic, Socher \textit{et al.} \cite{Socher} cre
 
 The authors of DeViSE worried however that the model was overfitting the transformation from the image representations into the semantic feature space. To overcome this they introduced another novel model called Convex Combination of Semantic Embeddings (ConSE) \cite{Norouzi2013}. The idea is as follows: take a previously unseen image class and simply feed this into a pretrained deep learning model which has been trained on, say 1000 classes. The model will consequently try to predict this new image as one of the known thousand classes and outputs respective 1000 predicted class probabilities $p_0 (y | \mathbf{x})$ such that $\sum_{y=1}^{1000} p_0 (y | \mathbf{x}) = 1$. The predicted semantic embedding for the new class can then be taken as the convex combination of the known classes weighed by the predicted probabilities from the previous step. More formally \cite{Norouzi2013}:
 \begin{align}
-  f(x) = \frac{1}{Z}\sum_1^T p(\hat{y}(\mathbf{x}, t)| \mathbf{x}) \cdot \mathcal{L}(\hat{y}(\mathbf{x}, t))
+  f(x) = \frac{1}{Z}\sum_{t=1}^T p(\hat{y}(\mathbf{x}, t)| \mathbf{x}) \cdot \mathcal{L}(\hat{y}(\mathbf{x}, t))
 \end{align}
-where $\hat{y}(\mathbf{x}, t)$ is the $t^{th}$ most likely class-label for image $\mathbf{x}$ out of the known labels, with $p()$ giving the respective probability. $\mathcal{L}$ maps each of these labels deterministically to their embedding. This model was shown to generalize slightly better to novel classes than DeViSE when both used the same image features and embedding vectors. 
+where $\hat{y}(\mathbf{x}, t)$ is the $t^{th}$ most likely class-label for image $\mathbf{x}$ out of the known labels, with $p()$ giving the respective probability. $\mathcal{L}$ maps each of these labels deterministically to their embedding. $Z$ is a normalizing consant, and $T$ is user-defined. This model was shown to generalize slightly better to novel classes than DeViSE when both used the same image features and embedding vectors. 
 
-
-
+A potential problem with using wikipedia to create embeddings in the ConSE model above is that vectors for low occurence labels may be imprecise. Li \textit{et al.} attempt to resolve this by using the full WordNet hierarchy. For example, the semantic embedding for the word 'arctic fox' is constructed as a distance-weighted combination of the semantic embeddings of the hypernym (parent) nodes in the WordNet ('arctic fox', 'fox', 'canine', 'carnivore' and so on) up to the root. Whilst this improved the performance over the ConSE model, the semantic embedding for each node in the WordNet hierarchy still comes from a source that does not account for this taxonomical structure. Further, each label only considers its own parent nodes. Consequently the resulting embedding manifold is unlikely to accurately reflect the entire WordNet graph and its complex relations. In this paper we show how this can be achieved with Poincare embeddings.
 
 
 \bibliographystyle{ieeetr}
