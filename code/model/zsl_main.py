@@ -80,6 +80,17 @@ best_prec1 = 0
 
 def main():
     global args, best_prec1, poinc_emb, imgnet_poinc_wgt, imgnet_poinc_labels
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+=======
+    global val_classes
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+    global val_classes
+=======
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
     args = parser.parse_args()
 
     #load poincare embedding
@@ -148,6 +159,8 @@ def main():
     #load all class ids sorted on hops
     labels_hop_order = pd.read_csv('21k_wnids.csv')
     wnids_21k = labels_hop_order.iloc[:, 1].tolist()
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
     wnids_20k = wnids_21k[1000:]
     wnids_1k = wnids_21k[:999]
     wnids_2hop = wnids_21k[1000:2549]
@@ -155,30 +168,105 @@ def main():
     wnids_2h_1k = wnids_21k[:2549]
     wnids_3h_1k = wnids_21k[:8860]
 
+=======
+=======
+<<<<<<< HEAD
+>>>>>>> test
+    #remove bad classes manually
+    wnids_21k.remove('n11196627')
+    wnids_21k.remove('n11318824')
+    wnids_21k.remove('n10994097')
+
+    wnids_20k = wnids_21k[1000:]
+    wnids_1k = wnids_21k[:999]
+    wnids_2hop = wnids_21k[1000:2549]
+    wnids_3hop = wnids_21k[1000:8860]
+    wnids_2h_1k = wnids_21k[:2549]
+    wnids_3h_1k = wnids_21k[:8860]
+
+    chosen_hop = wnids_2hop
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+>>>>>>> fix init
+=======
+=======
+    wnids_20k = wnids_21k[1000:]
+    wnids_1k = wnids_21k[:999]
+    wnids_2hop = wnids_21k[1000:2549]
+    wnids_3hop = wnids_21k[2549:8860]
+    wnids_2h_1k = wnids_21k[:2549]
+    wnids_3h_1k = wnids_21k[:8860]
+
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
     # Data loading code
     valdir = args.data
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
     img_data = CustImageFolder(valdir, wnids_20k, transforms.Compose([
+=======
+    img_data = CustImageFolder(valdir, chosen_hop, transforms.Compose([
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+    img_data = CustImageFolder(valdir, chosen_hop, transforms.Compose([
+=======
+    img_data = CustImageFolder(valdir, wnids_20k, transforms.Compose([
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
                                     transforms.Resize(256),
                                     transforms.CenterCrop(224),
                                     transforms.ToTensor(),
                                     normalize,]))
     val_loader = torch.utils.data.DataLoader(img_data,
                 batch_size=args.batch_size,
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
                 shuffle=True, num_workers=args.workers, pin_memory=True)
+=======
+                shuffle=False, num_workers=args.workers, pin_memory=True)
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+                shuffle=False, num_workers=args.workers, pin_memory=True)
+=======
+                shuffle=True, num_workers=args.workers, pin_memory=True)
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
     val_classes = val_loader.dataset.classes
 
     #create poincare embedding with all synsets
     imgnet2poinc_idx = [poinc_emb['objects'].index(i) for i in val_classes]
     imgnet_poinc_wgt = poinc_emb['model']['lt.weight'][[imgnet2poinc_idx]]
     imgnet_poinc_labels = [poinc_emb['objects'][i] for i in imgnet2poinc_idx]
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+=======
+
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
     #finally, run evaluation 
     validate(val_loader, model)
     return
 
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 
+=======
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 ### Functions 
 
 def validate(val_loader, model):
@@ -323,6 +411,12 @@ def accuracy(output, all_embs, targets, topk=(1,)):
             res.append(torch.sum(correct_tmp).float() / batch_size)
         return res
 
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> test
 class TestSampler(Sampler):
     def __init__(self, mask):
         self.mask = mask
@@ -340,6 +434,12 @@ class TestSampler(Sampler):
 
 
 
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+=======
+>>>>>>> fix init
+=======
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
 
 if __name__ == '__main__':

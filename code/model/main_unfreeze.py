@@ -42,7 +42,19 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                         ' (default: resnet18)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
+=======
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
+=======
+parser.add_argument('--epochs', default=90, type=int, metavar='N',
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -52,7 +64,19 @@ parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+=======
+parser.add_argument('--weight-decay', '--wd', default=1e-8, type=float,
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+parser.add_argument('--weight-decay', '--wd', default=1e-8, type=float,
+=======
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
                     metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--print-freq', '-p', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
@@ -132,7 +156,19 @@ def main():
     # define loss function (criterion) and optimizer
     criterion = PoincareXEntropyLoss()
     optimizer = torch.optim.SGD([{'params': model.features.parameters(),
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
                                   'lr': 1e-4},
+=======
+                                  'lr': 1e-5},
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+                                  'lr': 1e-5},
+=======
+                                  'lr': 1e-4},
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
                                  {'params': model.fc.parameters()},
                                  {'params': model.classifier.parameters()}],
                                  lr=args.lr,

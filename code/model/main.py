@@ -1,7 +1,19 @@
 import argparse
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
+=======
+os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
+=======
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
 import random
 import shutil
@@ -42,7 +54,19 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                         ' (default: resnet18)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
+=======
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
+=======
+parser.add_argument('--epochs', default=90, type=int, metavar='N',
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -52,7 +76,19 @@ parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+=======
+parser.add_argument('--weight-decay', '--wd', default=1e-8, type=float,
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+parser.add_argument('--weight-decay', '--wd', default=1e-8, type=float,
+=======
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
                     metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--print-freq', '-p', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
@@ -82,7 +118,19 @@ def main():
 
     #load poincare embedding
     poinc_emb = torch.load(
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
             '/home/hermanni/thesis/msc-thesis/code/model/nouns_200.pth')
+=======
+            '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+            '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
+=======
+            '/home/hermanni/thesis/msc-thesis/code/model/nouns_200.pth')
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -114,7 +162,19 @@ def main():
         orig_vgg = models.__dict__[args.arch]()
 
     #Change model to project into poincare space
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
     model = PoincareVGG(orig_vgg, n_emb_dims=200)
+=======
+    model = PoincareVGG(orig_vgg, n_emb_dims=10)
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+    model = PoincareVGG(orig_vgg, n_emb_dims=10)
+=======
+    model = PoincareVGG(orig_vgg, n_emb_dims=200)
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
     if args.gpu is not None:
         model = model.cuda(args.gpu)
@@ -133,10 +193,29 @@ def main():
     criterion = PoincareXEntropyLoss()
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()),
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
                                        args.lr,
                                        momentum=args.momentum,
                                        weight_decay=args.weight_decay)
 
+=======
+                                       lr=args.lr,
+                                       momentum=args.momentum,
+                                       weight_decay=args.weight_decay)
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+                                       lr=args.lr,
+                                       momentum=args.momentum,
+                                       weight_decay=args.weight_decay)
+=======
+                                       args.lr,
+                                       momentum=args.momentum,
+                                       weight_decay=args.weight_decay)
+
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
@@ -202,7 +281,21 @@ def main():
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
         adjust_learning_rate(optimizer, epoch)
+=======
+        if epoch in [30, 60, 90]:
+            adjust_learning_rate(optimizer, epoch)
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+        if epoch in [30, 60, 90]:
+            adjust_learning_rate(optimizer, epoch)
+=======
+        adjust_learning_rate(optimizer, epoch)
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
         # train the model 
         train(train_loader, model, criterion, optimizer, epoch)
@@ -249,6 +342,17 @@ def train(train_loader, model, criterion, optimizer, epoch):
         target_emb_idx = [imgnet_poinc_labels.index(i) for i in target_ids]
         target_embs = imgnet_poinc_wgt[[target_emb_idx]]
         target_embs = target_embs.cuda(args.gpu, non_blocking=True)
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+=======
+
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
         # compute output
         output = model(input)
         loss = criterion(output, target, imgnet_poinc_wgt)
@@ -257,10 +361,30 @@ def train(train_loader, model, criterion, optimizer, epoch):
         losses.update(loss.item(), input.size(0))
         top1.update(prec1.item(), input.size(0))
         top5.update(prec5.item(), input.size(0))
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         print(time.time() -end)
+=======
+=======
+<<<<<<< HEAD
+>>>>>>> test
+
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+>>>>>>> fix init
+=======
+=======
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        print(time.time() -end)
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
         optimizer.step()
 
         # measure elapsed time
@@ -331,10 +455,30 @@ def validate(val_loader, model, criterion):
     return top1.avg
 
 
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, 'model_best.pth.tar')
+=======
+=======
+<<<<<<< HEAD
+>>>>>>> test
+def save_checkpoint(state, is_best, filename='checkpoint_ufi.pth.tar'):
+    torch.save(state, filename)
+    if is_best:
+        shutil.copyfile(filename, 'model_best_ufi.pth.tar')
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+>>>>>>> fix init
+=======
+=======
+def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+    torch.save(state, filename)
+    if is_best:
+        shutil.copyfile(filename, 'model_best.pth.tar')
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
 
 
@@ -346,7 +490,19 @@ class PoincareVGG(nn.Module):
         self.fc = nn.Sequential(*list(
                                 vgg_model.classifier.children())[:-1])
         self.classifier = nn.Sequential(nn.Linear(4096, n_emb_dims))
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
         self.eps = 1e-5
+=======
+        self.eps = 1e-9
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+        self.eps = 1e-9
+=======
+        self.eps = 1e-5
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
         #freeze weights except classifier layer 
         self.unfreeze_features(False)
@@ -395,9 +551,25 @@ class AverageMeter(object):
 
 def adjust_learning_rate(optimizer, epoch):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
     lr = args.lr * (0.1 ** (epoch // 30))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
+=======
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = param_group['lr']*0.1
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = param_group['lr']*0.1
+=======
+    lr = args.lr * (0.1 ** (epoch // 30))
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
 
 
 def prediction(output, all_embs, knn=1):
@@ -422,7 +594,17 @@ def prediction(output, all_embs, knn=1):
 def accuracy(output, all_embs, targets, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
         hh0=time.time()
+=======
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+=======
+        hh0=time.time()
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
         maxk = max(topk)
         preds = prediction(output, all_embs, knn=maxk)
         batch_size = output.size(0)
@@ -432,7 +614,17 @@ def accuracy(output, all_embs, targets, topk=(1,)):
             preds_tmp = preds[:, :i]
             correct_tmp = preds_tmp.eq(targets.view(batch_size, -1).repeat(1, i))
             res.append(torch.sum(correct_tmp).float() / batch_size)
+<<<<<<< 663178558328768aecf52a9f02584dc57e6dce2f
+<<<<<<< 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
         print(time.time() - hh0)
+=======
+>>>>>>> fix init
+=======
+<<<<<<< HEAD
+=======
+        print(time.time() - hh0)
+>>>>>>> 00baa8dc74f43f68a00df8c7d8ca7bad8ce27de7
+>>>>>>> test
         return res
 
 if __name__ == '__main__':
