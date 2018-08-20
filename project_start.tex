@@ -98,6 +98,8 @@ I would like to\dots
     \item final layer of CNN doesnt have necessarily enough detailed information contained. Perhaps need to make links to higher layers \cite{Ba2015}
     \item is projection domain shift problem for this instance where output space is structured
     \item if need information on applications of ZSL see Fu and Sigal semi-supervised vocabulary-informed learning
+    \item use maybe some other data set as well
+    \item some very complex architectures - we want to produce simple easily justifiable solution
 \end{itemize}
 
 \chapter{Intro/Literature Review Notes}
@@ -299,17 +301,17 @@ Ji \textit{et al.} \cite{Ji2017} show how performance can be improved by ensurin
 Fu \textit{et al.} \cite{Fu2015} identified the issue of the projection domain shift that exists with most ZSL model, that is, the mapping that is learned from the image space into the embedding space may not transfer well to the disjoint set of unseen classes. Transductive multi-view embedding is proposed as a solution: in addition to training data, multiple semantic embeddings of each test labels are used in training phase as well, with all of them projected onto a common embedding space. See also Rohrbach \textit{et al.} for similar ideas \cite{Rohrbach2013}. The use of test labels during training may not be practical however, and as an alternative Kodirov \textit{et al.} \cite{Kodirov2017} propose a semantic autoencoder as a solution to this problem. The general idea of these autoencoder is to learn a mapping from images to semantic embedding space (encoder) and a mapping from the embedding back to input to reconstruct it as well as possible (decoder). The addition of the decoder constraints the model to solve the domain shift.
 
 
-Shigeto \textit{et al.} \cite{Shigeto2015} show that instead of learning a mapping from images to label space, it can be beneficial to learn this mapping in the opposite direction since nearest neighbor search is often easier in the lower dimensional image space. This however assumes high dimensional embedding vectors, which we manage to avoid as we employ hyperbolic spaces. 
+Shigeto \textit{et al.} \cite{Shigeto2015} show that instead of learning a mapping from images to label space, it can be beneficial to learn this mapping in the opposite direction since nearest neighbor search is often easier in the lower dimensional image space. This however assumes high dimensional embedding vectors, which we manage to avoid as we employ hyperbolic spaces. Zhang \textit{et al.} utilize a similar idea alongside CNNs.
 
 Fu and Sigal \cite{Fu2016} introduce the idea of using embeddings built on full semantic vocabularies rather than just training labels in order to learn a better mapping between image and semantic embeddings. 
 
 Fu \textit{et al.} \cite{Fu2015a} note that the vectors embedded in a semantic space often form class manifolds. Motivated by this observation they build a semantic manifold graph out of the labels in the embedding space and create a special form of a markov chain process that predicts the unseen class label.
 
 
-There also a plethora of models that focus on zero-shot learning via class attributes \cite{Xian2016}, \cite{Romera-Paredes2017}
+There also a plethora of models that focus on zero-shot learning via class attributes \cite{Xian2016}, \cite{Romera-Paredes2017}, \cite{Bucher2016}
 A limitation of these is when number of classes grows very big however the set of attributes is harder to manage manually, instead we prefer to learn similarities in the embedding spaces. More recently attribute based zero-shot has mainly been motivated by wishing to predict fine-grained classes that are visually very similar \cite{Xian2016} \cite{Reed2016} our motivation is different however as we are focusing on model that generalizes well on a large-scale. The set of attributes is also hard to transfer to new context \cite{Ba2015}. Manually defined attribute taxonomy is required\dots
 
-Finally, some works combined semantic embeddings and attributes \cite{Akata2015}, \cite{Fu2015}. Akata \textit{et al.} \cite{Akata2015} combine three embeddings, one learnt from the Wikipedia dataset, one for physical attributes of animals and a hierarchical embedding, which attempts to capture the taxonomical structure of the WordNet using various distance measures such as the shortest path between nodes. The model performs well on zero-shot prediction of fine-grained classes on a relatively small data set; it's generalization properties on a large data set such as the 21,000 label ImageNet are not explore however.  
+Finally, some works combined semantic embeddings and attributes \cite{Akata2015}, \cite{Fu2015} \cite{Zhou2005}. Akata \textit{et al.} \cite{Akata2015} combine three embeddings, one learnt from the Wikipedia dataset, one for physical attributes of animals and a hierarchical embedding, which attempts to capture the taxonomical structure of the WordNet using various distance measures such as the shortest path between nodes. The model performs well on zero-shot prediction of fine-grained classes on a relatively small data set; it's generalization properties on a large data set such as the 21,000 label ImageNet are not explore however.  
 
 
 
