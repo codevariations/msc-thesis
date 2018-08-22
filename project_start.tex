@@ -292,6 +292,30 @@ In addition to above, there exists a vast array of approaches that focus on zero
 
 Finally, there exist various studies that combine language and attribute based semantic embeddings \cite{Akata2015}, \cite{Fu2015} \cite{Zhou2005}. Akata \textit{et al.} \cite{Akata2015}, for instance, combine three embeddings, one learnt from the Wikipedia dataset, one for physical attributes of animals and a hierarchical embedding, which attempts to capture the taxonomical structure of the WordNet using various distance measures such as the shortest path between nodes. The model performs well on zero-shot prediction of fine-grained classes on a relatively small data set; it's generalization properties on a large data set such as the 21,000 label ImageNet are not explore however. A more comprehensive review of different ZSL approaches and trends is found in \cite{Xian2017}.
 
+
+\section{Semantic Embeddings in Hyperbolic Space}
+
+\textbf{Section overview:} As alluded to in the previous chapter, hyperbolic spaces provide an efficient way of embedding hierarchical graph structres. In this chapter we provide a brief overview of the required theoretical background and discuss the recent literature on building word embeddings in this space. Unless where otherwise stated, all the theoretical details are based on Cannon \textit{et al.} \cite{}.
+
+\subsection{Basics of Hyperbolic Geometry}
+Hyperbolic geometry is a type of non-Euclidean geometry in that it is derived by altering one of the five postulates of the classic Euclidean geometry, namely the fifth one:
+\begin{itemize}
+    \item Any pair of points can be joined up by stricly one staight line segment
+    \item All lines can be extended indefinitely
+    \item Exactly one circle of a specific circle and specific centre exists
+    \item All righ angles are identical
+    \item Parallel postulate: Consider line L and a point P which does \textit{not} lie on L. Then there exists only one other line M that passes through P and is parallel to L, no matter how much we extend the two lines.
+\end{itemize}
+
+In hyperbolic geometry the fifth postulate is expanded to allow for multiple parallel lines for L that all go through P:
+
+\begin{itemize}
+   \item Consider line L and a point P which does \textit{not} lie on L. For any L, ther are multiple lines that are both parallel to L and pass through P.
+ \end{itemize}
+
+For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first.
+
+
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
 
