@@ -295,7 +295,7 @@ Finally, there exist various studies that combine language and attribute based s
 
 \section{Semantic Embeddings in Hyperbolic Space}
 
-\textbf{Section overview:} As alluded to in the previous chapter, hyperbolic spaces provide an efficient way of embedding hierarchical graph structres. In this chapter we provide a brief overview of the required theoretical background and discuss the recent literature on building word embeddings in this space. Unless where otherwise stated, all the theoretical details are based on Cannon \textit{et al.} \cite{}.
+\textbf{Section overview:} As alluded to in the previous chapter, hyperbolic spaces provide an efficient way of embedding hierarchical graph structres. In this chapter we provide a brief overview of the required theoretical background and discuss the recent literature on building word embeddings in this space. Hyperbolic geometry and hyperbolic spaces are a vast fields containing thousands of years of work and formal statements and proofs are thus out of the scope of this work; we merely aim to provide the background necessary for the present work. For more thorough treatment of the topic, we refer the reader to Cannon \textit{et al.} \cite{} and Greenberg \cite{Greenberg1994}; unless where otherwise stated, all the theories and intuitions provided below are based on these two books.
 
 \subsection{Basics of Hyperbolic Geometry}
 Hyperbolic geometry is a type of non-Euclidean geometry in that it is derived by altering one of the five postulates of the classic Euclidean geometry, namely the fifth one:
@@ -307,14 +307,15 @@ Hyperbolic geometry is a type of non-Euclidean geometry in that it is derived by
     \item Parallel postulate: Consider line L and a point P which does \textit{not} lie on L. Then there exists only one other line M that passes through P and is parallel to L, no matter how much we extend the two lines.
 \end{itemize}
 
-In hyperbolic geometry the fifth postulate is expanded to allow for multiple parallel lines for L that all go through P:
+In hyperbolic geometry the fifth postulate becomes its negation: 
 
 \begin{itemize}
-   \item Consider line L and a point P which does \textit{not} lie on L. For any L, ther are multiple lines that are both parallel to L and pass through P.
+   \item Consider line L and a point P which does \textit{not} lie on L. For any L, ther are infinitely many lines that are both parallel to L and pass through P.
  \end{itemize}
 
-For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first.
+ For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces. For instance a hyperbolic plane is a 2-dimensional manifold with constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. It follows that the parallel lines in hyperbolic spaces are thus arcs, also known as geodesics. Geodesics define the shortest path between two points in a curved space, though similar to straight lines they can be expressed by linear equations \cite{Stillwell}. It is illustrative to consider the shortest path between two locations on the globe, say new york and london; this too is an arc of the great circle of the eartch circumference, rather than a straight line. For an improved intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of euclidean geomtry.
 
+ Two models are considered isomorphic when there is a one to one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}.
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
