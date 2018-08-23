@@ -313,9 +313,23 @@ In hyperbolic geometry the fifth postulate becomes its negation:
    \item Consider line L and a point P which does \textit{not} lie on L. For any L, ther are infinitely many lines that are both parallel to L and pass through P.
  \end{itemize}
 
- For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces. For instance a hyperbolic plane is a 2-dimensional manifold with constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. It follows that the parallel lines in hyperbolic spaces are thus arcs, also known as geodesics. Geodesics define the shortest path between two points in a curved space, though similar to straight lines they can be expressed by linear equations \cite{Stillwell}. It is illustrative to consider the shortest path between two locations on the globe, say new york and london; this too is an arc of the great circle of the eartch circumference, rather than a straight line. For an improved intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of euclidean geomtry.
+ For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces. For instance a hyperbolic plane is a 2-dimensional manifold with constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. It follows that the parallel lines in hyperbolic spaces are thus arcs, also known as geodesics. Geodesics define the shortest path between two points in a curved space, though similar to straight lines they can be expressed by linear equations \cite{Stillwell1991}. It is illustrative to consider the shortest path between two locations on the globe, say new york and london; this too is an arc of the great circle of the eartch circumference, rather than a straight line. For an improved intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of euclidean geomtry. In order to work with hyperbolic spaces more easily in practice an euclidean model of hyperbolic geometry is needed \cite{Greenberg1994}. In fact several exist and below covers the most important ones.
 
- Two models are considered isomorphic when there is a one to one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}.
+Two models are considered isomorphic when there is a one to one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}.
+
+\subsubsection{The Beltrami-Klein Model}
+Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$. Lines in this model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if we have line $l$ and a point not on it $P$, then there are infinite number of parallel lines of $l$ that go through $P$. Example is given in the RHS of Figure \ref{fig:klein}. The reason why $m$ and $n$ in this figure are parallel to $l$ is that they are open chords in $\gamma$ and at no point of this space do $m$ and $n$ interect $l$, which is the working definition of parallelism \cite{Greenberg1994}.
+
+\begin{figure}
+  \centering
+	\includegraphics[width=0.6\textwidth]{klein}
+	\caption{Depiction of the Klein model of hyperbolic geomtry.}
+	\label{fig:klein}
+\end{figure}
+
+
+
+
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
