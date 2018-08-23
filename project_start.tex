@@ -299,26 +299,33 @@ Finally, there exist various studies that combine language and attribute based s
 
 \subsection{Basics of Hyperbolic Geometry}
 Hyperbolic geometry is a type of non-Euclidean geometry in that it is derived by altering one of the five postulates of the classic Euclidean geometry, namely the fifth one:
-\begin{itemize}
+\begin{enumerate}
     \item Any pair of points can be joined up by stricly one staight line segment
     \item All lines can be extended indefinitely
     \item Exactly one circle of a specific circle and specific centre exists
     \item All righ angles are identical
     \item Parallel postulate: Consider line L and a point P which does \textit{not} lie on L. Then there exists only one other line M that passes through P and is parallel to L, no matter how much we extend the two lines.
-\end{itemize}
+\end{enumerate}
 
 In hyperbolic geometry the fifth postulate becomes its negation: 
 
-\begin{itemize}
-   \item Consider line L and a point P which does \textit{not} lie on L. For any L, ther are infinitely many lines that are both parallel to L and pass through P.
- \end{itemize}
+\begin{enumerate}
+   \setcounter{enumi}{4}
+   \item * Consider line L and a point P which does \textit{not} lie on L. For any L, ther are infinitely many lines that are both parallel to L and pass through P.
+ \end{enumerate}
 
- For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces. For instance a hyperbolic plane is a 2-dimensional manifold with constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. It follows that the parallel lines in hyperbolic spaces are thus arcs, also known as geodesics. Geodesics define the shortest path between two points in a curved space, though similar to straight lines they can be expressed by linear equations \cite{Stillwell1991}. It is illustrative to consider the shortest path between two locations on the globe, say new york and london; this too is an arc of the great circle of the eartch circumference, rather than a straight line. For an improved intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of euclidean geomtry. In order to work with hyperbolic spaces more easily in practice an euclidean model of hyperbolic geometry is needed \cite{Greenberg1994}. In fact several exist and below covers the most important ones.
+\begin{figure}
+  \centering
+	\includegraphics[width=0.5\textwidth]{pdisklines}
+	\caption{Parallel lines in Hyperbolic space (Poincare disk model). Thick blue lines is parallel to all the other lines since it never intersects any of them in the hyperbolic space that is defined as interior of the circle. All the lines are arcs of circles of different size that fall in the interior - these are known as geodesics. Image used with permission under Creative Commons license, released into public domain by Trevorgoodchild of English Wikipedia}
+	\label{fig:disklines}
+\end{figure}
 
-Two models are considered isomorphic when there is a one to one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}.
+For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces (Figure \ref{fig:disklines}). For instance a hyperbolic plane is a 2-dimensional manifold with constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. The lines in hyperbolic space are known as geodesics - arcs of circles. Geodesics define the shortest path between two points in a curved space, though similar to straight lines they can be expressed by linear equations \cite{Stillwell1991}. It is illustrative to consider the shortest path between two locations on the globe, say new york and london; this too is an arc of the great circle of the eartch circumference, rather than a straight line. For an improved intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of euclidean geomtry. In order to work with hyperbolic spaces more easily in practice an euclidean model of hyperbolic geometry is needed \cite{Greenberg1994}. In fact several exist and below covers the most important ones.
+
 
 \subsubsection{The Beltrami-Klein Model}
-Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$. Lines in this model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if we have line $l$ and a point not on it $P$, then there are infinite number of parallel lines of $l$ that go through $P$. Example is given in the RHS of Figure \ref{fig:klein}. The reason why $m$ and $n$ in this figure are parallel to $l$ is that they are open chords in $\gamma$ and at no point of this space do $m$ and $n$ interect $l$, which is the working definition of parallelism \cite{Greenberg1994}.
+Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$. Lines in this model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if we have line $l$ and a point not on it $P$, then there are infinite number of parallel lines of $l$ that go through $P$. Example is given in the RHS of Figure \ref{fig:klein}. The reason why $m$ and $n$ in this figure are parallel to $l$ is that they are open chords in $\gamma$ and at no point of this space do $m$ and $n$ interect $l$, which is the working definition of parallelism \cite{Greenberg1994}. It is crucial to notice that only the interior of the circle forms the hyperbolic space and the boundary can never be reached, hence the \textit{open} chords as lines. This combined with the requirement that lines can be extended indefinitely means that we can get arbitrarily close to the boundary of the circle but never reache it. As a consequences the distance between two points on the line can not be computed as euclidean distance as it grows exponentially the further away from the centre we get, which is not visibly evident from the figures \cite{Greenberg1994}. Notice also that the appearance of lines as straight is just a matter of mapping them from geodesics, such as those in Figure \ref{fig:disklines}. By explicitly using the geodesics, we come the Poincare model.
 
 \begin{figure}
   \centering
@@ -327,8 +334,37 @@ Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR
 	\label{fig:klein}
 \end{figure}
 
+\subsubsection{The Poincare Model}
+An alternative representation of a hyperbolic plane is the Poincare model. Here two types of lines exist: open chords that pass through the origin of the circle, which are like those in the Klein model, and arcs of all the circles orthogonal to $\gamma$ i.e. \textit{open} arcs (Figure \ref{fig:pdisk}) \cite{Greenberg1994}. The other statements about Klein model transfer here; the boundary can never be reached and distances grow exponentially as we approach it. Again an infinite number of parallel lines exist; this was visualized in Figure \ref{fig:disklines}.
 
+\begin{figure}
+  \centering
+	\includegraphics[width=0.4\textwidth]{poincdisk}
+	\caption{Depiction of the Poincare Disk model of hyperbolic geomtry. Line $l$ represent an open chord passing through the centre of the circle, whilst line $l$ is an open arc. A 
+}
+	\label{fig:pdisk}
+\end{figure}
 
+Whilst the Klein and Poincare model appear different, they are \textit{isomorphic}: there is a one to one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}. It can be proven that all models of hyperbolic geometry are isomorphic \cite{Greenberg1994}. Therefore it is possible map from one model to another, a property that we will employ later.
+
+\subsubsection{The Hyperboloid Model}
+This model has one more dimension as the previous two, and has its source in the theory of special relativity. If we denote $x$, $y$ for the coordinates and $t$ as time, then distance in is measured by the Minkowski metric \cite{Greenberg1994}:
+\begin{align*}
+  ds^2 = dx^2 + dy^2 - dt^2
+\end{align*}
+The surface equation that corresponds to this metric is given by below equation. See \cite{Greenberg1994} for details.
+\begin{align*}
+  x^2 + y^2 - t^2 = -1 
+\end{align*}
+
+In Euclidean space, this forms a hyperboloid object with two sheets as seen in Figure \ref{fig:lorenz}
+
+\begin{figure}
+  \centering
+	\includegraphics[width=0.6\textwidth]{lorenz}
+	\caption{Hyperboloid model in $\mathbb{R}^3$ and its projection on to the Poincare disk. Image used under Creative Commons license from Wikimedia Commons.}
+	\label{fig:lorenz}
+\end{figure}
 
 
 \bibliographystyle{ieeetr}
