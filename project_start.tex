@@ -80,6 +80,7 @@ I would like to\dots
 \begin{itemize}
   \item essentially our model proposes that semantic taxonomy is the best guide to visual taxonomy -- better than wikipedia 
     \item discuss how first trained on small data set
+    \item poincare model distorts distances \cite{Greenberg1994} -- I wonder if this is a problem.
     \item one practical limitation is how to compute nearest neighbours. We do exhaustive search but could do riemannian spectral hashing.
     \item in Data set section write about how difficult the task is by giving examples of 20k data set
     \item mention knowledge transfer
@@ -325,7 +326,7 @@ For us who are accustomed to thinking in Euclidean terms, this may seem impossib
 
 
 \subsubsection{The Beltrami-Klein Model}
-Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$. Lines in this model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if we have line $l$ and a point not on it $P$, then there are infinite number of parallel lines of $l$ that go through $P$. Example is given in the RHS of Figure \ref{fig:klein}. The reason why $m$ and $n$ in this figure are parallel to $l$ is that they are open chords in $\gamma$ and at no point of this space do $m$ and $n$ interect $l$, which is the working definition of parallelism \cite{Greenberg1994}. It is crucial to notice that only the interior of the circle forms the hyperbolic space and the boundary can never be reached, hence the \textit{open} chords as lines. This combined with the requirement that lines can be extended indefinitely means that we can get arbitrarily close to the boundary of the circle but never reache it. As a consequences the distance between two points on the line can not be computed as euclidean distance as it grows exponentially the further away from the centre we get, which is not visibly evident from the figures \cite{Greenberg1994}. Notice also that the appearance of lines as straight is just a matter of mapping them from geodesics, such as those in Figure \ref{fig:disklines}. By explicitly using the geodesics, we come the Poincare model.
+Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$. Lines in this model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if we have line $l$ and a point not on it $P$, then there are infinite number of parallel lines of $l$ that go through $P$. Example is given in the RHS of Figure \ref{fig:klein}. The reason why $m$ and $n$ in this figure are parallel to $l$ is that they are open chords in $\gamma$ and at no point of this space do $m$ and $n$ interect $l$, which is the working definition of parallelism \cite{Greenberg1994}. It is crucial to notice that only the interior of the circle forms the hyperbolic space and the boundary can never be reached, hence the \textit{open} chords as lines. This combined with the requirement that lines can be extended indefinitely means that we can get arbitrarily close to the boundary of the circle but never reache it. As a consequences the distance between two points on the line can not be computed as euclidean distance as it grows exponentially the further away from the centre we get, which is not visibly evident from the figures \cite{Greenberg1994}. Notice also that the appearance of lines as straight is just a matter of mapping them from geodesics, such as those in Figure \ref{fig:disklines}. By explicitly using the arcs as lines, we come the Poincare model.
 
 \begin{figure}
   \centering
@@ -357,15 +358,42 @@ The surface equation that corresponds to this metric is given by below equation.
   x^2 + y^2 - t^2 = -1 
 \end{align*}
 
-In Euclidean space, this forms a hyperboloid object with two sheets as seen in Figure \ref{fig:lorenz}
+In Euclidean space, this forms a hyperboloid object with two sheets, with the upper sheet shown in Figure \ref{fig:lorenz} \cite{Greenberg1994}. In that figure we also show how the model relates to the Poincare disk we saw above. The 'bowl' of the hyperboloid is infinite as the 'brim' can never be reached, thus satisfyin the indefinite extensibility of lines which are geodesics on the hyperboloid surface.
 
 \begin{figure}
   \centering
 	\includegraphics[width=0.6\textwidth]{lorenz}
-	\caption{Hyperboloid model in $\mathbb{R}^3$ and its projection on to the Poincare disk. Image used under Creative Commons license from Wikimedia Commons.}
+	\caption{Upper sheet of the hyperboloid model in $\mathbb{R}^3$ and a projection of one of its geodesics on to the Poincare disk. Image used under Creative Commons license from Wikimedia Commons.}
 	\label{fig:lorenz}
 \end{figure}
 
+\subsubsection{Important extensions}
+Above we have seen three models of hypebolic spaces. Whilst the exposition here has been given in two and three dimensions, the models generalize to arbitrary dimensions. For example, below we will discuss a Poincare ball rather than poincare disk. The reason for multiple models is that they are all \textit{Euclidean} models of hypebolic space with different properties and weaknesses. For example, the Poincare model retains an accurate representation of angles of the hyperbolic plane, whilst the Klein model doesn't \cite{Greenberg1994}. For our purposes, it is necessary to be able to compute distances between two points in the hyperbolic embedding spaces. Distances between two points $\mathcal{D}(\mathbf{x}, \mathbf{y})$ for the three models, where $\mathbf{x}$ and $\mathbf{y}$ denote the coordinates of the two points in the desired model space as vectors of desired dimensions, are given below:
+\begin{align}
+  \mathcal{D_K}(\mathbf{x}, \mathbf{y}) = \text{arcosh} \left( \frac{1 - \mathbf{x} \cdot \mathbf{y}}{\sqrt{1-\mathbf{x}\cdot \mathbf{x}}\sqrt{1-\mathbf{y}\cdot \mathbf{y}}}   \right) \tag{Klein model \cite{Greenberg1994}}
+\end{align}
+
+
+
+
+
+The important point for our purposes is that some computations are easier in some model than others and we will hence at times move between them. 
+
+
+
+
+
+
+
+
+
+
+Finally, the main property that has motivated researchers to use hyperbolic spaces for embedding hierarchical objects is that the circumference and area of hyperbolic circles grows exponentially with the radius as opposed to linear growth of Euclidean circles \cite{Nickel2018} \cite{Chamberlain2017}. Formally the circumference $C$ is given by \cite{Greenberg1994}:
+
+\begin{align*}
+  C = 2 \pi \text{sinh}(r)
+\end{align*}
+where sinh() is the hyperbolic sine function $\text{sinh}=\frac{e^x - e^{-x}}{2}$.
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
