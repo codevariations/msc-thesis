@@ -396,17 +396,27 @@ In higher dimensions, the $n$ dimensional hyperbolic space is defined as $\mathc
 \end{align}
 
 \subsection{Semantic Embeddings in Hyperbolic Spaces}
+Most popular word embedding methods such as the skip-gram and word2vec \cite{Mikolov2013}, \cite{Mikolov} taken into account the local context of words, or global context like Glove \cite{Pennington2014}, and produce vector representations for the words so that semantically similar words are embedded near each other in the resulting vector space. The ability of these embeddings to capture complex relationships is constrained, however, as the required dimensionality becomes easily exceedingly large \cite{Nickel2017}. This limit on representational capacity is particularly relevant to our project as we aim to build an embedding space that accurately captures the hierarchical graph structure of word semantics. Nickel and Kiela \cite{Nickel2017} show how this problem can be resolved through the use of hyperbolic embeddings instead of Euclidean ones. To see this, consider the Poincare and Klein disk models and contrast this to an Euclidean disk. The area of an Euclidean disc increases quadratically, since $A_E=\pi r^2$, whereas the negative curvature of hypebolic space allows the hyperbolic disc area to grow exponentially with $r$ as given by $A_H=2 \pi \left(\text{cosh}(r) - 1 \right)$ where cosh is the hyperbolic cosine function $\text{cosh}(x)=\frac{e^{2x} + 1}{2e^x}$ \cite{Greenberg1994}. Intuitively the benefit of this is that in hyperbolic spaces there is much more room for embedding different concepts as we move outwards from the centre (see Figure \ref{fig:hyspace}).
+
+\begin{figure}
+  \centering
+	\includegraphics[width=0.6\textwidth]{tiling}
+	\caption{Illustrations of Klein and Poincare Discs with hyperbolic tiling. The diminishing are of the tiles depicts how the area of the circles grows exponentially towards the boundary. Images used under Creative Commons license from Wikimedia Commons.}
+	\label{fig:hyspace}
+\end{figure}
 
 
 
 
 
-Finally, the main property that has motivated researchers to use hyperbolic spaces for embedding hierarchical objects is that the circumference and area of hyperbolic circles grows exponentially with the radius as opposed to linear growth of Euclidean circles \cite{Nickel2018} \cite{Chamberlain2017}. Formally the circumference $C$ is given by \cite{Greenberg1994}:
 
-\begin{align*}
-  C = 2 \pi \text{sinh}(r)
-\end{align*}
-where sinh() is the hyperbolic sine function $\text{sinh}=\frac{e^x - e^{-x}}{2}$.
+
+
+
+
+
+
+
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
