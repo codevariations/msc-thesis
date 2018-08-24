@@ -424,16 +424,14 @@ where the final inequality is needed to ensure the vectors fall inside the open 
 \begin{align*}
   &\mathcal{L} \left(\Theta\right) = \sum_{(u,v) \in \mathcal{D}} \log \frac{\exp^{-d( \mathbf{u},\mathbf{v})}}{\sum_{\mathbf{v'}\in N(u)}\exp^{-d(\mathbf{u},\mathbf{v'})}}
 \end{align*}
-where the tuple $(u,v)$ represents the nouns that are connected to each other in the wordnet graph, $\mathbf{u}$ and $\mathbf{v}$ their estimated embedding vectors, and $N(u)$ those nouns $v$ not actually connected to a given $u$. Finally, $d(\mathbf{u}, \mathbf{v})$ is the hyperbolic distance betwen the nouns. Since this embedding is based on the Poincare model, the relevant distance function is the one in Equation \ref{eq:pdist}.
+where the tuple $(u,v)$ represents the nouns that are connected to each other in the wordnet graph, $\mathbf{u}$ and $\mathbf{v}$ their estimated embedding vectors, and $N(u)$ those nouns $v$ not actually connected to a given $u$. Finally, $d(\mathbf{u}, \mathbf{v})$ is the hyperbolic distance betwen the nouns. Since this embedding is based on the Poincare model, the relevant distance function is the one in Equation \ref{eq:pdist}. A point of emphasis is that the model is not given any explicit hierarchical information but it learns it from the connection between the nouns in the wordnet, thus enabling the ability to learn latent hierarchies. 
 
-Above optimization problem could be solved using Riemannian optimization, but the authors show that the Riemanian gradients can also be obtained in terms of Euclidean gradinets $\nabla_E$:  
+Above optimization problem could be solved using Riemannian optimization, but the authors show that the Riemanian gradients can also be obtained in terms of Euclidean gradinets $\nabla_E$, resulting in the following SGD updates:  
 \begin{align*}
   \boldsymbol{\theta}_{t+1} = \text{proj} \left( \boldsymbol{\theta}_t -\eta_t \frac{(1-\lVert\boldsymbol{\theta}_t\rVert^2)^2}{4}\nabla_E \right)
 \end{align*}
-where $\eta_t$ is the learning rate, and $\text{proj}(\boldsymbol{\theta}) = \boldsymbol{\theta}/\lVert \boldsymbol{\theta} \rVert - 10^{-5}$ if $ \boldsymbol{\theta} \geq 1; \text{ otherwise } \boldsymbol{\theta}$ ensures the updates remain with the open unit ball Poincare space.
+where $\eta_t$ is the learning rate, and $\text{proj}(\boldsymbol{\theta}) = \boldsymbol{\theta}/\lVert \boldsymbol{\theta} \rVert - 10^{-5}$ if $ \boldsymbol{\theta} \geq 1; \text{ otherwise } \boldsymbol{\theta}$ ensures the updates remain with the open unit ball Poincare space. $\nabla_E$ is easily derived using the backpropagation algorithm introduced in Section. The trained model on WordNet achieved superior performance to an Euclidean baseline in various experiments that tested for the models' ability to preserve the original taxonomical structure \cite{Nickel2017}.
 
-
-A point of emphasis is that the model is not given any explicit hierarchical information but it learns it from the connection between the nouns in the wordnet, thus enabling the ability to learn latent hierarchies. 
 
 
 
