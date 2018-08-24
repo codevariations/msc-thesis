@@ -416,15 +416,24 @@ To understand the benefits of hyperbolic word embeddings, consider the Poincare 
   \label{fig:htree}
 \end{figure}
 
-The hyperbolic embedding that we utilized is the Poincare Embedding model of Nickel and Kiela \cite{Nickel2017}, mainly because they show its effectiveness on the Wordnet lexical hierarchy which is the basis for the labels in the ImageNet dataset that we used. Here we give a brief overview of the way in which the poincare embeddings are actually computed in this model; rest of this section is thus entirely based on \cite{Nickel2017}. Since this embedding is based on the Poincare model, the relevant distance function is the one in Equation \ref{eq:pdist}. To use the original notation of the paper, let $\mathcal{S} = \{x_i\}_{i=1}^n$ denote the set of words, and $\Theta = \{\boldsymbol{\theta}_i\}_{i=1}^n$ be their repsective locations in the $d$ dimensional Poincare embedding space $\mathcal{P}^d$ i.e. $\boldsymbol{\theta}_i \in \mathcal{P}^d$. To find embeddings, the authors set to solve the following optimization problem:
+The hyperbolic embedding that we utilized is the Poincare Embedding model of Nickel and Kiela \cite{Nickel2017}, mainly because they show its effectiveness on the Wordnet lexical hierarchy which is the basis for the labels in the ImageNet dataset that we used. Here we give a brief overview of the way in which the poincare embeddings are actually computed in this model; rest of this section is thus entirely based on \cite{Nickel2017}.  To use the original notation of the paper, let $\mathcal{S} = \{x_i\}_{i=1}^n$ denote the set of words, and $\Theta = \{\boldsymbol{\theta}_i\}_{i=1}^n$ be their repsective locations in the $d$ dimensional Poincare embedding space $\mathcal{P}^d$ i.e. $\boldsymbol{\theta}_i \in \mathcal{P}^d$. To find embeddings, the authors set to solve the following optimization problem:
 \begin{align*}
-  \Theta' \leftarrow \text{arg}\,max_{\Theta} \mathcal{L}\left(\Theta\right)\text{  s.t.} \forall \boldsymbol{\theta}_i \in \Theta : \lVert \boldsymbol{\theta}_i \rVert < 1
+  &\Theta' \leftarrow \text{arg}\,max_{\Theta} \mathcal{L}\left(\Theta\right)\text{  s.t.} \forall \boldsymbol{\theta}_i \in \Theta : \lVert \boldsymbol{\theta}_i \rVert < 1
 \end{align*}
+where the final inequality is needed to ensure the vectors fall inside the open unit ball. And their loss function is a ranking loss:
+\begin{align*}
+  &\mathcal{L} \left(\Theta\right) = \sum_{(u,v) \in \mathcal{D}} \log \frac{\exp^{-d( \mathbf{u},\mathbf{v})}}{\sum_{\mathbf{v'}\in N(u)}\exp^{-d(\mathbf{u},\mathbf{v'})}}
+\end{align*}
+where the tuple $(u,v)$ represents the nouns that are connected to each other in the wordnet graph, $\mathbf{u}$ and $\mathbf{v}$ their estimated embedding vectors, and $N(u)$ those nouns $v$ not actually connected to a given $u$. Finally, $d(\mathbf{u}, \mathbf{v})$ is the hyperbolic distance betwen the nouns. Since this embedding is based on the Poincare model, the relevant distance function is the one in Equation \ref{eq:pdist}.
+
+Above optimization problem could be solved using Riemannian optimization, but the authors show that the Riemanian gradients can also be obtained in terms of Euclidean gradinets $\nabla_E$:  
+\begin{align*}
+  \boldsymbol{\theta}_{t+1} = \text{proj} \left( \boldsymbol{\theta}_t -\eta_t \frac{(1-\lVert\boldsymbol{\theta}_t\rVert^2)^2}{4}\nabla_E \right)
+\end{align*}
+where $\eta_t$ is the learning rate, and $\text{proj}(\boldsymbol{\theta}) = \boldsymbol{\theta}/\lVert \boldsymbol{\theta} \rVert - 10^{-5}$ if $ \boldsymbol{\theta} \geq 1; \text{ otherwise } \boldsymbol{\theta}$ ensures the updates remain with the open unit ball Poincare space.
 
 
-
-
-
+A point of emphasis is that the model is not given any explicit hierarchical information but it learns it from the connection between the nouns in the wordnet, thus enabling the ability to learn latent hierarchies. 
 
 
 
