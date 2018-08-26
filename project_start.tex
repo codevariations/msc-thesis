@@ -83,6 +83,7 @@ First, I would like to thank my supervisor Prof. Bradley Love, for all of his gu
     \item discuss how first trained on small data set
     \item does current updates necessarily follow geodesics. perhaps small learning rate is very important -- need to explore in more detail lr setting
     \item poincare model distorts distances \cite{Greenberg1994} -- I wonder if this is a problem.
+    \item check that final dense layer mentioned in CNN intro
     \item one practical limitation is how to compute nearest neighbours. We do exhaustive search but could do riemannian spectral hashing.
     \item in Data set section write about how difficult the task is by giving examples of 20k data set
     \item mention knowledge transfer
@@ -412,7 +413,7 @@ In higher dimensions, the $n$ dimensional hyperbolic space is defined as $\mathc
 	\label{fig:hyspace}
 \end{figure}
 
-\subsection{Semantic Embeddings in Hyperbolic Spaces}
+\subsection{Semantic Embeddings in Hyperbolic Spaces} \label{sec:poincare}
 Most popular word embedding methods such as the skip-gram and word2vec \cite{Mikolov2013}, \cite{Mikolov} taken into account the local context of words, or global context like Glove \cite{Pennington2014}, and produce vector representations for the words so that semantically similar words are embedded near each other in the resulting vector space. The ability of these embeddings to capture complex relationships is constrained, however, as the required dimensionality becomes easily exceedingly large \cite{Nickel2017} \cite{Chamberlain2017} \cite{Nickel2018}. This limit on representational capacity is particularly relevant to our project as we aim to build an embedding space that accurately captures the hierarchical graph structure of word semantics. The idea of using hyperbolic spaces for representing semantic hierarchies more accurately was explored early on by \cite{Ritter1999}, \cite{Ontrup2002} and \cite{Walter2006}, though this was in the context of Self-Organizing Maps rather than word embeddings. More recently, Nickel and Kiela \cite{Nickel2017}, Chamberlain \textit{et al.} \cite{Chamberlain2017} have succesfully demonstrated the advantages of hyperbolic word embeddings over Euclidean ones in terms generalization performance and computational cost. Additionally, Gulcehre \textit{et al.} \cite{Gulcehre2018} have achieved success on various tasks, such as neural machine translation, by imposing hyperbolic spaces on the activation functions of their novel neural network model.
 
 To understand the benefits of hyperbolic word embeddings, consider the Poincare and Klein disk models and contrast this to an Euclidean disk. The area of an Euclidean disc increases quadratically, since $A_E=\pi r^2$, whereas the negative curvature of hypebolic space allows the hyperbolic disc area to grow exponentially with $r$ as given by $A_H=2 \pi \left(\text{cosh}(r) - 1 \right)$ (assuming constant curvature of 1) where cosh is the hyperbolic cosine function $\text{cosh}(x)=\frac{e^{2x} + 1}{2e^x}$ \cite{Greenberg1994}. Intuitively the benefit of this is that in hyperbolic spaces there is much more room for embedding different concepts as we move outwards from the centre (see Figure \ref{fig:hyspace}). Further, Hyperbolic spaces can be interpreted as continuous space extensions of trees and are thus particularly efficient for embedding hierarchical structure in a way that preserves the associated graph structure, even for infinite trees \cite{Chamberlain2017}; like hyperbolic space, the number of leaves of a tree also grows exponentially as we increase hierarchical levels (assuming the number of splits per level remains constant) \cite{Nickel2017} (See Figure \ref{fig:htree} for a naive example). 
@@ -442,9 +443,33 @@ where $\eta_t$ is the learning rate, and $\text{proj}(\boldsymbol{\theta}) = \bo
 
 \chapter{Our Approach}
 
-\section{Qualitative Overview:}
-We propose two model architectures Deep Hyperbolic Semantic Embedding Model (Deep-HSEM) and Convex Hyperbolic Semantic Embedding Model (Convex-HSEM). The general intuition is to replace the standard one-hot-encoded targets used in deep learning with poincare embedding vectors that should better reflect the location of each label in a hierarchical semantic taxonomy; we use the lexical database WordNet as the hierarchy \cite{Miller1995}. By training against these hierarchical embedding labels, we exploit the fact that many objects of initially different categories share common visual attributes through a shared super-catgory. For images, we use the ImageNet 2012 1000 class dataset. After we have learned a mapping from visual features into the hyperbolic embedding space, we then perform zero-shot recognition by feeding unseen images through the trained model and then search for the nearest label in the embedding space. Crucially, we hypothesized that hyperbolic embedding space which is based on semantic hierarchy will reflect visual similarities better than pure similarity based word embeddings which just captures the context the words occur in. To explore this, we also performed the zero-shot experiment with a version of our model that uses the Glove embedding in place of the hyperbolic embedding.
+\section{Approach Overview:}
+We propose two model architectures Deep Hyperbolic Semantic Embedding (Deep-HSEM) model  and Convex Hyperbolic Semantic Embedding (Convex-HSEM) model . The general intuition is to replace the standard one-hot-encoded targets used in deep learning with poincare embedding vectors that should better reflect the location of each label in a hierarchical semantic taxonomy; we use the lexical database WordNet as the hierarchy \cite{Miller1995}. By training against these hierarchical embedding labels, we exploit the fact that many objects of initially different categories share common visual attributes through a shared super-catgory. For images, we use the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) 2012 1000-class dataset \cite{JiaDeng2009}. After we have learned a mapping from images into the hyperbolic embedding space, we then perform zero-shot recognition by feeding previously unseen classes of images through the trained model and then search for the nearest label in the embedding space. In total we use 20,000 classe of unseen images for the zero-shot evaluation. These images come from the broader 21K full ImageNet 2011 dataset. Crucially, we hypothesized that hyperbolic embedding space which is based on semantic hierarchy will reflect visual similarities better than pure similarity based word embeddings which just captures the context the words occur in; words that occur in a similar context could easily have no visual resemblence. To explore this, we also performed the zero-shot experiment with a version of our model that uses the Glove embedding in place of the hyperbolic embedding.
 
+\section{Model Details}
+
+\subsubsection{Poincare Embedding Construction}
+In order to learn a mapping between images and their location in the hyperbolic embedding space, we first had to acquired the ground truth hyperbolic embedding vector for each image label. Since all of the ImageNet class-labels correspond to specifc words in the WordNet lexical database, WordNet was the obvious choise for based on which to construct the hyperbolic embeddings. Moreover, WordNet provides exactly the type of lexical semantic hierarchy that we were looking to use. As a whole, the WordNet consists of 117,000 synsets (synonym sets; words in a single synset share a meaning), which are connected to each other in a graph based on their super- and sub-ordinate relations. These relations are transitive so that if A is an subordinate of B and B is subordinate of C, then A is also subordinate of C. Several different types of words are encoded in WordNet, such as verbs and nouns. In this work only nouns were considered. One potentail issue was that each synset may contain several nouns, but fortunately the ImageNet database provides an exact mapping from each image class to a specific noun. Overall, our final list consisted of 82,000 of commonly used nouns, including all the 21,000 classes of the full ImageNet. Note that we also used nouns not included in the ImageNet labels in order to learn a more accurate structure for the hyperbolic embedding.
+
+The specific hyperbolic embedding model we used is Poincare embedding model of Nickel and Kiela \cite{Nickel2017}, which was described in detail in Section \ref{sec:poincare}. These authors also provided an open-source implementation of the model \footnote{Available at https://github.com/facebookresearch/poincare-embeddings}, which we used to construct Poincare embeddings for all the 82,000 nouns. The dimensionality of embedding vectors was chosen to be 10 for this project. The main reason we chose this is because
+
+
+
+\subsubsection{Deep Hyperbolic Semantic Embedding Model (Deep-HSEM)}
+Typically convolutional neural network takes in an image and outputs predicted probabilities for the different possible class labels. Our model is very similar with the crucial exception that, for each image, Deep-HSEM predicts a single vector that corresponds to a point in the Poincare embedding space. More precisely, we have taken a well known CNN architecture VGG-16 \cite{Simonyan2014} and re-adjusted its final output layer by taking out the softmax layer and replaced it with a fully connected layer that corresponds to the dimensionality of the Poincare embedding space. We chose the VGG-16 
+model since it provides near state-of-the-art performance on the ImageNet 2012 1K data (top-1 accuracy 76.3\%, top-5 accuracy 93.8\%) but is simpler and less costly to train than many of the more recent CNNs. The architecture of the VGG-16 consists of 16 layers: 13 3x3 convolution layers followed by three fully-connected layers. Additionally, the network uses 2x2 max-pooling, ReLU non-linearities and dropout for regularization. 
+
+All of the ImageNet image class labels fall within the WordNet lexical database and thus WordNet was the obvious choise for constructing the embedding space. As a whole, WordNet contains 117,000 synsets (synonym sets) grouped into 
+
+
+Figure \ref{fig:dhsem} depicts the deep-HSEM architecture.
+
+
+
+\subsubsection{Implementation Details}
+Existing VGG-16 open-source implementation  was used for the initial network architecture, which we then adjusted as described above. All of the 
+
+mention that first fully fitted on small data.
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
