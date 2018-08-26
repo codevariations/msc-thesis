@@ -13,6 +13,7 @@ from torch import nn
 from torch.autograd import Function, Variable
 from torch.utils.data import Dataset
 from collections import defaultdict as ddict
+import pdb
 
 eps = 1e-5
 
@@ -40,8 +41,9 @@ def grad(x, v, sqnormx, sqnormv, sqdist):
     a = a * x - v / alpha.unsqueeze(-1).expand_as(v)
     z = th.sqrt(th.pow(z, 2) - 1)
     z = th.clamp(z * beta, min=eps).unsqueeze(-1)
-    return 4 * a / z.expand_as(x)
-
+    euc_grad = 4 * a / z.expand_as(x)
+    return alpha.view(-1,1).pow(2).div(4) * euc_grad
+#    return euc_grad
 
 class PoincareDistance(Function):
 
@@ -51,7 +53,7 @@ class PoincareDistance(Function):
         ctx.squnorm = th.clamp(th.sum(u * u, dim=-1), 0, boundary)
         ctx.sqvnorm = th.clamp(th.sum(v * v, dim=-1), 0, boundary)
         ctx.sqdist = th.sum(th.pow(u - v, 2), dim=-1)
-        x = ctx.sqdist / ((1 - ctx.squnorm) * (1 - ctx.sqvnorm)) * 2 + 1
+        x = ctx.sqdist / ((1-ctx.squnorm) * (1-ctx.sqvnorm))*2 + 1
         # arcosh
         z = th.sqrt(th.pow(x, 2) - 1)
         return th.log(x + z)

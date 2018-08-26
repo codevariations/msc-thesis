@@ -83,7 +83,7 @@ def main():
     #load poincare embedding
     poinc_emb = torch.load(
             '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
-
+    pdb.set_trace()
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -348,11 +348,13 @@ class PoincareVGG(nn.Module):
         self.fc = nn.Sequential(*list(
                                 vgg_model.classifier.children())[:-1])
         self.classifier = nn.Sequential(nn.Linear(4096, n_emb_dims))
+        torch.nn.init.uniform_(self.classifier[0].weight, -0.001, 0.001)
+        torch.nn.init.constant_(self.classifier[0].bias, 0.0)
         self.eps = 1e-9
 
         #freeze weights except classifier layer 
         self.unfreeze_features(False)
-        self.unfreeze_fc(True)
+        self.unfreeze_fc(False)
 
     def unfreeze_features(self, unfreeze):
         for p in self.features.parameters():
@@ -369,12 +371,9 @@ class PoincareVGG(nn.Module):
             f = self.fc(f)
         f = f.view(f.size(0), -1)
         y = self.classifier(f)
-        y_norm = y.pow(2).sum(dim=1, keepdim=True).pow(0.5)
-        y_normsq = y_norm.pow(2)
-        y_normsqplus = torch.add(y_normsq, 1)
-        y_unitnorm = torch.div(y, y_norm)
-        return torch.add(torch.div(torch.mul(y_unitnorm,
-                         y_normsq), y_normsqplus), -self.eps)
+        y_norm = torch.norm(y, dim=1, keepdim=True)
+        to_clamp = torch.tensor(y_norm >=1, dtype=torch.float).cuda()
+        return y.div(y_norm.pow(to_clamp)).add(-to_clamp*1e-5)
 
 
 class AverageMeter(object):
