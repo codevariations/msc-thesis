@@ -68,7 +68,8 @@ Summarise your report concisely.
 \end{abstract}
 \chapter*{Acknowledgements}
 \thispagestyle{empty}
-I would like to\dots
+First, I would like to thank my supervisor Prof. Bradley Love, for all of his guidance, support and loads of great ideas. His genuine interest in the project and desire to help out when needed the most really made the entire process very enjoyable. Massive thanks also to Olivia Guest, and Sebastian Bobadilla-Suarez for sharing their ideas and for pointing me to loads of relevant research I likely would have otherwise missed. Thank you to Adam Hornsby for helping me get my head around the different word embedding methods and for how I should think about presenting the project. Special thank you to Brett Roads for being incredibly helpful with setting up and helping to maintain the compute resources etc. that were required for this project; I was so impressed with the whole set up and how well it all functioned. For sure, nothing would have come of this project had I not received all this help, so for that - thank you!
+
 \clearpage
 
 \tableofcontents
@@ -432,6 +433,10 @@ Above optimization problem could be solved using Riemannian optimization, but th
   \boldsymbol{\theta}_{t+1} = \text{proj} \left( \boldsymbol{\theta}_t -\eta_t \frac{(1-\lVert\boldsymbol{\theta}_t\rVert^2)^2}{4}\nabla_E \right)
 \end{align*}
 where $\eta_t$ is the learning rate, and $\text{proj}(\boldsymbol{\theta}) = \boldsymbol{\theta}/\lVert \boldsymbol{\theta} \rVert - 10^{-5}$ if $ \boldsymbol{\theta} \geq 1; \text{ otherwise } \boldsymbol{\theta}$ ensures the updates remain with the open unit ball Poincare space. $\nabla_E$ is easily derived using the backpropagation algorithm introduced in Section. The trained model on WordNet achieved superior performance to an Euclidean baseline in various experiments that tested for the models' ability to preserve the original taxonomical structure \cite{Nickel2017}.
+
+\chapter{Our Approach}
+
+\section{Qualitative Overview:} We propose two model architectures Deep Hyperbolic Semantic Embedding Model (Deep-HSEM) and Convex Hyperbolic Semantic Embedding Model (Convex-HSEM). The general intuition is to replace the standard one-hot-encoded targets used in deep learning with poincare embedding vectors that should better reflect the location of each label in a hierarchical semantic taxonomy; we use the lexical database WordNet as the hierarchy \cite{Miller1995}. The motivation for this approach is based on our hypothesis that semantic hierarchy corresponds to hierarchy of visual features: for instance, wolves and dogs share many visual features as both fall under a common hypernym (super-category) Canines. Implicit of this hypothesis is that the semantic hierarchy reflects the different categorisations that exist in nature such as that of biological taxonomy which reflects the principle of common descent and thus shared visual attributes. Similarly, for human-made objects, visual similarity tends to increase as two objects become more similar in what they are intended to be used for. Crucially, we hypothesize that a hyperbolic embedding space allows us to represent these hierarchies better than pure similarity based word embeddings which just captures the similarity of the words' contexts. As an example, the words 'car' and 'road' may occur relatively close to each other in an embedding that is built on a large text corpuses, such as Wikipedia, but the two in isolation are not visually alike, which can make it harder to learn the mapping from visual features into the semantic space. In fact, 
 
 
 
