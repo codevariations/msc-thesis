@@ -128,6 +128,12 @@ Humans are able to extract rich semantic information from visual scenes. For ins
 
 Despite the many successes of deep learning in various computer vision tasks, most of these rely on well defined training and testing envionments and do not generalize well beyond them; we are thus stil far from general human-level performance.
 
+Typical deep learning models used for image classification are trained on one-hot-encoded labels. An implicit consequence of this is that all classes of objects are considered equally different from eachother since they are orthogonal in the label-space. These models therefore fail to exploit the rich semantic hierarchy that exists in how we categorize objects and entities. For example, assigning orthogonal labels to 'red fox' and 'artic fox' misses out on them both falling under the hypernym (broader category word) 'fox'. Certainly, these are closer to each other than to 'toaster'. We believe that by taking account of these rich semantic relationships, we can achieve improved generalization performance. This hypothesis stems from the observation that semantic hierarchy often corresponds to a hierarchy of visual features: for instance, wolves and dogs share many visual features as both fall under a common hypernym (super-category) Canines. Implicit of this hypothesis is that the semantic hierarchy reflects the different categorisations that exist in nature such as that of biological taxonomy which reflects the principle of common descent which in turn manifests itself as shared visual attributes. Similarly, for human-made objects, visual similarity tends to increase as two objects become more similar in what they are intended to be used for. 
+
+
+
+
+
 \newpage
 
 \chapter{Background}
@@ -436,9 +442,8 @@ where $\eta_t$ is the learning rate, and $\text{proj}(\boldsymbol{\theta}) = \bo
 
 \chapter{Our Approach}
 
-\section{Qualitative Overview:} We propose two model architectures Deep Hyperbolic Semantic Embedding Model (Deep-HSEM) and Convex Hyperbolic Semantic Embedding Model (Convex-HSEM). The general intuition is to replace the standard one-hot-encoded targets used in deep learning with poincare embedding vectors that should better reflect the location of each label in a hierarchical semantic taxonomy; we use the lexical database WordNet as the hierarchy \cite{Miller1995}. The motivation for this approach is based on our hypothesis that semantic hierarchy corresponds to hierarchy of visual features: for instance, wolves and dogs share many visual features as both fall under a common hypernym (super-category) Canines. Implicit of this hypothesis is that the semantic hierarchy reflects the different categorisations that exist in nature such as that of biological taxonomy which reflects the principle of common descent and thus shared visual attributes. Similarly, for human-made objects, visual similarity tends to increase as two objects become more similar in what they are intended to be used for. Crucially, we hypothesize that a hyperbolic embedding space allows us to represent these hierarchies better than pure similarity based word embeddings which just captures the similarity of the words' contexts. As an example, the words 'car' and 'road' may occur relatively close to each other in an embedding that is built on a large text corpuses, such as Wikipedia, but the two in isolation are not visually alike, which can make it harder to learn the mapping from visual features into the semantic space. In fact, 
-
-
+\section{Qualitative Overview:}
+We propose two model architectures Deep Hyperbolic Semantic Embedding Model (Deep-HSEM) and Convex Hyperbolic Semantic Embedding Model (Convex-HSEM). The general intuition is to replace the standard one-hot-encoded targets used in deep learning with poincare embedding vectors that should better reflect the location of each label in a hierarchical semantic taxonomy; we use the lexical database WordNet as the hierarchy \cite{Miller1995}. By training against these hierarchical embedding labels, we exploit the fact that many objects of initially different categories share common visual attributes through a shared super-catgory. For images, we use the ImageNet 2012 1000 class dataset. After we have learned a mapping from visual features into the hyperbolic embedding space, we then perform zero-shot recognition by feeding unseen images through the trained model and then search for the nearest label in the embedding space. Crucially, we hypothesized that hyperbolic embedding space which is based on semantic hierarchy will reflect visual similarities better than pure similarity based word embeddings which just captures the context the words occur in. To explore this, we also performed the zero-shot experiment with a version of our model that uses the Glove embedding in place of the hyperbolic embedding.
 
 
 \bibliographystyle{ieeetr}
