@@ -92,7 +92,7 @@ import matplotlib
 X_embedded = TSNE(n_components=2).fit_transform(imgnet_poinc_wgt)
 XX = TSNE(n_components=2).fit_transform(poinc_emb['model']['lt.weight'])
 
-
+plt.scatter(XX[:,0], XX[:,1])
 
 
 
