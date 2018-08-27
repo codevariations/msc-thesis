@@ -515,12 +515,20 @@ In our Convex-HSEM, the embedding vectors $\mathbf{f}$ come from the Poincare em
 \begin{align*}
   \mathbf{\hat{f}(\mathbf{x})}_{EM} = \sum_{t=1}^T \left[\frac{p(\hat{y}(\mathbf{x}, t)|\mathbf{x})\gamma(\mathbf{v}_t)}{\sum_{l=1}^T p(\hat{y}(\mathbf{x}, l)|\mathbf{x})\gamma(\mathbf{v}_l)}\right]\mathbf{v}_t
 \end{align*}
-Here $\mathbf{v}_t$ are the embedding vectors expressed in Klein coordinates. Since we used the Poincare model to construct our embeddings, we had to translate them into Klein coordinates,$\mathbf{f}_t \rightarrow \mathbf{v}_t$, using the Equation \ref{eq:p2k} introduced in the previous section. $\gamma(\mathbf{v}_t)$ are known as Lorentz factors: $\gamma(\mathbf{v}_t)=\frac{1}{\sqrt{1 - \lVert\mathbf{v_t}\rVert^2}}$. Above expositon followed \cite{Gulcehre2018}, who, in turn, based it on Ungar \cite{Ungar2005} where the full derivation can be found. 
+where $\mathbf{v}_t$ are the embedding vectors expressed in Klein coordinates, and  $\gamma(\mathbf{v}_t)=\frac{1}{\sqrt{1 - \lVert\mathbf{v_t}\rVert^2}}$, are known as Lorentz factors. Since we used the Poincare model to construct our embeddings, we had to project our vectors into Klein coordinates, $\mathbf{f}_t \rightarrow \mathbf{v}_t$, using the Equation \ref{eq:p2k} introduced in the previous section. After calculating the Einstein midpoint it is projected back to Poincare coordinates. In above expositon we have followed \cite{Gulcehre2018}, who, in turn, based it on Ungar \cite{Ungar2005} where the full derivation can be found. 
 
-In summary the Convex-HSEM consists two step. First, the pre-trained VGG-16 model is used to produce predicted class probabilities, out of which $T$ most likely ones are used to calculated a convex combination of 
+The Convex-HSEM therefore consists of two step. First, the pre-trained VGG-16 model is used to produce predicted class probabilities, out of which $T$ most likely ones, and their corresponding embedding vectors, are chosen. The Einstein midpoint of these embeddings gives the predicted Poincare embedding for the input image, which allows it to be classified using nearest neighbour search over the possible ground-truth embeddings. Figure \ref{fig:chsem} illustrates these steps. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{chsem}
+  \caption{Illustration of the Convex-HSEM model. The orange circle represents the einstein midpoint of the semantic embeddings (yellow circles) of the $T$ most likely classes. The einstein midoint is mapped to the nearest ground-truth embedding in order to classify the input image}
+  \label{fig:chsem}
+\end{figure}
 
 
-
+Since we used the pre-trained VGG-16 model, Convex-HSEM did not require any additional training and was therefore much faster to implement than the Deep-HSEM. The only hyperparameter to set was the number of data points over which to calculate the convex combination, $T$. We ran our experiments for 
+$T \in \{1, 2, 5, 10, 100, 1000\}$. The motivation for this model architecture is to represent any novel image as combination of known image classes. This model is hence predominantly aimed at zero-shot learning; if we were to classify a new image, and we knew it to be one of the 1000 training classes, it would make more sense just to use the standard VGG-16 model.
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
