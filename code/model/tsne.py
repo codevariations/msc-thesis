@@ -90,7 +90,7 @@ from sklearn.manifold import TSNE
 import matplotlib
 
 X_embedded = TSNE(n_components=2).fit_transform(imgnet_poinc_wgt)
-
+XX = TSNE(n_components=2).fit_transform(poinc_emb['model']['lt.weight'])
 
 
 
