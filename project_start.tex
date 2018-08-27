@@ -266,7 +266,7 @@ In their research on human categorization, Rosch \textit{et al.} \cite{Rosch1976
 
 Despite the important contribution of above works, they are limited in that they only consider two levels of a semantic taxonomy. It has been shown that, despite the importance of the basic level, humans posses and utilize a much more complex multi-level semantic hierarchy \cite{Joliceur1984}. We are not aware of any deep learning papers that explore the type of representations and the consequent generalization properties that would be learnt by considering a multi-level semantic taxonomy. We attempt to fill this void by exploiting a full set of hierarchical taxonomy via semantic embeddings built on a large-scale lexical database WordNet \cite{Miller1995}.
 
-\subsection{Semantic Embeddings and Zero-shot Learning}
+\subsection{Semantic Embeddings and Zero-shot Learning} \label{sec:semlit}
 Above studies illustrate the implicit connection between text and visual data processing in humans. Joliceur \textit{et al.} \cite{Joliceur1984} explored the dependence of our visual system on semantic understanding in more depth and illustrated this with several experiments. For instance, upon viewing a picture of a chair we can use our semantic knowledge base to generalize it to the category of furniture even though the image itself doesn't reveal that such an abstraction even exists. Similary, we can seamlessly access our visual memory to imagine semantic concepts, even ones we may never have seen such as 'a cat wearing ice skates'.
 
 Zero-shot learning (ZSL) \cite{Palatucci2009} is concerned with making predictions about previously unseen classes of images. Formally if a classifier $f$ is trained on features $X_{TR}$ and training labels $Y_{TR}$ such that $f:X_{TR} \rightarrow Y_{TR}$, then in ZSL for the possible class labels we have that $Y_{TR} \cap Y_{ZSL} = \emptyset$ where $Y_{ZSL}$ represents the test labels of any ZSL dataset. A fundamental idea in this area was to exploit the semantic relatedness of visually linked categories \cite{Monay2004}, \cite{Weston2010}, \cite{Palatucci2009} by projecting input data into a lower dimensional semantic embedding space. This can be represnted by the following equations \cite{Palatucci2009} (see Figure \ref{fig:zsl} for a graphical explanation):
@@ -370,13 +370,14 @@ In the Klein model arcs were mapped to straight lines. An alternative representa
 To extend this formally into $n$ higher dimensions we can define the hyperbolic space as an open unit ball $\mathcal{B}^n$ as we did for the Klein model $\mathcal{B}^n = \{\mathbf{x} \in \mathbb{R}^n | \lVert \mathbf{x} \rVert <1 \}$, but as straight lines are arcs (due to negative curvature), we have different distance function \cite{Iversen1992}:
 \begin{align}
   \mathcal{D_P}(\mathbf{p}, \mathbf{q}) = \text{arcosh} \left(1 + 2 \frac{\lVert \mathbf{p} - \mathbf{q} \rVert^2}{(1-\lVert \mathbf{p}\rVert^2)(1-\lVert \mathbf{q}\rVert^2)}   \right) 
+  \label{eq:pdist}
 \end{align}
 
 Whilst the Klein and Poincare model appear different, they both obey all the same axioms of hyperbolic spaces, in fact, the models are \textit{isomorphic}: there is a one-to-one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}. It can be proven that all models of hyperbolic geometry are isomorphic \cite{Greenberg1994}. Therefore it is possible map from one model to another. We will employ the mapping from Poincare ball into the Klein model at a later stage and thus present the required equation here \cite{Greenberg1994}:
 
 \begin{align}
   \mathbf{s} = \frac{2\mathbf{u}}{1 + \lVert \mathbf{u} \rVert^2}
-  \label{eq:pdist}
+  \label{eq:p2k}
 \end{align}
 where $\mathbf{s}$ is the point in the coordinates of the Klein model and $\mathbf{u}$ in the Poincare model.
 
@@ -456,7 +457,7 @@ The specific hyperbolic embedding model we used is Poincare embedding model of N
 \subsection{Deep Hyperbolic Semantic Embedding Model \\ (Deep-HSEM)}
 \subsubsection{Model Architecture}
 Typically convolutional neural network takes in an image and outputs predicted probabilities for the different possible class labels. Our model is very similar with the crucial exception that, for each image, Deep-HSEM predicts a single vector that corresponds to a point in the Poincare embedding space. More precisely, we have taken a well known CNN architecture, VGG-16 \cite{Simonyan2014}, and re-adjusted its final output layer by taking out the softmax layer and replace it with a fully connected layer that corresponds to the dimensionality of the Poincare embedding space. We chose the VGG-16
-model since it provides near state-of-the-art performance on the ImageNet 2012 1K data (top-1 accuracy 76.3\%, top-5 accuracy 93.8\%) but is simpler and less costly to train than many of the more recent CNNs. The architecture of the VGG-16 consists of 16 layers: 13 3x3 convolution layers followed by three fully-connected layers. Additionally, the network uses 2x2 max-pooling, ReLU non-linearities and dropout for regularization. We illustrate the Deep-HSEM architecture in Figure \ref{fig:dhsem}. The resulting architecture is very similar to the DeViSE model of Frome \textit{et al.} \cite{Frome2013}; the most significant difference is that our model outputs predictions within the Poincare embedding hyperbolic space. 
+model since it provides near state-of-the-art performance on the ImageNet 2012 1K data (top-1 accuracy 76.3\%, top-5 accuracy 93.8\%) but is simpler and less costly to train than many of the more recent CNNs. The architecture of the VGG-16 consists of 16 layers: 13 3x3 convolution layers followed by three fully-connected layers. Additionally, the network uses 2x2 max-pooling, ReLU non-linearities and dropout for regularization. We illustrate the Deep-HSEM architecture in Figure \ref{fig:dhsem}. The resulting architecture is very similar to the DeViSE model of Frome \textit{et al.} \cite{Frome2013} (reviewed in Section \ref{sec:semlit}); the most significant difference is that our model outputs predictions within the Poincare embedding hyperbolic space. 
 
 \begin{figure}
   \centering
@@ -501,6 +502,24 @@ To implement the Deep-HSEM model, we started from a pre-trained open-source impl
 We initially tested the model on small subset of the full ImageNet dataset to ensure it was functioning as expected. We then proceeded, to train the model on the 1000 classes of the ImageNet 2012 dataset which contains around 1.3 million images. Rather than training the model from scratch, we initialized the VGG portion of the Deep-HSEM with pre-trained VGG-16 weights available on PyTorch. The pre-trained model was trained on the same ImageNet dataset so should give better starting point for the model than random weights. Further, this reduced the necessary training time; training the model from scratch on such a big data set would have taken nearly two weeks. With this set-up, two versions of the Deep-HSEM were trained. In the first, call it Deep-HSEM-FC, we only trained the final fully-connected layer that maps the 4096-long image feature vector into the embedding space. In the second, call it just Deep-HSEM, we trained all the layers.
 
 Both Deep-HSEM-FC and Deep-HSEM were trained for a total of 90 epochs using SGD with momentum. The initial learning rate was set to 0.001 and it was reduced by factor of 10 every 30 epochs. We set momentum to 0.9. Batch-size of 32 images was used, with loss for each iteration averaged over the batch images. The above hyperparameters were based on initial tests of 20 epochs of various settings. During and after training, the models were evaluated on a separate test data of 50,000 images. The overall training time for Deep-HSEM-FC was 4 days and 6 days for Deep-HSEM.
+
+\subsection{Convex Hyperbolic Semantic Embedding Model (Convex-HSEM)}
+The Convex-HSEM model is a hyperbolic embedding version of the ConSE model of Norouzi \textit{et al.} \cite{Norouzi2013}. To reiterate our discussion from Section \ref{sec:semlit}, in the first step this model utilizes a standard pre-trained CNN to get predicted softmax class probabilities for an input image. In our case, we use the original VGG-16 CNN trained on the 1000 ImageNet 2012 classes. Therefore, for any input image, the CNN will output probabilities $p(1|\mathbf{x}) \dots p(y|\mathbf{x}) \dots p(1000|\mathbf{x})$ where $\mathbf{x}$ is the input image and $\sum_1^{1000}p(y|\mathbf{x})=1$.
+
+In the second stage of the model, the predictions from the previous step are sorted according to probabilities and the corresonding $T$ most likely class labels are taken: $\hat{y}(\mathbf{x}, 1),\hat{y}(\mathbf{x}, 2) \dots \hat{y}(\mathbf{x}, T)$. Next, the corresponding embedding vectors are taken $\mathbf{f}_1 = \mathcal{L}(\hat{y}(\mathbf{x}, 1)) \dots \mathbf{f}_T = \mathcal{L}(\hat{y}(\mathbf{x}, T))$ where $\mathcal{L}$ is just a look-up table for the embeddings. Finally, the predicted embedding vector is calculated as the weighted convex combination of the $T$ most likely embeddings, where the weights are the T most likely softmax probabilities from the first stage of the model:
+\begin{align}
+  \mathbf{\hat{f}(\mathbf{x})} = \frac{1}{Z}\sum_{t=1}^T p(\hat{y}(\mathbf{x}, t)| \mathbf{x}) \cdot \mathbf{f}_t
+\end{align}
+
+In our Convex-HSEM, the embedding vectors $\mathbf{f}$ come from the Poincare embeddings we calculated for the 1000 ImageNet 2012 class labels. Calculating convex combinations in hyperbolic space proves tricky, however. To see this, recall that due to constant negative curvature, straight lines in the Poincare model are arcs. Therefore if we take an Eucliden convex combination of two points on the arc, the resulting point will fall off the arc. Further, distances cannot be treated as in Euclidean case as they grow exponentially away from the centre of the embedding space. These challenges are exacerbated in higher dimension and our wanting to calculate a weighted convex combination of more than just two point. Fortunately, Gulcehre \textit{et al.} \cite{Gulcehre2018} solved a similar predicament using the Einstein midpoint, and we adapted their approach to our model. The Einstein midpoint in our setting is given as:
+\begin{align*}
+  \mathbf{\hat{f}(\mathbf{x})}_{EM} = \sum_{t=1}^T \left[\frac{p(\hat{y}(\mathbf{x}, t)|\mathbf{x})\gamma(\mathbf{v}_t)}{\sum_{l=1}^T p(\hat{y}(\mathbf{x}, l)|\mathbf{x})\gamma(\mathbf{v}_l)}\right]\mathbf{v}_t
+\end{align*}
+Here $\mathbf{v}_t$ are the embedding vectors expressed in Klein coordinates. Since we used the Poincare model to construct our embeddings, we had to translate them into Klein coordinates,$\mathbf{f}_t \rightarrow \mathbf{v}_t$, using the Equation \ref{eq:p2k} introduced in the previous section. $\gamma(\mathbf{v}_t)$ are known as Lorentz factors: $\gamma(\mathbf{v}_t)=\frac{1}{\sqrt{1 - \lVert\mathbf{v_t}\rVert^2}}$. Above expositon followed \cite{Gulcehre2018}, who, in turn, based it on Ungar \cite{Ungar2005} where the full derivation can be found. 
+
+In summary the Convex-HSEM consists two step. First, the pre-trained VGG-16 model is used to produce predicted class probabilities, out of which $T$ most likely ones are used to calculated a convex combination of 
+
+
 
 
 \bibliographystyle{ieeetr}
