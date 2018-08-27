@@ -455,7 +455,7 @@ The specific hyperbolic embedding model we used is Poincare embedding model of N
 
 \subsubsection{Deep Hyperbolic Semantic Embedding Model (Deep-HSEM)}
 Typically convolutional neural network takes in an image and outputs predicted probabilities for the different possible class labels. Our model is very similar with the crucial exception that, for each image, Deep-HSEM predicts a single vector that corresponds to a point in the Poincare embedding space. More precisely, we have taken a well known CNN architecture, VGG-16 \cite{Simonyan2014}, and re-adjusted its final output layer by taking out the softmax layer and replace it with a fully connected layer that corresponds to the dimensionality of the Poincare embedding space. We chose the VGG-16
-model since it provides near state-of-the-art performance on the ImageNet 2012 1K data (top-1 accuracy 76.3\%, top-5 accuracy 93.8\%) but is simpler and less costly to train than many of the more recent CNNs. The architecture of the VGG-16 consists of 16 layers: 13 3x3 convolution layers followed by three fully-connected layers. Additionally, the network uses 2x2 max-pooling, ReLU non-linearities and dropout for regularization. We illustrate the Deep-HSEM architecture in Figure \ref{fig:dhsem}.
+model since it provides near state-of-the-art performance on the ImageNet 2012 1K data (top-1 accuracy 76.3\%, top-5 accuracy 93.8\%) but is simpler and less costly to train than many of the more recent CNNs. The architecture of the VGG-16 consists of 16 layers: 13 3x3 convolution layers followed by three fully-connected layers. Additionally, the network uses 2x2 max-pooling, ReLU non-linearities and dropout for regularization. We illustrate the Deep-HSEM architecture in Figure \ref{fig:dhsem}. The resulting architecture is very similar to the DeViSE model of Frome \textit{et al.} \cite{Frome2013}; the most significant difference is that our model outputs predictions within the Poincare embedding hyperbolic space. 
 
 \begin{figure}
   \centering
@@ -464,12 +464,31 @@ model since it provides near state-of-the-art performance on the ImageNet 2012 1
   \label{fig:dhsem}
 \end{figure}
 
+Formally, our aim is to learn a mapping $S$ from 224x224 RGB image space $X^{224x224x3}$ into the 10-dimensional Poincare embedding $F_{\mathcal{P}}^{10}$.
+\begin{align*}
+\mathcal{S}: X^{224x224x3} \rightarrow F_{\mathcal{P}}^{10}
+\end{align*}
+In order to learn this mapping, the Deep-HSEM, denote it $H_{deep}(X, \pmb{\theta})$, where $\pmb{\theta}$ denotes the model weights, is provided with training data pairs of input images and corresponding embeddings $\{X, f\}$. The model takes the input image $X$ and predicts an embedding $\hat{f}$:
+\begin{align*}
+  H_{deep}(X, \pmb{\theta}) = \hat{f}
+\end{align*}
+The Poincare hyperbolic space in this instance is defined as the 10-dimensional open unit ball:
+\begin{align*}
+  F_{\mathcal{P}}^{10}=\{\mathbf{f} \in \mathbb{R}^{10} | \lVert \mathbf{f} \rVert <1 \}
+\end{align*}
+Note that we need to therefore ensure that the Deep-HSEM outputs are constrained into this space. This is ensured by the below performed at the end of the network:
 
-
+\begin{equation}
+\mathbf{\hat{f}} =
+\begin{cases}
+   \frac{\mathbf{\hat{f}}}{\lVert\mathbf{\hat{f}}\rVert}, & \text{if}\ \lVert\mathbf{\hat{f}}\rVert \geq 1 \\
+   \mathbf{\hat{f}}, & \text{otherwise} 
+\end{cases}
+\end{equation}
 
 \subsubsection{Implementation Details}
 Existing VGG-16 open-source implementation  was used for the initial network architecture, which we then adjusted as described above. All of the 
-
+Backprop implementations
 mention that first fully fitted on small data.
 
 \bibliographystyle{ieeetr}
