@@ -80,43 +80,33 @@ First, I would like to thank my supervisor Prof. Bradley Love, for all of his gu
 \chapter{Notes}
 \begin{itemize}
   \item essentially our model proposes that semantic taxonomy is the best guide to visual taxonomy -- better than wikipedia 
-    \item discuss how first trained on small data set
     \item does current updates necessarily follow geodesics. perhaps small learning rate is very important -- need to explore in more detail lr setting
-    \item poincare model distorts distances \cite{Greenberg1994} -- I wonder if this is a problem.
     \item check that final dense layer mentioned in CNN intro
-    \item one practical limitation is how to compute nearest neighbours. We do exhaustive search but could do riemannian spectral hashing.
-    \item in Data set section write about how difficult the task is by giving examples of 20k data set
-    \item mention knowledge transfer
     \item one problem is that we are training only transformation to the leafs of the nodes. I wonder if we could includ basic level labels since those are the ones humans learn first and also some suggest on average capture most distinction (see the two papers)
-    \item look at yolo 9000 for wordnet explanation
     \item Do I clearly state that CNNs are the state-of-the-art on image classification, give some example of current results / super human performance or when they wont competitions first time
-    \item applications of zero-shot learning and better representation. e.g. autonomous vehicles need to make deductions. 
     \item benthos example on wikipedia
     \item because of benthos problem -- it would be worth testing our model on the animals with attributes data set 
     \item Is this really zero-shot learning since we are using knowledge
-    \item see DEvise for motivating ZSL
-    \item one motivatin is that it's expensive to get labelled data
     \item a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
-    \item doman adaptation to help with transfer  from leaf to centre?
+    \item doman adaptation to help with transfer from leaf to centre?
     \item problem if overall visual things arent near to each other in the hierarchy. Maybe more true for animals but less true for things that are 'used' for something.
     \item maybe one contribution is that visual similarity is not entire from taxonomy e.g. zebra maybe difficult to guess. Our benefit is really probabily to predict basic level classes. 
-    \item zero shot image retrieval
     \item final layer of CNN doesnt have necessarily enough detailed information contained. Perhaps need to make links to higher layers \cite{Ba2015}
     \item is projection domain shift problem for this instance where output space is structured
     \item if need information on applications of ZSL see Fu and Sigal semi-supervised vocabulary-informed learning
     \item use maybe some other data set as well
-    \item some very complex architectures - we want to produce simple easily justifiable solution
     \item we probably need to consider domain adaptation in more detail e.g. some literature \cite{Patel2015}, \cite{Wang2018}
     \item a problem with our domanin adaptation might be from only images to leaves, but actually we could re-group data and predict into higher nodes, this may improve domain adaptation
     \item Zebra may be difficult if the semantic space doesnt fully reflect visual space smoothly -- maybe need some model 
     \item suggest all\_embs model but note that it may not be practical as not dynamic
+    \item maybe different loss function; mse, distortion of xentropy, adding allemb to xentropy
     \item maybe another issue is that labels on different levels may not be organised wrt each other
     \item other problem is that the poincare embedding that we have learnt is not perfect for example it appears golden retriever is closer to some non-retriever breeds than labrador retriever which shouldnt be the case. This in general might not be a problem because as demonstrate by Douwe and Kiela the overall strucutre is very good but perhaps there is more imprecision at the leaf nodes but problematically that is where the imagenet labels are. need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
     \item also problem since 10\% are dog breeds.
     \item one idea is to combine wordnet and wikipedia info and just do a voting system
     \item maybe could also compare attributes -- these attributes could be learnt from the different layers of the CNN, perhaps together they could used with hierarchy to predict new semantic embedding, could even combine with wikiedia. This would help. Combining different layers may be helpful for prediction of leaf nodes because at these nodes the differences between classes are determined by small details in parts.
     \item can we somehow get attributes into the thing by using the internal layers of a DNN -- avoid problem of expensive to manually draw them.
-    \item maybe we dont have enough levels of hierarchy still to really get the benefit of the poincare models
+    \item presenting the entire network in hyperbolic space since CNN learn hierarchical representations in layers, it might be better to have everything in hyperbolic space and then train the entire model on Riemannian optimization.
 \end{itemize}
 
 \chapter[Introduction]{Introduction\raisebox{.3\baselineskip}{\normalsize\footnotemark}}
@@ -162,9 +152,6 @@ The main property than distinguishes hyperbolic spaces from Euclidean ones, and 
 After calculting the Poincare embedding, we propose two separate models to map into this spaces. The first one, called Deep Hyperbolic Semantic Embedding model (Deep-HSEM) employes a standard convolutional neural network in a similar vein as the DeViSE model of Frome \textit{et al.} \cite{Frome2013}. The second one, called Convex Hyperbolic Semantic Embedding model (Convex-HSEM) follows the approach of Norouzi \textit{et al.} \cite{Norouzi2013} and computes the predicted embeddings for zero-shot classes as convex combinations of known classes' embeddings. Both of these models were trained on the 1000 classes of ImageNet 2012 dataset \cite{JiaDeng2009, Russakovsky2015}, which contains a total of 1.2 million images. 21,000 previously unseen classes, total of around 13 million images, from the full ImageNet 2011 release \cite{JiaDeng2009} were used to evaluate the zero-shot capabilitis of the model. The next section presents our key results and conclusions.
 
 \section{Summary of our results and discussion}
-
-
-
 
 
 
@@ -566,10 +553,19 @@ $T \in \{1, 2, 5, 10, 100, 1000\}$. The motivation for this model architecture i
 
 \chapter{Discussion \& Future Research}
 
-Nickel showed that the Poincare embedding much better represent relationships of explicit graph. Also graph convolution showed graph importance.
-The failure of hierarchical semantic embedding to overperform w2v has hence two possible reason: alone semantic relations dont really show visual resemblence as well (this is hard to understand, consider the Bethos example, and GCN). It it however the possible that GCN performance would have been worse without similarit (check paper). Nevertheless it is unlikely that this space is smooth. Second possbility is that mapping into poincare embedding space is difficult. On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..
+Two possible issues. First is are possible problem of mapping from image space into the hyperbolic space, and the second one is that the eventhough semantic space may not have visual smoothness.
+
+\subsubsection{issues of mapping into embedding space}
 
 
+On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..
+
+\subsubsection{Issues of visual smoothness}
+
+GCN showed however accounting excplicit semantic hierarchy is important. Nevertheless, at the same time their model also used similarity emebedding. Likely both are important consider bethos example vs. words that dont have have visual relevance, and also biological taxonomy. perhaps use both models.
+
+Essentially our model proposes that a hyperbolic embedding is better repsentation of visual similarity than Euclidean similarity based embeddings buil on large text corpus, such at the Wikipedia data set. Our experiments suggest that both have advantages. A relatd issue is then the visual smoothness of poincare embedding space. Benthos example.
+Nickel showed that the Poincare embedding much better represent relationships of explicit graph.
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
