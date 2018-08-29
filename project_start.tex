@@ -44,8 +44,8 @@ $\Box$ \end{quotation}}
 
 
 \title{  	{ \includegraphics[scale=.5]{ucl_logo.png}}\\
-{{\Huge Improving the Generalization Performance of Deep Learning with Hyperbolic Semantic Embeddings}}\\
-{\large with Application to Zero-shot Learning}\\
+{{\Huge Deep Hyperbolic Semantic Embedding Model for Zero-Shot Learning}}\\
+%{\large }\\
 		}
 \date{Submission date: Day Month Year}
 \author{Hermanni H{\"a}lv{\"a} \thanks{
@@ -528,11 +528,18 @@ $T \in \{1, 2, 5, 10, 100, 1000\}$. The motivation for this model architecture i
 \newpage
 \chapter{Conclusions \& Ideas for Future Work}
 
-\subsection{Summary}
+\section{Summary}
+The aim of this thesis has been to improve the generalization ability of deep learning models used for image classification, and zero-shot learning in particular. The precise research question we set out to explore was: 
+\begin{itemize}
+\item \textit{Does semantic hierarchical knowledge in the form of hyperbolic embeddings help to improve the zero-shot prediction capability of deep learning models}
+\end{itemize}
+Two novel zero-shot learning models were introduced to investigate this: the Deep-Hyperbolic Semantic Embedding model used a CNN to learn a mapping from training images into a Poincare embedding, whilst the Convex-Hyperbolic Semantic Embedding model constructed embedding predictions as a weighted convex combination of known classes' embedding. Various zero-shot experiments were run on up to 21k previously unseen classes in an attempt to answer the above reserch question.
 
-\subsection{Limitations of Our Approach}
+Overall our results show promising results \dots.. . However, as the next two sections highlight, there are several improvements that can be made in future works to explore this approach in more detail.
 
-\subsection{Ideas for Further Research}
+\section{Limitations of Our Approach}
+
+\section{Ideas for Further Research}
 
 
 
@@ -578,8 +585,9 @@ maybe another issue is that labels on different levels may not be organised wrt 
 
 other problem is that the poincare embedding that we have learnt is not perfect for example it appears golden retriever is closer to some non-retriever breeds than labrador retriever which shouldnt be the case. This in general might not be a problem because as demonstrate by Douwe and Kiela the overall strucutre is very good but perhaps there is more imprecision at the leaf nodes but problematically that is where the imagenet labels are. need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
 
-
 \subsubsection{experimental extensions}
+random poincare embeddings.
+issues of training time
 generalize zsl excluded.
 more dimensions of the embedding space
 one idea is to combine wordnet and wikipedia info and just do a voting system
