@@ -79,40 +79,14 @@ First, I would like to thank my supervisor Prof. Bradley Love, for all of his gu
 
 \chapter{Notes}
 \begin{itemize}
-  \item essentially our model proposes that semantic taxonomy is the best guide to visual taxonomy -- better than wikipedia 
-    \item does current updates necessarily follow geodesics. perhaps small learning rate is very important -- need to explore in more detail lr setting
     \item check that final dense layer mentioned in CNN intro
-    \item one problem is that we are training only transformation to the leafs of the nodes. I wonder if we could includ basic level labels since those are the ones humans learn first and also some suggest on average capture most distinction (see the two papers)
     \item Do I clearly state that CNNs are the state-of-the-art on image classification, give some example of current results / super human performance or when they wont competitions first time
-    \item benthos example on wikipedia
-    \item because of benthos problem -- it would be worth testing our model on the animals with attributes data set 
-    \item Is this really zero-shot learning since we are using knowledge
-    \item a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
-    \item doman adaptation to help with transfer from leaf to centre?
-    \item problem if overall visual things arent near to each other in the hierarchy. Maybe more true for animals but less true for things that are 'used' for something.
-    \item maybe one contribution is that visual similarity is not entire from taxonomy e.g. zebra maybe difficult to guess. Our benefit is really probabily to predict basic level classes. 
-    \item final layer of CNN doesnt have necessarily enough detailed information contained. Perhaps need to make links to higher layers \cite{Ba2015}
-    \item is projection domain shift problem for this instance where output space is structured
-    \item if need information on applications of ZSL see Fu and Sigal semi-supervised vocabulary-informed learning
-    \item use maybe some other data set as well
-    \item we probably need to consider domain adaptation in more detail e.g. some literature \cite{Patel2015}, \cite{Wang2018}
-    \item a problem with our domanin adaptation might be from only images to leaves, but actually we could re-group data and predict into higher nodes, this may improve domain adaptation
-    \item Zebra may be difficult if the semantic space doesnt fully reflect visual space smoothly -- maybe need some model 
-    \item suggest all\_embs model but note that it may not be practical as not dynamic
-    \item maybe different loss function; mse, distortion of xentropy, adding allemb to xentropy
-    \item maybe another issue is that labels on different levels may not be organised wrt each other
-    \item other problem is that the poincare embedding that we have learnt is not perfect for example it appears golden retriever is closer to some non-retriever breeds than labrador retriever which shouldnt be the case. This in general might not be a problem because as demonstrate by Douwe and Kiela the overall strucutre is very good but perhaps there is more imprecision at the leaf nodes but problematically that is where the imagenet labels are. need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
-    \item also problem since 10\% are dog breeds.
-    \item one idea is to combine wordnet and wikipedia info and just do a voting system
-    \item maybe could also compare attributes -- these attributes could be learnt from the different layers of the CNN, perhaps together they could used with hierarchy to predict new semantic embedding, could even combine with wikiedia. This would help. Combining different layers may be helpful for prediction of leaf nodes because at these nodes the differences between classes are determined by small details in parts.
-    \item can we somehow get attributes into the thing by using the internal layers of a DNN -- avoid problem of expensive to manually draw them.
-    \item presenting the entire network in hyperbolic space since CNN learn hierarchical representations in layers, it might be better to have everything in hyperbolic space and then train the entire model on Riemannian optimization.
 \end{itemize}
 
 \chapter[Introduction]{Introduction\raisebox{.3\baselineskip}{\normalsize\footnotemark}}
 \footnotetext{All the code developed for this project can be found at https://github.com/HHalva/msc-thesis}
 
-\section{Project motivation}
+\section{Project Motivation}
 Over the past decade deep learning has achieved state-of-the-art results on virtually all computer vision tasks \cite{Goodfellow2016}. The impressive performance of these models has, in turn, propelled paramount improvements in a wide range of practical applications areas such as autonomous vehicles\cite{Bojarski2016}, face recognition \cite{Taigman2014} and robotics \cite{Finn2015}\cite{Ganegedara2017}. Despite the many successes of deep learning, most of the achievements rely on well defined training and test envionments; the generalization performance of these models is stil far from that of the human visual system. The broad aim of this thesis is to improve the generalization performance deep learning models in image classification. We approach this by attempting to teach the models a more human-like understanding of object categorization, and illustrate this within the context of zero-shot learning.
 
 Some of the biggest advances in deep learning have come in the area of image classification, that is, the task of being able to a assign a correct label to an object in an image. Inspired by the breakthrough performance of Krizhevsky \textit{et al.} \cite{Krizhevsky2012} on the ImageNet 2012 classification challenge, researchers have produced increasingly novel deep learning models and as a result have exceeded human performance on this task \cite{Dodge2017}. Yet, the classification these models perform is simplistic in the way that each object is predicted to be one of a pre-defined subset of object classes. This is very different from the rich semantic understanding that humans display upon viewing an image. For instance, if we are presented an image of a labrador retriever, we could also put the image under a higher level category of dogs, or even animals and mammals. We therefore posses a complex semantic hierarchy of categories in our memory which is intertwined with our visual processing system \cite{Joliceur1984}. Deep learning models, on the other hand, are usually trained against individual object labels without any broader semantic context about the relationship between the object classes. We propose to resolve this shortcoming by instead training deep learning models against semantic embedding labels that capture the hierarchical semantic relationships between different classes of objects. For instance, in our model the label for labrador retriever will encode information about it belonging to the aforementioned higher-level categories of dog and animal, as well as information about how close or far away it is semantically from other categories such as a 'cat' or a 'football'. We do this by projecting all the class labels into a hyperbolic semantic embedding space that is optimal for representing hierarchical concepts and their relations, and train a deep learning model against these labels.
@@ -138,7 +112,7 @@ Overall our resuls\dots\dots\dots
 
 In the remainder of this chapter we provide a brief overview of our methodology and how it fits in the existing literature on zero-shot learning. We also summarize our key results more explicitly and the main take-aways for future research. In Chapter \ref{ch:backg} we cover the necessary technical background for this project and review literature in more detail. Chapter \ref{} presents our approach in detail, and the full results from our experiments are given in Chapter \ref{}. Chapter \ref{} concludes our work with a discussion of the results and presents ideas for future research.
 
-\section{Summary of our approach in relation to existing literature}
+\section{Summary of Our Approach in Relation to Existing Literature}
 Modern deep neural networks take the form of Convolutional Neural Networks \cite{Lecun2015}, which learn a hierarchical visual representation of objects over multiple layers of convolution operations. Typically these models are trained against one-hot-encoded vectors of class labels: if there are N classes, the label vector of each image will be N long and have zeros at each dimension except a one in that of the correct class. Crucially, these vectors are orthogonal to each other. This is why standard deep learning models do not learn to capture any semantic relations between the visual objects, eventhough the hierarchical visual features that the model learn would be well suited for this. A handful works have attempted to improve up this by training against two different levels of hierarchy and found that this improves the generalization of these models \cite{Wang2015}, \cite{Peterson2018}. More research is needed however to determine whether accounting for more complex multi-level hierarchies would lead to further benefits in standard classification tasks.
 
 Despite its limited use in the most popular deep learning applications, the idea of using semantic embeddings is well established in the area of zero--shot learning \cite{Palatucci2009, Socher, Huang2012, Frome2013, Norouzi2013}. Common to all of these approaches is to utilize a small subset of data to learn a mapping from image features into a semantic embedding vector-space where similar words are close to each other. By using this learnt mapping, any image can in fact be mapped into the embedding space and by finding the nearest label-vector predictions can be made for novel classes i.e. zero-shot classes of objects. Note that this is possible because the embedding space contains all the labels, including zero-shot ones; this akin to a human who knows the names and relations of all physical entities but has only seen some of them.
@@ -151,9 +125,9 @@ The main property than distinguishes hyperbolic spaces from Euclidean ones, and 
 
 After calculting the Poincare embedding, we propose two separate models to map into this spaces. The first one, called Deep Hyperbolic Semantic Embedding model (Deep-HSEM) employes a standard convolutional neural network in a similar vein as the DeViSE model of Frome \textit{et al.} \cite{Frome2013}. The second one, called Convex Hyperbolic Semantic Embedding model (Convex-HSEM) follows the approach of Norouzi \textit{et al.} \cite{Norouzi2013} and computes the predicted embeddings for zero-shot classes as convex combinations of known classes' embeddings. Both of these models were trained on the 1000 classes of ImageNet 2012 dataset \cite{JiaDeng2009, Russakovsky2015}, which contains a total of 1.2 million images. 21,000 previously unseen classes, total of around 13 million images, from the full ImageNet 2011 release \cite{JiaDeng2009} were used to evaluate the zero-shot capabilitis of the model. The next section presents our key results and conclusions.
 
-\section{Summary of our results and discussion}
+\section{Summary of Our Results and Discussion}
 
-
+main contribution..
 
 \newpage
 
@@ -268,9 +242,11 @@ Convolution layers in CNNs are normally followed up by max-pooling functions. Us
 
 One of the most important features of CNNs is that they can be trained end-to-end using back-propagation and SGD. A consequence of paramount importance is that the type of visual features which convolution kernels learn to represent is fully determined by what best fits the data, and they can be learned directly from raw data. This is in sharp contrast to earlier computer vision image classification that usually involved feature extraction techniques \cite{Prince2012} such as SIFT \cite{Lowe1999} in which manually designed features are used. These features would then be passed to a separate classifier, for example Support Vector Machine \cite{Weston2010}. CNNs with their automatic feature learning capability produced very large accuracy gains on this apprach \cite{Razavian2014} and following the breakthrough performance of the seminal AlexNet CNN \cite{Krizhevsky2012} at the ImageNet 2012 competition, deep CNNs of various designs have become state-of-the-art in virtually all machine vision classification and detection tasks \cite{JurgenSchmidhuber2015}.
 
-In addition to convolution and pooling layers, CNNs involve several other important architectural designs. For example, deep networks with a large number of convolution and pooling layers have been found to perform better \cite{Srivastava2015} than shallow ones. This is exploited by several CNN models such as the ResNet architectures which can have more than 100 layers \cite{He2015}. Theoretically, depth increases the representational capacity of the network \cite{Sun2015}. Representational capacity is also increased by the use of ReLUs on top of convolution layers. All in all, modern deep CNNs can easily have hundres of millions of parameters and the ability to learn super-human performance on many image classification tasks \cite{Lecun2015}. Due to their large representational capactiy, these models can also easily overfit training data and the development of appropriate regularization techniques has played a large role in CNNs recent achievements. Perhaps the most popular regularization technique, and the one applied in this work, is DropOut \cite{Srivastava2014}. During model training, dropout deactivates a each neuron in each iteration with a probability $P$. The consequence of this is that over the entire training period we essentially end up training an ensemble of different models, and the final model is an average of exponentially many sub-models \cite{Goodfellow2016}. This method regularizes the network as individual neurons can not rely too much on any other neurons and the output expected to get out of them. Durng test-time, dropout is turned off.
+In addition to convolution and pooling layers, CNNs involve several other important architectural designs. For example, deep networks with a large number of convolution and pooling layers have been found to perform better \cite{Srivastava2015} than shallow ones. This is exploited by several CNN models such as the ResNet architectures which can have more than 100 layers \cite{He2015}. Theoretically, depth increases the representational capacity of the network \cite{Sun2015}. Representational capacity is also increased by the use of ReLUs on top of convolution layers. Usually the final layer of a CNN contains similar fully-connected layer as feedforward networkds in order to map feature representations into a vector of class predictions.
 
-Many of the theoretical concepts of modern deep CNNs have been around for several decades \cite{JurgenSchmidhuber2015}. The reason for their recent surge in popularity is to a large extent that they have become a lot easier and faster to train as our computers have gotten more powerful and our datasets much larger. In particular, the ability to train deep models on Graphical Processing Units (GPUs) has cut training times by at least an order of magnitude \cite{Lecun2015}. However, we have only been able reap the benefits of faster compute and better models because of 'big data'. It has been suggested that CNNs with around 5000 labels per training category can on average start to match human performance \cite{Goodfellow2016} - over the past decade we have seen the advent of datasets that have up to tens of millions of training examples \cite{Russakovsky2015i}, \cite{JiaDeng2009}, \cite{Netzer2011}.
+All in all, modern deep CNNs can easily have hundres of millions of parameters and the ability to learn super-human performance on many image classification tasks \cite{Lecun2015}. Due to their large representational capactiy, these models can also easily overfit training data and the development of appropriate regularization techniques has played a large role in CNNs recent achievements. Perhaps the most popular regularization technique, and the one applied in this work, is DropOut \cite{Srivastava2014}. During model training, dropout deactivates a each neuron in each iteration with a probability $P$. The consequence of this is that over the entire training period we essentially end up training an ensemble of different models, and the final model is an average of exponentially many sub-models \cite{Goodfellow2016}. This method regularizes the network as individual neurons can not rely too much on any other neurons and the output expected to get out of them. Durng test-time, dropout is turned off.
+
+Many of the theoretical concepts of modern deep CNNs have been around for several decades \cite{JurgenSchmidhuber2015}. The reason for their recent surge in popularity is to a large extent that they have become a lot easier and faster to train as our computers have gotten more powerful and our datasets much larger. In particular, the ability to train deep models on Graphical Processing Units (GPUs) has cut training times by at least an order of magnitude \cite{Lecun2015}. However, we have only been able reap the benefits of faster compute and better models because of 'big data'. It has been suggested that CNNs with around 5000 labels per training category can on average start to match human performance \cite{Goodfellow2016} - over the past decade we have seen the advent of datasets that have up to tens of millions of training examples \cite{Russakovsky2015i}, \cite{JiaDeng2009}, \cite{Netzer2011}. Modern CNNs have started to outperform humans on these data sets \cite{Dodge2017}.
 
 \section{Exploiting Semantic Information in \\ Computer Vision}
 
@@ -549,9 +525,18 @@ The Convex-HSEM therefore consists of two step. First, the pre-trained VGG-16 mo
 Since we used the pre-trained VGG-16 model, Convex-HSEM did not require any additional training and was therefore much faster to implement than the Deep-HSEM. The only hyperparameter to set was the number of data points over which to calculate the convex combination, $T$. We ran our experiments for 
 $T \in \{1, 2, 5, 10, 100, 1000\}$. The motivation for this model architecture is to represent any novel image as combination of known image classes. This model is hence predominantly aimed at zero-shot learning; if we were to classify a new image, and we knew it to be one of the 1000 training classes, it would make more sense just to use the standard VGG-16 model.
 
+\newpage
+\chapter{Conclusions \& Ideas for Future Work}
+
+\subsection{Summary}
+
+\subsection{Limitations of Our Approach}
+
+\subsection{Ideas for Further Research}
 
 
-\chapter{Discussion \& Future Research}
+
+Main contribution of this work is therefore.
 
 Two possible issues. First is are possible problem of mapping from image space into the hyperbolic space, and the second one is that the eventhough semantic space may not have visual smoothness.
 
@@ -560,13 +545,48 @@ Two possible issues. First is are possible problem of mapping from image space i
 
 On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..
 
+presenting the entire network in hyperbolic space since CNN learn hierarchical representations in layers, it might be better to have everything in hyperbolic space and then train the entire model on Riemannian optimization.
+
+a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
+
+doman adaptation to help with transfer from leaf to centre?
+final layer of CNN doesnt have necessarily enough detailed information contained. Perhaps need to make links to higher layers \cite{Ba2015}
+
+a problem with our domanin adaptation might be from only images to leaves, but actually we could re-group data and predict into higher nodes, this may improve domain adaptation
+
+problem with riemannian and Euclidean gradiens. and how riemannian graients are calculated.
+Numerical issues, attempted to use double-precision (64 bit floating points.
+
 \subsubsection{Issues of visual smoothness}
 
 GCN showed however accounting excplicit semantic hierarchy is important. Nevertheless, at the same time their model also used similarity emebedding. Likely both are important consider bethos example vs. words that dont have have visual relevance, and also biological taxonomy. perhaps use both models.
+because of benthos problem -- it would be worth testing our model on the animals with attributes data set 
+
+problem if overall visual things arent near to each other in the hierarchy. Maybe more true for animals but less true for things that are 'used' for something.
+
+maybe one contribution is that visual similarity is not entire from taxonomy e.g. zebra maybe difficult to guess. Our benefit is really probabily to predict basic level classes. 
 
 Essentially our model proposes that a hyperbolic embedding is better repsentation of visual similarity than Euclidean similarity based embeddings buil on large text corpus, such at the Wikipedia data set. Our experiments suggest that both have advantages. A relatd issue is then the visual smoothness of poincare embedding space. Benthos example.
 Nickel showed that the Poincare embedding much better represent relationships of explicit graph.
+item does current updates necessarily follow geodesics. perhaps small learning rate is very important -- need to explore in more detail lr setting
+    
+problem is that we are training only transformation to the leafs of the nodes. I wonder if we could includ basic level labels since those are the ones humans learn first and also some suggest on average capture most distinction (see the two papers)
+we probably need to consider domain adaptation in more detail e.g. some literature \cite{Patel2015}, \cite{Wang2018}
+maybe different loss function; mse, distortion of xentropy, adding allemb to xentropy
 
+maybe another issue is that labels on different levels may not be organised wrt each other
+
+other problem is that the poincare embedding that we have learnt is not perfect for example it appears golden retriever is closer to some non-retriever breeds than labrador retriever which shouldnt be the case. This in general might not be a problem because as demonstrate by Douwe and Kiela the overall strucutre is very good but perhaps there is more imprecision at the leaf nodes but problematically that is where the imagenet labels are. need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
+
+
+\subsubsection{experimental extensions}
+generalize zsl excluded.
+more dimensions of the embedding space
+one idea is to combine wordnet and wikipedia info and just do a voting system
+non-zsl
+new data sets e.g. if trained against embedding learns well new data sets
+maybe could also compare attributes -- these attributes could be learnt from the different layers of the CNN, perhaps together they could used with hierarchy to predict new semantic embedding, could even combine with wikiedia. This would help. Combining different layers may be helpful for prediction of leaf nodes because at these nodes the differences between classes are determined by small details in parts.
+w2v model trained to same accuracy as poincare  
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
 
