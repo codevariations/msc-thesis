@@ -535,9 +535,21 @@ The aim of this thesis has been to improve the generalization ability of deep le
 \end{itemize}
 Two novel zero-shot learning models were introduced to investigate this: the Deep-Hyperbolic Semantic Embedding model used a CNN to learn a mapping from training images into a Poincare embedding, whilst the Convex-Hyperbolic Semantic Embedding model constructed embedding predictions as a weighted convex combination of known classes' embedding. Various zero-shot experiments were run on up to 21k previously unseen classes in an attempt to answer the above reserch question.
 
-Overall our results show promising results \dots.. . However, as the next two sections highlight, there are several improvements that can be made in future works to explore this approach in more detail.
+Overall our results show promising results \dots..versus Euclidean similarity based embeddings...The main contribution is therefore \dots.. However, as the next two sections highlight, there are several improvements that can be made in future works to explore this approach in more detail.
+
+Whilst our hypebolic models did perform better on the robust zero-shot task, thus indicating the power of these models in learning hierarchical relations, their accuracy in non-zero shot and the standard zero-shot setting was worse. This suggests that \dots 
 
 \section{Limitations of Our Approach}
+The main potential shortcomings of our model can be grouped under two broader, related, categories. The first ones have to do with the quality and usefulness of the hyperbolic semantic embedding built on the WordNet hierarchy, and the second ones have to with the quality of mapping we have learned from the image space into the embedding space.
+
+Concerning the first set of limitations, it is clear from our analysis that there are certain situations in which our model performed worse than the baseline model that used similarity based worde embedding. One of the examples given was that of the word 'benthos' defined as 'organisms living at near the seabed'. Our model failed to classify this as it was not directly linked any species in the WordNet hierarchy. The baseline model had more success, persumably because the massive Wikipedia data used to create its embedding space had many species in the same context with 'benthos'. This illustrates that hierarchical semantic taxonomy is not alway better descriptor of visually relatedness than semantic contex. To be clear, this is not a shortcoming of hyperbolic embeddings in general, but rather a limitation of the WordNet versus the massive contextual data available from other data sets, in certain situations. In fact, future work could attempt to build a hyperbolic embedding based on both contextual data as well as explicit semantic word taxonomies. This is possible because the Poincare model of Nickel and Kiela \cite{Nickel2018} do not require excplicit hierarchy as an input, instead it just needs to be given data about which words are connected to each other. If such data set could be constructed from the Wikipedia data set, then we could use it to learn a latent hierarchy of those words and use that in conjunction with the Poincare embedding of this paper for improved performance.
+
+The above issue is closely linked to a broader concern we have, namely the visual smoothness of the embedding space. 
+
+
+
+
+
 
 \section{Ideas for Further Research}
 
@@ -595,6 +607,8 @@ non-zsl
 new data sets e.g. if trained against embedding learns well new data sets
 maybe could also compare attributes -- these attributes could be learnt from the different layers of the CNN, perhaps together they could used with hierarchy to predict new semantic embedding, could even combine with wikiedia. This would help. Combining different layers may be helpful for prediction of leaf nodes because at these nodes the differences between classes are determined by small details in parts.
 w2v model trained to same accuracy as poincare  
+
+compare against state of the art -- we now havent, but would be interesting to see if their performance could be improved by Poincare embedding.
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
 
