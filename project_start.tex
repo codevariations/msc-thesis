@@ -540,24 +540,19 @@ Overall our results show promising results \dots..versus Euclidean similarity ba
 Whilst our hypebolic models did perform better on the robust zero-shot task, thus indicating the power of these models in learning hierarchical relations, their accuracy in non-zero shot and the standard zero-shot setting was worse. This suggests that \dots 
 
 \section{Limitations of Our Approach}
+Big problem is that in the non-zero shot training the embedding model did much worse.
+
 The main potential shortcomings of our model can be grouped under two broader, related, categories. The first ones have to do with the quality and usefulness of the hyperbolic semantic embedding built on the WordNet hierarchy, and the second ones have to with the quality of mapping we have learned from the image space into the embedding space.
 
 Concerning the first set of limitations, it is clear from our analysis that there are certain situations in which our model performed worse than the baseline model that used similarity based worde embedding. One of the examples given was that of the word 'benthos' defined as 'organisms living at near the seabed'. Our model failed to classify this as it was not directly linked any species in the WordNet hierarchy. The baseline model had more success, persumably because the massive Wikipedia data used to create its embedding space had many species in the same context with 'benthos'. This illustrates that hierarchical semantic taxonomy is not alway better descriptor of visually relatedness than semantic contex. To be clear, this is not a shortcoming of hyperbolic embeddings in general, but rather a limitation of the WordNet versus the massive contextual data available from other data sets, in certain situations. In fact, future work could attempt to build a hyperbolic embedding based on both contextual data as well as explicit semantic word taxonomies. This is possible because the Poincare model of Nickel and Kiela \cite{Nickel2018} do not require excplicit hierarchy as an input, instead it just needs to be given data about which words are connected to each other. If such data set could be constructed from the Wikipedia data set, then we could use it to learn a latent hierarchy of those words and use that in conjunction with the Poincare embedding of this paper for improved performance.
 
-The above issue is closely linked to a broader concern we have, namely the visual smoothness of the embedding space. 
-
-
+The above issue is closely linked to the broader of problem of an embedding space not preserving the local structure of its input image space. This is a common challenge in zero-shot learning \cite{Ji2017}.
 
 
 
 
 \section{Ideas for Further Research}
 
-
-
-Main contribution of this work is therefore.
-
-Two possible issues. First is are possible problem of mapping from image space into the hyperbolic space, and the second one is that the eventhough semantic space may not have visual smoothness.
 
 \subsubsection{issues of mapping into embedding space}
 
@@ -578,12 +573,7 @@ Numerical issues, attempted to use double-precision (64 bit floating points.
 
 \subsubsection{Issues of visual smoothness}
 
-GCN showed however accounting excplicit semantic hierarchy is important. Nevertheless, at the same time their model also used similarity emebedding. Likely both are important consider bethos example vs. words that dont have have visual relevance, and also biological taxonomy. perhaps use both models.
-because of benthos problem -- it would be worth testing our model on the animals with attributes data set 
-
 problem if overall visual things arent near to each other in the hierarchy. Maybe more true for animals but less true for things that are 'used' for something.
-
-maybe one contribution is that visual similarity is not entire from taxonomy e.g. zebra maybe difficult to guess. Our benefit is really probabily to predict basic level classes. 
 
 Essentially our model proposes that a hyperbolic embedding is better repsentation of visual similarity than Euclidean similarity based embeddings buil on large text corpus, such at the Wikipedia data set. Our experiments suggest that both have advantages. A relatd issue is then the visual smoothness of poincare embedding space. Benthos example.
 Nickel showed that the Poincare embedding much better represent relationships of explicit graph.
