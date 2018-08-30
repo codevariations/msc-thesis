@@ -13,6 +13,11 @@ def p2k_coords(emb_mat):
     den = torch.sum(emb_mat.pow(2), dim=1, keepdim=True)+1
     return num.div(den)
 
+def k2p_coords(emb_mat):
+    sqnorm = emb_mat.pow(2).sum()
+    den = torch.sqrt(torch.add(-sqnorm, 1)).add(1)
+    return emb_mat.div(den)
+
 def calc_lorenz_factors(emb_mat):
     return 1. / torch.sqrt(1 - torch.sum(emb_mat.pow(2), dim=1))
 
