@@ -83,7 +83,6 @@ def main():
     #load poincare embedding
     poinc_emb = torch.load(
             '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
-    pdb.set_trace()
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -155,7 +154,7 @@ def main():
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val_white')
+    valdir = os.path.join(args.data, 'train')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -354,7 +353,7 @@ class PoincareVGG(nn.Module):
 
         #freeze weights except classifier layer 
         self.unfreeze_features(False)
-        self.unfreeze_fc(False)
+        self.unfreeze_fc(True)
 
     def unfreeze_features(self, unfreeze):
         for p in self.features.parameters():

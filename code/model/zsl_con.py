@@ -160,7 +160,7 @@ def main():
     wnids_3h_1k = wnids_21k[:8860]
 
     #select which hop data-set to use
-    chosen_hop_data = wnids_2hop
+    chosen_hop_data = wnids_1k
 
     # ZSL Data loading code
     valdir = args.data
@@ -178,7 +178,7 @@ def main():
 
     #load poincare embedding data (include embs for only current hop-data)
     poinc_emb = torch.load(
-            '/home/hermanni/thesis/msc-thesis/code/model/nouns_200.pth')
+            '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
     poinc_emb_hop_idx = [poinc_emb['objects'].index(i)
                       for i in val_classes]
     poinc_emb_hop_wgt = torch.tensor(

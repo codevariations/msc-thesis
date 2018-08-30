@@ -4,6 +4,7 @@ import random
 import shutil
 import time
 import warnings
+import pdb
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "2, 3"
 
@@ -135,8 +136,8 @@ def main():
     cudnn.benchmark = True
 
     # Data loading code
-    traindir = os.path.join(args.data)
-    valdir = os.path.join(args.data)
+    traindir = os.path.join(args.data, 'train')
+    valdir = os.path.join(args.data, 'val_white')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -327,6 +328,7 @@ def accuracy(output, target, topk=(1,)):
         batch_size = target.size(0)
 
         _, pred = output.topk(maxk, 1, True, True)
+        pdb.set_trace()
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
 
