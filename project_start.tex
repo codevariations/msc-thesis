@@ -63,12 +63,21 @@ Supervisor: Prof. Bradley Love}
  
 \onehalfspacing
 \maketitle
+
 \begin{abstract}
-Summarise your report concisely.
+Even though \textit{deep learning} models have achieved state-of-the-art results on virtually all image classification tasks, their ability to generalize into novel environments remains constrained. One of the most challenging problems which illustrates this is zero-shot learning. In this task the training and test sets are completely disjoint; that is, at test time the model tries to label images from object classes that it has never seen before. A common approach to this problem has been to learn a mapping from training images to a semantic embedding space that contains all the class labels. Zero-shot classification is done by mapping novel images into the embedding space where nearest neighbour search is performed. The semantic embeddings spaces employed by previous works are limited however: 
+
+
+
+
+
+
+
 \end{abstract}
+
 \chapter*{Acknowledgements}
 \thispagestyle{empty}
-First, I would like to thank my supervisor Prof. Bradley Love, for all of his guidance, support and loads of great ideas. His genuine interest in the project and desire to help out when needed the most really made the entire process very enjoyable. Massive thanks also to Olivia Guest, and Sebastian Bobadilla-Suarez for sharing their ideas and for pointing me to loads of relevant research I likely would have otherwise missed. Thank you to Adam Hornsby for helping me get my head around the different word embedding methods and for how I should think about presenting the project. Special thank you to Brett Roads for being incredibly helpful with setting up and helping to maintain the compute resources etc. that were required for this project; I was so impressed with the whole set up and how well it all functioned. For sure, nothing would have come of this project had I not received all this help, so for that - thank you!
+First, I would like to thank my supervisor Prof. Bradley Love, for all of his guidance, support and loads of great ideas. His genuine interest in the project and desire to help out when needed the most really made the entire process very enjoyable. Massive thanks also to Olivia Guest, and Sebastian Bobadilla-Suarez for sharing their ideas and for pointing me to loads of relevant research I likely would have otherwise missed. Thank you to Adam Hornsby for helping me get my head around the different word embedding methods and for how I should think about presenting the project. Special thank you to Brett Roads for being incredibly helpful with setting up and helping to maintain the compute resources and data, which were required for this project; I was so impressed with the whole set up and how well it all functioned. For sure, nothing would have come of this project had I not received all this help, so for that - thank you!
 
 \clearpage
 
@@ -99,7 +108,6 @@ We chose to evaluate the generalization performance of our deep hyperbolic seman
 	\caption{Hypothetical example of zero-shot classfication. Assume that we have used training images and their embedding vectors (blue dots) to learn a mapping from image features into the hyperbolic embedding space. Next a novel class of image is encountered, since the entity in the image looks a bit like a mix of golden retriever and Irish red setter, the predicted semantic embedding falls in between those two, which indeed happens to be close to the ground-truth embedding: Nova-scotia Duck Tolling Retriever.}
 	\label{fig:intro}
 \end{figure}
-
 
 We believe that hyperbolic semantic embeddings are particularly well suited for this task, but have not, our knowledge, previously been explore. This conjecture is based on the following two arguments. First, the hyperbolic embedding is able to reflect semantic hierarchical relationships between objects explicitly. Second, semantic hierarchies and similarities are closely linked, for instance, animals of the same biological family will share more visual similarities than those of different. Visually similar concepts should thus be close to each other in this space, and consequently searching for nearest embedding labels should provide better zero-shot predictions. Our central research question can thus be stated as: 
 \begin{itemize}
