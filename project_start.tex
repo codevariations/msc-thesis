@@ -44,7 +44,7 @@ $\Box$ \end{quotation}}
 
 
 \title{  	{ \includegraphics[scale=.5]{ucl_logo.png}}\\
-{{\Huge Deep Hyperbolic Semantic Embedding Model for Zero-Shot Learning}}\\
+{{\Huge Deep Hyperbolic Semantic Embedding Models for Zero-Shot Learning}}\\
 %{\large }\\
 		}
 \date{Submission date: Day Month Year}
@@ -65,11 +65,9 @@ Supervisor: Prof. Bradley Love}
 \maketitle
 
 \begin{abstract}
-Even though \textit{deep learning} models have achieved state-of-the-art results on virtually all image classification tasks, their ability to generalize into novel environments remains constrained. One of the most challenging problems which illustrates this is zero-shot learning. In this task the training and test sets are completely disjoint; that is, at test time the model tries to label images from object classes that it has never seen before. A common approach to this problem has been to learn a mapping from training images to a semantic embedding space that contains all the class labels. Zero-shot classification is done by mapping novel images into the embedding space where nearest neighbour search is performed. The semantic embeddings spaces employed by previous works are limited however: 
+Even though \textit{deep learning} models have achieved state-of-the-art results on virtually all image classification tasks, their ability to generalize into novel environments remains constrained. One of the most challenging problems which illustrates this is zero-shot learning. In this task the training and test sets are completely disjoint; that is, at test time the model tries to label images from object classes that it has never seen before. A common approach to this problem has been to learn a mapping from training images to a semantic embedding space that contains all the class labels. Zero-shot classification is done by mapping novel images into the embedding space where nearest neighbour search is performed. A limitation of the embeddings spaces employed by previous works is that they only capture semantic similarity of labels, but fail to account for more complex hierarchical semantic relations that could further improve generalization performance. For instance, research has shown that humans perform classification by traversing a hierarchy of semantic categories and associated taxonomy of visual memories. Thus even if we are shown a picture of an uknown dog breed, we can still say that it belong to the higher level categories 'dogs', 'mammals' and so forth. 
 
-
-
-
+The aim of this thesis is to introduce similar rich hierarchical semantic understanding into deep learning models. To do this we introduce a Deep Hyperbolic Semantic Embedding model which uses a conventional deep learning model to map into a hyperbolic semantic embedding space. Hyperbolic embeddings have previously been shown to be much better than standard Euclidean embeddings used by previous works in capturing hierarchical semantic graphs. The model was evaluated on \dots and the results show that \dots
 
 
 
