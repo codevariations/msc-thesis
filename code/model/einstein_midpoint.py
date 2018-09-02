@@ -9,22 +9,25 @@ poinc_wgts = poinc_emb['model']['lt.weight']
 poinc_wgts = torch.tensor(poinc_wgts, dtype=torch.double).cuda()
 
 def p2k_coords(emb_mat):
-    num = 2*emb_mat
-    den = torch.sum(emb_mat.pow(2), dim=1, keepdim=True)+1
-    return num.div(den)
+    #num = 2*emb_mat
+    #den = torch.sum(emb_mat.pow(2), dim=2, keepdim=True)+1
+    return 2*emb_mat.div(torch.sum(emb_mat.pow(2), dim=2, keepdim=True)+1)
 
 def k2p_coords(emb_mat):
-    sqnorm = emb_mat.pow(2).sum()
+    sqnorm = emb_mat.pow(2).sum(dim=1, keepdim=True)
     den = torch.sqrt(torch.add(-sqnorm, 1)).add(1)
     return emb_mat.div(den)
 
 def calc_lorenz_factors(emb_mat):
-    return 1. / torch.sqrt(1 - torch.sum(emb_mat.pow(2), dim=1))
+    return 1. / (torch.sqrt(1 - torch.sum(emb_mat.pow(2), dim=2)))
 
 def einstein_midpoint(emb_mat, lfactors, weights):
+    batch_size = emb_mat.size(0)
+    T = emb_mat.size(1)
+    n_emb_dims = emb_mat.size(2)
     wgts = torch.mul(weights, lfactors).div(torch.sum(torch.mul(weights,
-       lfactors))).view(-1, 1)
-    return torch.sum(wgts*emb_mat, 0)
+       lfactors), dim=1, keepdim=True))
+    return torch.mul(wgts.view(batch_size, T, 1), emb_mat).sum(dim=1)
 
 def klein_dist(U, V):
     num = 1 - torch.sum(torch.mul(U, V), dim=1)
