@@ -87,7 +87,7 @@ best_prec1 = 0
 
 def main():
     global args, best_prec1, poinc_emb, poinc_emb_wgt, poinc_emb_hop_wgt
-    global img2emb_idx
+    global poinc_emb_orig_wgt, img2emb_idx
 
     args = parser.parse_args()
 
@@ -160,7 +160,7 @@ def main():
     wnids_3h_1k = wnids_21k[:8860]
 
     #select which hop data-set to use
-    chosen_hop_data = wnids_1k
+    chosen_hop_data = wnids_2hop
 
     # ZSL Data loading code
     valdir = args.data
@@ -181,6 +181,11 @@ def main():
             '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
     poinc_emb_wgt = torch.tensor(poinc_emb['model']['lt.weight'],
                   dtype=torch.double)
+    poinc_emb_orig_idx = [poinc_emb['objects'].index(i)
+                          for i in orig_data.classes]
+    poinc_emb_orig_wgt = torch.tensor(
+                       poinc_emb_wgt[poinc_emb_orig_idx],
+                       dtype=torch.double).cuda()
     poinc_emb_hop_idx = [poinc_emb['objects'].index(i)
                       for i in val_classes]
     poinc_emb_hop_wgt = torch.tensor(
@@ -190,8 +195,7 @@ def main():
                          poinc_emb_hop_idx]
 
     #mapping from predicted img label idx to embedding idx
-    img2emb_idx = torch.tensor([poinc_emb['objects'].index(i) for i in
-                               orig_data.classes]).cuda(
+    img2emb_idx = torch.tensor(poinc_emb_orig_idx).cuda(
                                non_blocking=True).view(1, -1)
 
     #finally, run evaluation 
@@ -220,7 +224,7 @@ def validate(val_loader, model):
             target = target.cuda(args.gpu, non_blocking=True)
 
             # compute output
-            output = model(input)
+            output = model(input).double()
             # measure accuracy and record loss
             prec1, prec2, prec5, prec10, prec20  = accuracy(output,
                                                  target,
@@ -275,7 +279,7 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
-
+@profile
 def prediction(output, knn, T, equally_weighted):
     """Predicts the nearest classes based on klein distance
        to einstein midpoint"""
@@ -285,21 +289,13 @@ def prediction(output, knn, T, equally_weighted):
         n_emb_dims = poinc_emb_hop_wgt.size(1)
         smax = torch.nn.Softmax(dim=1)
         sm_out = smax(output)
-        topk_wgt, topk_idx = torch.topk(sm_out, k=T, dim=1)
-        tpk_idx = torch.gather(img2emb_idx.repeat(batch_size, 1), 1,
-                               topk_idx)
-        poinc_tpk_emb_tensor = poinc_emb_wgt[tpk_idx]
-        tensor_list = []
-        for n in range(batch_size):
-            klein_coords = eins.p2k_coords(poinc_tpk_emb_tensor[n]).cuda()
-            lorenz_fs = eins.calc_lorenz_factors(klein_coords)
-            eins_wgts = torch.tensor(topk_wgt[n],
-                                     dtype=torch.double).cuda()
-            eins_wgts = eins_wgts.div(eins_wgts.sum())
-            emp = eins.einstein_midpoint(klein_coords, lorenz_fs, eins_wgts)
-            tensor_list.extend([emp])
-        midpoints = torch.stack(tensor_list, 0)
-        dists_to_all = PoincareDistance.apply(midpoints.repeat(1,
+        eins_wgts, topk_idx = torch.topk(sm_out, k=T, dim=1)
+        klein_coords = eins.p2k_coords(poinc_emb_orig_wgt[topk_idx])
+        lorenz_fs = eins.calc_lorenz_factors(klein_coords)
+        #eins_wgts = topk_wgt.div(topk_wgt.sum(dim=1, keepdim=True))
+        emp_k = eins.einstein_midpoint(klein_coords, lorenz_fs, eins_wgts)
+        emp = eins.k2p_coords(emp_k)
+        dists_to_all = PoincareDistance.apply(emp.repeat(1,
                                        n_classes).view(-1, n_emb_dims),
                                        poinc_emb_hop_wgt.repeat(batch_size,
                                        1).cuda(args.gpu, non_blocking=True))
