@@ -335,10 +335,10 @@ Finally, there exist various studies that combine language and attribute based s
 
 \section{Semantic Embeddings in Hyperbolic Space}
 
-\textbf{Section overview:} As alluded to in the previous chapter, hyperbolic spaces provide an efficient way of embedding hierarchical graph structres. In this chapter we provide a brief overview of the required theoretical background and discuss the recent literature on building word embeddings in this space. Hyperbolic geometry and hyperbolic spaces are a vast fields containing thousands of years of work and formal statements and proofs are thus out of the scope of this work; we merely aim to provide the background necessary for the present work. For more thorough treatment of the topic, we refer the reader to Cannon \textit{et al.} \cite{} and Greenberg \cite{Greenberg1994}; unless where otherwise stated, all the theories and intuitions provided below are based on these two books.
+\textbf{Section overview:} As alluded to in the previous section, hyperbolic spaces provide an efficient way of embedding hierarchical graph structres. In this chapter we provide a brief overview of the required theoretical background and discuss the recent literature on building word embeddings in this space. Hyperbolic geometry and hyperbolic spaces are a vast fields containing thousands of years of work and formal statements and proofs are thus out of the scope of this work; we merely aim to provide the background necessary for the present work. For more thorough treatment of the topic, we refer the reader to Cannon \textit{et al.} \cite{} and Greenberg \cite{Greenberg1994}; unless where otherwise stated, all the theories and intuitions provided below are based on these two books.
 
 \subsection{Basics of Hyperbolic Geometry}
-Hyperbolic geometry is a type of non-Euclidean geometry in that it is derived by altering one of the five postulates of the classic Euclidean geometry, namely the fifth one:
+Hyperbolic geometry is a type of non-Euclidean geometry, derived by altering the fifth postulate of the classic Euclidean geometry \cite{Greenberg1994}:
 \begin{enumerate}
     \item Any pair of points can be joined up by stricly one staight line segment
     \item All lines can be extended indefinitely
@@ -351,7 +351,7 @@ In hyperbolic geometry the fifth postulate becomes its negation:
 
 \begin{enumerate}
    \setcounter{enumi}{4}
-   \item * Consider line L and a point P which does \textit{not} lie on L. For any L, ther are infinitely many lines that are both parallel to L and pass through P.
+   \item * Consider line L and a point P which does \textit{not} lie on L. For any L, there are infinitely many lines that are both parallel to L and pass through P.
  \end{enumerate}
 
 \begin{figure}
@@ -368,15 +368,15 @@ In hyperbolic geometry the fifth postulate becomes its negation:
 	\label{fig:hsaddle}
 \end{figure}
 
-For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces (Figure \ref{fig:disklines}). For instance a hyperbolic plane is a 2-dimensional manifold with constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. As long as lines in hyperbolic space never intersect each other, they are parallel. Straight lines in hyperbolic space are more precisely known as geodesics - arcs of circle, and locally they define the shortest path between two points in a curved space \cite{Stillwell1991}. It is illustrative to consider the shortest path between two locations on the globe, say new york and london; this too is an arc of the great circle of the earth circumference, rather than a straight line (though in this instance it is a result of the positive curvature of the earth). For an improved, intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of euclidean geometry (Figure \ref{fig:hsaddle}). There are several ways of constructing hyperbolic spaces from Euclidean geometry; the only requirement is that aforementioned necessary axioms are satisfied. Below we define the most important models.
+For us who are accustomed to thinking in Euclidean terms, this may seem impossible, at first. This becomes possible when we consider spaces of constant negative Gaussian curvature, which indeed is the fundamental property of hyperbolic spaces (Figure \ref{fig:disklines}). For instance a hyperbolic plane is a 2-dimensional manifold with a constant negative curvature; similar logic holds in higher dimensions too \cite{Stillwell1991}. As long as lines in hyperbolic space never intersect each other, they are parallel. Straight lines in hyperbolic space are more precisely known as geodesics - arcs of circle, and locally they define the shortest path between two points in the curved space \cite{Stillwell1991}. It is illustrative to consider the shortest path between two locations on the globe drawn on a flat map, say new york and london; this too is an arc of the great circle of the earth's circumference, rather than a straight line (though in this instance due to a positive curvature). For an improved intuition of hyperbolic geometry, it should be noted that all points in a hyperbolic space can be viewed as saddle points of Euclidean geometry (Figure \ref{fig:hsaddle}). There are several ways of constructing hyperbolic spaces from Euclidean geometry; the only requirement is that aforementioned necessary axioms are satisfied. Below we define the most important models, following \cite{Greenberg1994}.
 
 \subsubsection{The Beltrami-Klein Model}
-Consider a circle $\gamma$ of the Euclidean plane and its centre $O$, radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$. Lines in this model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if we have line $l$ and a point not on it $P$, then there are infinite number of parallel lines of $l$ that go through $P$. Example is given in the RHS of Figure \ref{fig:klein}. The reason why $m$ and $n$ in this figure are parallel to $l$ is that they are open chords in $\gamma$ and at no point of this space do $m$ and $n$ interect $l$, which is the working definition of parallelism \cite{Greenberg1994}. It is crucial to notice that only the interior of the circle forms the hyperbolic space and the boundary can never be reached, hence the \textit{open} chords as lines. This combined with the requirement that lines can be extended indefinitely means that we can get arbitrarily close to the boundary of the circle but never reache it. As a consequences the distance between two points on the line can not be computed as euclidean distance as it grows exponentially the further away from the centre we get, which is not visibly evident from the figures \cite{Greenberg1994}. Notice also that the appearance of lines as straight is just a matter of mapping them from geodesics, such as those in Figure \ref{fig:disklines}. 
+Consider a circle $\gamma$ of the Euclidean plane, its centre $O$, and radius $OR$ (see Figure \ref{fig:klein}). The hypebolic space is then defined as the interior of all points $X$ for which $OX < OR$ \cite{Greenberg1994}. Lines in the Klein model of hyperbolic space are open chords of $\gamma$, with open referring to a chord without its end points. This model satisfies the requirement of hyperbolic space since if there is a line $l$ and a point \textit{not} on it, $P$, then there are infinite number of parallel lines of $l$ that go through $P$. An example is given in Figure \ref{fig:klein}. The reason why $m$ and $n$ are parallel to $l$ in this figure is that they are open chords in $\gamma$ and at no point of this space do they interect $l$, which is the working definition of parallelism \cite{Greenberg1994}. It is crucial to notice that only the interior of the circle forms the hyperbolic space and the boundary can never be reached, hence the \textit{open} chords as lines. This, combined with the requirement that lines can be extended indefinitely, means that one can get arbitrarily close to the boundary of the circle but never reach it. As a consequences, the distance between two points on the line grows exponentially the further away from the centre we get and therefore we cannot use Euclidean distance (which is not visibly evident from the figures) \cite{Greenberg1994}. Notice also that the appearance of lines as 'straight' is just a matter of mapping them from geodesics \cite{Greenberg1994}, such as those in Figure \ref{fig:disklines}. 
 
 \begin{figure}
   \centering
 	\includegraphics[width=0.6\textwidth]{klein}
-	\caption{Depiction of the Klein model of hyperbolic geometry.}
+	\caption{Depiction of the Klein model of hyperbolic geometry. $m$, and $n$ are parallel lines to $l$ as they never intersect it.}
 	\label{fig:klein}
 \end{figure}
 
@@ -386,23 +386,22 @@ We can extend this model to any higher dimension $n$ by re-defining the disk as 
 \end{align}
 
 \subsubsection{The Poincare Model}
-In the Klein model arcs were mapped to straight lines. An alternative representation of a hyperbolic plane is the Poincare model. Here two types of lines exist: open chords that pass through the origin of the circle, which are like those in the Klein model, and arcs of all the circles orthogonal to $\gamma$ i.e. \textit{open} arcs (Figure \ref{fig:pdisk}) \cite{Greenberg1994}. The other statements about Klein model transfer here; the boundary can never be reached and distances grow exponentially as we approach it. Again an infinite number of parallel lines exist; this was visualized in Figure \ref{fig:disklines}.
+In the Klein model arcs were mapped to straight lines. An alternative representation of hyperbolic space is the Poincare model. Here two types of lines exist: open chords that pass through the origin of the circle, which are like those in the Klein model, and arcs of all the circles orthogonal to $\gamma$ i.e. \textit{open} arcs (Figure \ref{fig:pdisk}) \cite{Greenberg1994}. The other statements about Klein model transfer here; the boundary can never be reached and distances grow exponentially as we approach it. Again an infinite number of parallel lines exist. This is visualized in Figure \ref{fig:disklines}.
 
 \begin{figure}
   \centering
 	\includegraphics[width=0.4\textwidth]{poincdisk}
-	\caption{Depiction of the Poincare Disk model of hyperbolic geometry. Line $l$ represent an open chord passing through the centre of the circle, whilst line $l$ is an open arc.
-}
+	\caption{Depiction of the Poincare Disk model of hyperbolic geometry. Line $l$ represents an open chord passing through the centre of the circle, whilst line $m$ is an open arc.}
 	\label{fig:pdisk}
 \end{figure}
 
-To extend this formally into $n$ higher dimensions we can define the hyperbolic space as an open unit ball $\mathcal{B}^n$ as we did for the Klein model $\mathcal{B}^n = \{\mathbf{x} \in \mathbb{R}^n | \lVert \mathbf{x} \rVert <1 \}$, but as straight lines are arcs (due to negative curvature), we have different distance function \cite{Iversen1992}:
+To extend this formally into $n$ higher dimensions we can define the hyperbolic space as an open unit ball $\mathcal{B}^n$ as we did for the Klein model $\mathcal{B}^n = \{\mathbf{x} \in \mathbb{R}^n | \lVert \mathbf{x} \rVert <1 \}$, but as straight lines are arcs, we have a different distance function \cite{Iversen1992}:
 \begin{align}
   \mathcal{D_P}(\mathbf{p}, \mathbf{q}) = \text{arcosh} \left(1 + 2 \frac{\lVert \mathbf{p} - \mathbf{q} \rVert^2}{(1-\lVert \mathbf{p}\rVert^2)(1-\lVert \mathbf{q}\rVert^2)}   \right) 
   \label{eq:pdist}
 \end{align}
 
-Whilst the Klein and Poincare model appear different, they both obey all the same axioms of hyperbolic spaces, in fact, the models are \textit{isomorphic}: there is a one-to-one corresondence between points between all the points $P$ and $P'$ of the two models as well as one-to-one correspondence between $l$ and $l'$ of the models such that $P$ lies on $l$ if and only if $P'$ lies on $l'$ \cite{Greenberg1994}. It can be proven that all models of hyperbolic geometry are isomorphic \cite{Greenberg1994}. Therefore it is possible map from one model to another. We will employ the mapping from Poincare ball into the Klein model at a later stage and thus present the required equation here \cite{Greenberg1994}:
+Whilst the Klein and Poincare models appear different, they both obey all the same axioms of hyperbolic spaces, in fact, the models are \textit{isomorphic}: there is a one-to-one corresondence between all the points $P$ and $P'$ of the two models, as well as one-to-one correspondence between lines $l$ and $l'$, such that '$P$ lies on $l$ if and only if $P'$ lies on $l''$ \cite{Greenberg1994}. It can be proven that all models of hyperbolic geometry are isomorphic \cite{Greenberg1994}. Therefore it is possible map from one model to another. We will employ the mapping from Poincare ball into the Klein model at a later stage and thus present the required equation here \cite{Greenberg1994}:
 
 \begin{align}
   \mathbf{s} = \frac{2\mathbf{u}}{1 + \lVert \mathbf{u} \rVert^2}
@@ -410,28 +409,24 @@ Whilst the Klein and Poincare model appear different, they both obey all the sam
 \end{align}
 where $\mathbf{s}$ is the point in the coordinates of the Klein model and $\mathbf{u}$ in the Poincare model.
 
-
-
 \subsubsection{The Hyperboloid Model}
-This model stems from the theory of special relativity. If we denote $x$, $y$ the 2-dimensional coordinates and $t$ as time, then distance in is measured by the Minkowski metric \cite{Greenberg1994}:
+This model stems from the theory of special relativity. If we denote $x$, $y$ the 2-dimensional coordinates and $t$ as time, then distances are measured by the Minkowski metric \cite{Greenberg1994}:
 \begin{align*}
   ds^2 = dx^2 + dy^2 - dt^2
 \end{align*}
-The surface equation that corresponds to this metric is given by below equation. See \cite{Greenberg1994} for details.
+The surface equation that corresponds to this metric is given by the equation below. See \cite{Greenberg1994} for details.
 \begin{align*}
   x^2 + y^2 - t^2 = -1 
 \end{align*}
 
-In Euclidean space, this forms a hyperboloid object with two sheets, with the upper sheet shown in Figure \ref{fig:lorenz} \cite{Greenberg1994}. In that figure we also show how the model relates to the Poincare disk we saw above. The 'bowl' of the hyperboloid is infinite so the 'brim' can never be reached, thus satisfyin the indefinite extensibility of lines which are geodesics on the hyperboloid surface.
-
+In Euclidean space, this forms a hyperboloid object with two sheets \cite{Greenberg1994}, with the upper sheet shown in Figure \ref{fig:lorenz}. In that figure we also show how the model relates to the Poincare disk we saw above. The 'bowl' of the hyperboloid is infinite so the 'brim' can never be reached, thus satisfying the indefinite extensibility of lines, which are geodesics on the hyperboloid surface.
 \begin{figure}
   \centering
 	\includegraphics[width=0.6\textwidth]{lorenz}
 	\caption{Upper sheet of the hyperboloid model in $\mathbb{R}^3$ and a projection of one of its geodesics on to the Poincare disk. While not possible to visually illustrate, the brim of the 'bowl' is at infinity and can never be reached. Image used under Creative Commons license from Wikimedia Commons.}
 	\label{fig:lorenz}
 \end{figure}
-
-In higher dimensions, the $n$ dimensional hyperbolic space is defined as $\mathcal{H}^n = \{\mathbf{x} \in \mathbb{R}^{n+1} | \mathbf{x} * \mathbf{x}=-1 \}$ where $\mathbf{x} * \mathbf{x} = \sum_{i=1}^n x_i x_i - x_0 x_0$ is the Lorenzian inner product \cite{Nickel2018} \cite{Cannon}. Distance function is:
+In higher dimensions, the $n$ dimensional hyperbolic space is defined as $\mathcal{H}^n = \{\mathbf{x} \in \mathbb{R}^{n+1} | \mathbf{x} * \mathbf{x}=-1 \}$ where $\mathbf{x} * \mathbf{x} = \sum_{i=1}^n x_i x_i - x_0 x_0$ is the Lorenzian inner product \cite{Nickel2018} \cite{Cannon}. The distance function is:
 \begin{align}
   \mathcal{D_H(\mathbf{p}, \mathbf{q})} = \text{arcosh}(-\mathbf{p} * \mathbf{q})
 \end{align}
@@ -444,7 +439,7 @@ In higher dimensions, the $n$ dimensional hyperbolic space is defined as $\mathc
 \end{figure}
 
 \subsection{Semantic Embeddings in Hyperbolic Spaces} \label{sec:poincare}
-Most popular word embedding methods such as the skip-gram and word2vec \cite{Mikolov2013}, \cite{Mikolov} taken into account the local context of words, or global context like Glove \cite{Pennington2014}, and produce vector representations for the words so that semantically similar words are embedded near each other in the resulting vector space. The ability of these embeddings to capture complex relationships is constrained, however, as the required dimensionality becomes easily exceedingly large \cite{Nickel2017} \cite{Chamberlain2017} \cite{Nickel2018}. This limit on representational capacity is particularly relevant to our project as we aim to build an embedding space that accurately captures the hierarchical graph structure of word semantics. The idea of using hyperbolic spaces for representing semantic hierarchies more accurately was explored early on by \cite{Ritter1999}, \cite{Ontrup2002} and \cite{Walter2006}, though this was in the context of Self-Organizing Maps rather than word embeddings. More recently, Nickel and Kiela \cite{Nickel2017}, Chamberlain \textit{et al.} \cite{Chamberlain2017} have succesfully demonstrated the advantages of hyperbolic word embeddings over Euclidean ones in terms generalization performance and computational cost. Additionally, Gulcehre \textit{et al.} \cite{Gulcehre2018} have achieved success on various tasks, such as neural machine translation, by imposing hyperbolic spaces on the activation functions of their neural network model.
+Most popular word embedding methods take into account the local context of words, e.g. the \textit{word2vec} models \cite{Mikolov, Mikolov2013}, or the global context like the \textit{Glove} model \cite{Pennington2014}, and produce vector representations so that semantically similar words are embedded near each other in the resulting vector space. The ability of these embeddings to capture complex relationships is constrained, however, as the required dimensionality becomes easily exceedingly large \cite{Nickel2017, Chamberlain2017, Nickel2018}. This limit on representational capacity is particularly relevant to our project as we aim to build an embedding space that accurately captures the hierarchical graph structure of word semantics. The idea of using hyperbolic spaces for representing semantic hierarchies more accurately was explored early on by \cite{Ritter1999}, \cite{Ontrup2002} and \cite{Walter2006}, though this was in the context of Self-Organizing Maps rather than word embeddings. More recently, Nickel and Kiela \cite{Nickel2017}, and Chamberlain \textit{et al.} \cite{Chamberlain2017} have succesfully demonstrated the advantages of hyperbolic word embeddings over Euclidean ones in terms of generalization performance and computational cost for representing hierarchical data. Additionally, Gulcehre \textit{et al.} \cite{Gulcehre2018} have achieved success on various tasks, such as neural machine translation, by imposing hyperbolic geometry on the activation functions of their neural network model.
 
 To understand the benefits of hyperbolic word embeddings, consider the Poincare and Klein disk models and contrast this to an Euclidean disk. The area of an Euclidean disk increases quadratically, since $A_E=\pi r^2$, whereas the negative curvature of hypebolic space allows the hyperbolic disk area to grow exponentially with $r$ as given by $A_H=2 \pi \left(\text{cosh}(r) - 1 \right)$ (assuming constant curvature of 1) where cosh is the hyperbolic cosine function $\text{cosh}(x)=\frac{e^{2x} + 1}{2e^x}$ \cite{Greenberg1994}. Intuitively the benefit of this is that in hyperbolic spaces there is much more room for embedding different concepts as we move outwards from the centre (see Figure \ref{fig:hyspace}). Further, Hyperbolic spaces can be interpreted as continuous space extensions of trees and are thus particularly efficient for embedding hierarchical structure in a way that preserves the associated graph structure, even for infinite trees \cite{Chamberlain2017}; like hyperbolic space, the number of leaves of a tree also grows exponentially as we increase hierarchical levels (assuming the number of splits per level remains constant) \cite{Nickel2017} (See Figure \ref{fig:htree} for a naive example). 
 
