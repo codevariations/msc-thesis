@@ -134,11 +134,12 @@ def main():
 
     # define loss function (criterion) and optimizer
     criterion = PoincareXEntropyLoss()
-    optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
-                                       model.parameters()),
-                                       args.lr,
-                                       momentum=args.momentum,
-                                       weight_decay=args.weight_decay)
+    optimizer = torch.optim.SGD([{'params': model.features.parameters(),
+                                  'lr': 1e-4},                                                                {'params':model.fc.parameters()},
+                                 {'params':model.classifier.parameters()}],
+                                 lr=args.lr,
+                                 momentum=args.momentum,
+                                 weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -301,7 +302,7 @@ class PoincareVGG(nn.Module):
         self.eps = 1e-9
 
         #freeze weights except classifier layer 
-        self.unfreeze_features(False)
+        self.unfreeze_features(True)
         self.unfreeze_fc(True)
 
     def unfreeze_features(self, unfreeze):

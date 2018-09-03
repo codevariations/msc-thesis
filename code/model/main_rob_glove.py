@@ -26,11 +26,12 @@ from torch.utils.data.sampler import Sampler
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+from torch.nn.modules.distance import PairwiseDistance
+
 
 from cust_loader import CustImageFolder
-from custom_loss import PoincareXEntropyLoss
-from poincare_model import PoincareDistance, PoincareDistance2
-import einstein_midpoint as eins
+from custom_loss import EmbXEntropyLoss
+
 import pdb
 
 
@@ -83,7 +84,8 @@ best_prec1 = 0
 
 
 def main():
-    global args, best_prec1, imgnet_poinc_wgt, all_hyper_ids, poinc_emb_hop_wgt
+    global args, best_prec1, glove_emb, imgnet_glove_wgt, all_hyper_ids
+    global glove_emb_hop_wgt, imgnet_glove_labels
     global target2tree_idx, numeric_robust_hyper_labels, expand_all_embs
     args = parser.parse_args()
 
@@ -117,7 +119,7 @@ def main():
         orig_vgg = models.__dict__[args.arch]()
 
     #Change model to project into poincare space
-    model = PoincareVGG(orig_vgg, n_emb_dims=10)
+    model = EmbVGG(orig_vgg, n_emb_dims=50)
 
     if args.gpu is not None:
         model = model.cuda(args.gpu)
@@ -133,7 +135,7 @@ def main():
 
 
     # define loss function (criterion) and optimizer
-    criterion = PoincareXEntropyLoss()
+    criterion = EmbXEntropyLoss()
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad,
                                        model.parameters()),
                                        args.lr,
@@ -177,7 +179,7 @@ def main():
     chosen_hop_data = wnids_2hop
 
     #load labels for current robust prediction
-    with open('dicts/robust_labels_2hop.pickle', 'rb') as f:
+    with open('dicts/glove_robust_labels_2hop.pickle', 'rb') as f:
         robust_labels = pickle.load(f)
     all_hyper_ids = robust_labels['all_hyper_ids']
     robust_hyper_labels = robust_labels['hyper_labels']
@@ -202,24 +204,25 @@ def main():
     val_classes = val_loader.dataset.classes
 
     #load poincare embedding data (include embs for only curren hops)
-    poinc_emb = torch.load(
-            '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
-    poinc_emb_wgt = poinc_emb['model']['lt.weight']
-    #poinc_emb_orig_idx = [poinc_emb['objects'].index(i)
-    #                      for i in orig_data.classes]
-    #poinc_emb_orig_wgt = poinc_emb_wgt[[poinc_emb_orig_idx]]
+    with open('w2v_emb.pkl', 'rb') as f:
+        glove_emb = pickle.load(f, encoding='latin')
 
-    poinc_emb_hop_idx = [poinc_emb['objects'].index(i)
+    glove_emb_wgt = torch.tensor(glove_emb['model'], dtype=torch.float)
+    glove_emb_orig_idx = [glove_emb['objects'].index(i)
+                          for i in orig_data.classes]
+    glove_emb_orig_wgt = glove_emb_wgt[[glove_emb_orig_idx]]
+
+    glove_emb_hop_idx = [glove_emb['objects'].index(i)
                          for i in all_hyper_ids]
-    poinc_emb_hop_wgt = poinc_emb_wgt[[poinc_emb_hop_idx]]
-    poinc_emb_hop_labels = [poinc_emb['objects'][i] for i in
-                            poinc_emb_hop_idx]
+    glove_emb_hop_wgt = glove_emb_wgt[[glove_emb_hop_idx]]
+    glove_emb_hop_labels = [glove_emb['objects'][i] for i in
+                            glove_emb_hop_idx]
 
     #locate target idx in tree idx
     target2tree_idx = [chosen_hop_data.index(i) for i in val_classes]
 
     #this is needed in prediction
-    expand_all_embs = poinc_emb_hop_wgt.repeat(args.batch_size,
+    expand_all_embs = glove_emb_hop_wgt.repeat(args.batch_size,
                     1).cuda(args.gpu, non_blocking=True)
 
     #finally, run evaluation
@@ -256,7 +259,7 @@ def validate(val_loader, model):
 
             # measure accuracy and record loss
             prec1, prec2, prec3, prec4, prec5  = accuracy(output,
-                                               poinc_emb_hop_wgt,
+                                               glove_emb_hop_wgt,
                                                tree_targets, topk=(1, 2,
                                                3, 4, 5))
             top1.update(prec1.item(), input.size(0))
@@ -288,16 +291,14 @@ def validate(val_loader, model):
 
     return top1.avg, top2.avg, top3.avg, top4.avg, top5.avg
 
-class PoincareVGG(nn.Module):
+class EmbVGG(nn.Module):
 
     def __init__(self, vgg_model, n_emb_dims):
-        super(PoincareVGG, self).__init__()
+        super(EmbVGG, self).__init__()
         self.features = vgg_model.features
         self.fc = nn.Sequential(*list(
                                 vgg_model.classifier.children())[:-1])
         self.classifier = nn.Sequential(nn.Linear(4096, n_emb_dims))
-        torch.nn.init.uniform_(self.classifier[0].weight, -0.001, 0.001)
-        torch.nn.init.constant_(self.classifier[0].bias, 0.0)
         self.eps = 1e-9
 
         #freeze weights except classifier layer 
@@ -319,10 +320,7 @@ class PoincareVGG(nn.Module):
             f = self.fc(f)
         f = f.view(f.size(0), -1)
         y = self.classifier(f)
-        y_norm = torch.norm(y, dim=1, keepdim=True)
-        to_clamp = torch.tensor(y_norm >=1, dtype=torch.float).cuda()
-        return y.div(y_norm.pow(to_clamp)).add(-to_clamp*1e-5)
-
+        return y
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -350,12 +348,12 @@ def adjust_learning_rate(optimizer, epoch):
 def prediction(output, all_embs, knn=1):
     """Predicts the nearest class based on poincare distance"""
     with torch.no_grad():
-        pdist = torch.nn.DataParallel(PoincareDistance2()).cuda()
+        eucdist = torch.nn.DataParallel(PairwiseDistance()).cuda()
         batch_size = output.size(0)
         n_emb_dims = output.size(1)
         n_classes = all_embs.size(0)
-        dists_to_all = pdist(output.repeat(1, n_classes).view(-1, n_emb_dims),
-                             expand_all_embs)
+        dists_to_all = eucdist(output.repeat(1, n_classes).view(-1, n_emb_dims),
+                               expand_all_embs)
         #pred_norms = expand_output.pow(2).sum(dim=1).sqrt()
         #label_norms = expand_all_embs.pow(2).sum(dim=1).sqrt()
         #norm_wgt = -(1 + (label_norms.cuda(args.gpu, non_blocking=True)
