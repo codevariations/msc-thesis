@@ -38,6 +38,7 @@ for i in all_ss:
   cur_hypers = ['n' + wn.ss2of(i).split('-')[0] for i in cur_hypers]
   holder.extend(cur_hypers)
   all_hypers.append(holder)
+pdb.set_trace()
 exc_ids = [i[0] for i in all_hypers if len(i)<5]
 all_hypers = [i for i in all_hypers if i[0] not in exc_ids]
 all_hypers_ids = [i for j in all_hypers for i in j]

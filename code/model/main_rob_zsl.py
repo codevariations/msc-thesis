@@ -9,6 +9,7 @@ import time
 import warnings
 import pickle
 
+import numpy as np
 import pandas as pd
 from nltk.corpus import wordnet as wn
 
@@ -28,7 +29,7 @@ import torchvision.models as models
 
 from cust_loader import CustImageFolder
 from custom_loss import PoincareXEntropyLoss
-from poincare_model import PoincareDistance
+from poincare_model import PoincareDistance, PoincareDistance2
 import einstein_midpoint as eins
 import pdb
 
@@ -83,7 +84,7 @@ best_prec1 = 0
 
 def main():
     global args, best_prec1, imgnet_poinc_wgt, all_hyper_ids, poinc_emb_hop_wgt
-    global target2tree_idx, numeric_robust_hyper_labels
+    global target2tree_idx, numeric_robust_hyper_labels, expand_all_embs
     args = parser.parse_args()
 
     if args.seed is not None:
@@ -173,10 +174,10 @@ def main():
     wnids_2h_1k = wnids_21k[:2549]
     wnids_3h_1k = wnids_21k[:8860]
 
-    chosen_hop_data = wnids_20k
+    chosen_hop_data = wnids_2hop
 
     #load labels for current robust prediction
-    with open('dicts/robust_labels_20k.pickle', 'rb') as f:
+    with open('dicts/robust_labels_2hop.pickle', 'rb') as f:
         robust_labels = pickle.load(f)
     all_hyper_ids = robust_labels['all_hyper_ids']
     robust_hyper_labels = robust_labels['hyper_labels']
@@ -217,6 +218,10 @@ def main():
     #locate target idx in tree idx
     target2tree_idx = [chosen_hop_data.index(i) for i in val_classes]
 
+    #this is needed in prediction
+    expand_all_embs = poinc_emb_hop_wgt.repeat(args.batch_size,
+                    1).cuda(args.gpu, non_blocking=True)
+
     #finally, run evaluation
     validate(val_loader, model)
     return
@@ -225,6 +230,10 @@ def validate(val_loader, model):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
+    top2 = AverageMeter()
+    top3 = AverageMeter()
+    top4 = AverageMeter()
+    top5 = AverageMeter()
 
     # switch to evaluate mode
     model.eval()
@@ -246,9 +255,15 @@ def validate(val_loader, model):
             output = model(input)
 
             # measure accuracy and record loss
-            prec1  = accuracy(output, poinc_emb_hop_wgt,
-                              tree_targets, topk=(5,))
+            prec1, prec2, prec3, prec4, prec5  = accuracy(output,
+                                               poinc_emb_hop_wgt,
+                                               tree_targets, topk=(1, 2,
+                                               3, 4, 5))
             top1.update(prec1.item(), input.size(0))
+            top2.update(prec2.item(), input.size(0))
+            top3.update(prec3.item(), input.size(0))
+            top4.update(prec4.item(), input.size(0))
+            top5.update(prec5.item(), input.size(0))
 
             # measure elapsed time
             batch_time.update(time.time() - end)
@@ -257,12 +272,21 @@ def validate(val_loader, model):
             if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                       i, len(val_loader), batch_time=batch_time, top1=top1))
+                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+                      'Prec@2 {top2.val:.3f} ({top2.avg:.3f})\t'
+                      'Prec@3 {top3.val:.3f} ({top3.avg:.3f})\t'
+                      'Prec@4 {top4.val:.3f} ({top4.avg:.3f})\t'
+                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
+                       i, len(val_loader), batch_time=batch_time,
+                       top1=top1, top2=top2, top3=top3,
+                       top4=top4, top5=top5))
 
-        print(' * Prec@1 {top1.avg:.3f}'.format(top1=top1))
+        print(' * Prec@1 {top1.avg:.3f} Prec@3 {top3.avg:.3f}\t'
+              'Prec@3 {top3.avg:.3f} Prec@4 {top4.avg:.3f}\t'
+              'Prec@5 {top5.avg:.3f}'.format(top1=top1, top2=top2,
+              top3=top3, top4=top4, top5=top5))
 
-    return top1.avg
+    return top1.avg, top2.avg, top3.avg, top4.avg, top5.avg
 
 class PoincareVGG(nn.Module):
 
@@ -307,7 +331,7 @@ class AverageMeter(object):
 
     def reset(self):
         self.val = 0
-        self.avg = 0
+        self.avg = 1
         self.sum = 0
         self.count = 0
 
@@ -326,14 +350,12 @@ def adjust_learning_rate(optimizer, epoch):
 def prediction(output, all_embs, knn=1):
     """Predicts the nearest class based on poincare distance"""
     with torch.no_grad():
+        pdist = PoincareDistance2()
         batch_size = output.size(0)
         n_emb_dims = output.size(1)
         n_classes = all_embs.size(0)
-        expand_output = output.repeat(1, n_classes).view(-1, n_emb_dims)
-        expand_all_embs = all_embs.repeat(batch_size, 1)
-        dists_to_all = PoincareDistance.apply(expand_output,
-                                              expand_all_embs.cuda(args.gpu,
-                                              non_blocking=True))
+        dists_to_all = pdist(output.repeat(1, n_classes).view(-1, n_emb_dims),
+                             expand_all_embs)
         #pred_norms = expand_output.pow(2).sum(dim=1).sqrt()
         #label_norms = expand_all_embs.pow(2).sum(dim=1).sqrt()
         #norm_wgt = -(1 + (label_norms.cuda(args.gpu, non_blocking=True)
@@ -347,7 +369,7 @@ def prediction(output, all_embs, knn=1):
             return topk_per_batch.view(-1)
         return topk_per_batch
 
-
+@profile
 def accuracy(output, all_embs, targets, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
@@ -356,13 +378,25 @@ def accuracy(output, all_embs, targets, topk=(1,)):
         preds = prediction(output, all_embs, knn=maxk)
         batch_size = output.size(0)
         correct_tmp = preds.eq(targets)
-        holder = []
-        for b in range(batch_size):
-            holder.append([i.item() in preds[b] for i in targets[b]])
-        res = torch.tensor(holder, dtype=torch.float).cuda()
-        acc_wgts = torch.tensor([[1, 1/2, 1/3, 1/4, 1/5]],
-                                  dtype=torch.float).cuda()
-        return torch.mul(res, acc_wgts).div(acc_wgts.sum()).sum(dim=1).mean()
+        acc_wgts = np.array([[1, 1/2, 1/3, 1/4, 1/5]])
+        res = []
+        torch.cuda.synchronize()
+        torch.cuda.synchronize()
+        predcpu = preds.cpu().numpy()
+        targetcpu = targets.cpu().numpy()
+        for k in topk:
+            preds_tmp = predcpu[:, :k]
+            matches = np.any((targetcpu.reshape(targetcpu.shape
+                    + (1,)).reshape(targetcpu.shape[0], 1,
+                    targetcpu.shape[1])
+                    - preds_tmp.reshape(preds_tmp.shape+(1,)))==0, axis=1)
+            res.append(np.mean(np.sum(
+                       matches*acc_wgts, axis=1) / np.sum(acc_wgts)))
+        return res
+
+
+
+
 
 def find_name(wnid):
     ss = wnid.split('n')[1] + '-n'
