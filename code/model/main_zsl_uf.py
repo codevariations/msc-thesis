@@ -172,7 +172,7 @@ def main():
     wnids_3h_1k = wnids_21k[:8860]
 
     #select which hop data-set to use
-    chosen_hop_data = wnids_20k
+    chosen_hop_data = wnids_3hop
 
     #ZSL data loading code
     valdir = args.data
@@ -321,12 +321,7 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
-
-def adjust_learning_rate(optimizer, epoch):
-    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = param_group['lr']*0.1
-
+@profile
 def prediction(output, all_embs, knn=1):
     """Predicts the nearest class based on poincare distance"""
     with torch.no_grad():
