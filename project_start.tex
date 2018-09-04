@@ -470,6 +470,9 @@ where $\eta_t$ is the learning rate, and the authords used
 \end{align}
 to ensure the updates remain with the open unit ball Poincare space. $\nabla_E$ can be derived using the backpropagation algorithm introduced in Section \ref{sec:trainANN}. This model achieved superior performance in comparison to an Euclidean baseline in various experiments that tested for the models' ability to preserve original graph structures \cite{Nickel2017}.
 
+\subsubsection{Summary of Background}
+In this section we have covered the necessary technical background and the most relevant literature that inspired this thesis. Our literature review can be summarized as follow. First, deep learning has achieved unparalleled success in almost all computer vision tasks but in their standard from they are unable to generalize to previously unseen classes. Zero-shot learning tries to address this shortcoming, often by borrowing strength from different forms of semantic embeddings. This is motivated by the observation that semantic similarity often corresponds to visual similarity. Unlike similaritity based embeddings, the human brain categorizes visual objects in a much richer representation of semantic \textit{hierarchies} that allows robust inference on novel objects. We look to replicate this behaviour in the zero-shot setting. Whilst some hierarchical models have been introduced in this area previously, to our knowledge, no work has used the recent hyperbolic embeddings to explore their potential benefits over the standard Euclidean word embeddings.
+
 \chapter{Our Approach}
 
 \section{Approach Overview}
