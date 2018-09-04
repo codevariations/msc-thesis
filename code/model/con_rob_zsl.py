@@ -7,7 +7,9 @@ import random
 import shutil
 import time
 import warnings
+import pickle
 
+import numpy as np
 import pandas as pd
 from nltk.corpus import wordnet as wn
 
@@ -19,15 +21,15 @@ import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch.optim
 import torch.utils.data
-from torch.utils.data.sampler import Sampler
 import torch.utils.data.distributed
+from torch.utils.data.sampler import Sampler
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
 from cust_loader import CustImageFolder
 from custom_loss import PoincareXEntropyLoss
-from poincare_model import PoincareDistance
+from poincare_model import PoincareDistance, PoincareDistance2
 import einstein_midpoint as eins
 import pdb
 
@@ -46,7 +48,7 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                         ' (default: resnet18)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=90, type=int, metavar='N',
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -56,7 +58,7 @@ parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+parser.add_argument('--weight-decay', '--wd', default=1e-8, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--print-freq', '-p', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
@@ -77,18 +79,14 @@ parser.add_argument('--seed', default=None, type=int,
 parser.add_argument('--gpu', default=None, type=int,
                     help='GPU id to use.')
 parser.add_argument('--T', default=10, type=int,
-                    help='Use T best guesses to predict embedding')
-parser.add_argument('--eqweight', dest='eqweight', action='store_true',
-                    help='equally weighted emb predictions')
-
+                    help='Use convex comb of T points')
 
 best_prec1 = 0
 
 
 def main():
-    global args, best_prec1, poinc_emb, poinc_emb_wgt, poinc_emb_hop_wgt
-    global poinc_emb_orig_wgt, img2emb_idx
-
+    global args, best_prec1, all_hyper_ids, poinc_emb_hop_wgt, poinc_emb_orig_wgt
+    global target2tree_idx, numeric_robust_hyper_labels, expand_all_embs
     args = parser.parse_args()
 
     if args.seed is not None:
@@ -106,6 +104,7 @@ def main():
                       'disable data parallelism.')
 
     args.distributed = args.world_size > 1
+
     if args.distributed:
         dist.init_process_group(backend=args.dist_backend,
                                 init_method=args.dist_url,
@@ -118,6 +117,7 @@ def main():
     else:
         print("=> creating model '{}'".format(args.arch))
         model = models.__dict__[args.arch]()
+
     if args.gpu is not None:
         model = model.cuda(args.gpu)
     elif args.distributed:
@@ -145,13 +145,17 @@ def main():
 
     cudnn.benchmark = True
 
+    ## Data loading code
+
     #regular 1k imagenet training data
     origdir = '/fast-data/datasets/ILSVRC/2012/clsloc/train/'
     orig_data = datasets.ImageFolder(origdir)
 
-    #load all zero-shot class ids sorted on hops
-    labels_hop_order = pd.read_csv('21k_wnids.csv')
-    wnids_21k = labels_hop_order.iloc[:, 1].tolist()
+    #load the different hop ids so that load correct imgs
+
+    all_hops = pd.read_csv('21k_wnids.csv')
+
+    wnids_21k = all_hops.iloc[:, 1].tolist()
     wnids_20k = wnids_21k[1000:]
     wnids_1k = wnids_21k[:999]
     wnids_2hop = wnids_21k[1000:2549]
@@ -159,62 +163,76 @@ def main():
     wnids_2h_1k = wnids_21k[:2549]
     wnids_3h_1k = wnids_21k[:8860]
 
-    #select which hop data-set to use
     chosen_hop_data = wnids_2hop
 
-    # ZSL Data loading code
+    #load labels for current robust prediction
+    with open('dicts/glove_robust_labels_2hop.pickle', 'rb') as f:
+        robust_labels = pickle.load(f)
+    all_hyper_ids = robust_labels['all_hyper_ids']
+    robust_hyper_labels = robust_labels['hyper_labels']
+    numeric_robust_hyper_labels = torch.tensor([[all_hyper_ids.index(i)
+                                                 for i in j] for j in
+                                                 robust_hyper_labels]).cuda()
+    exc_ids = robust_labels['exc_ids']
+    chosen_hop_data = [i for i in chosen_hop_data if i not in exc_ids]
+
+    #ZSL data loading code
     valdir = args.data
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
     img_data = CustImageFolder(valdir, chosen_hop_data, transforms.Compose([
-                                    transforms.Resize(256),
-                                    transforms.CenterCrop(224),
-                                    transforms.ToTensor(),
-                                    normalize,]))
+                               transforms.Resize(256), transforms.CenterCrop(224),
+                               transforms.ToTensor(), normalize,]))
     val_loader = torch.utils.data.DataLoader(img_data,
-                batch_size=args.batch_size,
-                shuffle=False, num_workers=args.workers, pin_memory=True)
+                                             batch_size=args.batch_size,
+                                             shuffle=False,
+                                             num_workers=args.workers,
+                                             pin_memory=True)
     val_classes = val_loader.dataset.classes
 
-    #load poincare embedding data (include embs for only current hop-data)
+    #load poincare embedding data (include embs for only curren hops)
     poinc_emb = torch.load(
             '/home/hermanni/thesis/msc-thesis/code/model/nouns_id.pth')
     poinc_emb_wgt = torch.tensor(poinc_emb['model']['lt.weight'],
-                  dtype=torch.double)
+                                 dtype=torch.double)
     poinc_emb_orig_idx = [poinc_emb['objects'].index(i)
                           for i in orig_data.classes]
-    poinc_emb_orig_wgt = torch.tensor(
-                       poinc_emb_wgt[poinc_emb_orig_idx],
-                       dtype=torch.double).cuda()
+    poinc_emb_orig_wgt = torch.tensor(poinc_emb_wgt[[poinc_emb_orig_idx]],
+                                     dtype=torch.double).cuda()
+
     poinc_emb_hop_idx = [poinc_emb['objects'].index(i)
-                      for i in val_classes]
-    poinc_emb_hop_wgt = torch.tensor(
-                      poinc_emb_wgt[poinc_emb_hop_idx],
-                      dtype=torch.double).cuda()
+                         for i in all_hyper_ids]
+    poinc_emb_hop_wgt = torch.tensor(poinc_emb_wgt[[poinc_emb_hop_idx]],
+                                     dtype=torch.double).cuda()
     poinc_emb_hop_labels = [poinc_emb['objects'][i] for i in
-                         poinc_emb_hop_idx]
+                            poinc_emb_hop_idx]
 
-    #mapping from predicted img label idx to embedding idx
-    img2emb_idx = torch.tensor(poinc_emb_orig_idx).cuda(
-                               non_blocking=True).view(1, -1)
+    #locate target idx in tree idx
+    target2tree_idx = [chosen_hop_data.index(i) for i in val_classes]
 
-    #finally, run evaluation 
+    #this is needed in prediction
+    expand_all_embs = poinc_emb_hop_wgt.repeat(args.batch_size,
+                    1).cuda(args.gpu, non_blocking=True)
+
+    #finally, run evaluation
     validate(val_loader, model)
     return
 
-
-### Functions 
-
 def validate(val_loader, model):
     batch_time = AverageMeter()
+    losses = AverageMeter()
     top1 = AverageMeter()
     top2 = AverageMeter()
+    top3 = AverageMeter()
+    top4 = AverageMeter()
     top5 = AverageMeter()
-    top10 = AverageMeter()
-    top20 = AverageMeter()
 
     # switch to evaluate mode
     model.eval()
+
+    #needed for converting class idx to IDs
+    class2idx = val_loader.dataset.class_to_idx
+    idx2class = {v: k for k, v in class2idx.items()}
 
     with torch.no_grad():
         end = time.time()
@@ -222,43 +240,46 @@ def validate(val_loader, model):
             if args.gpu is not None:
                 input = input.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
+            tree_target_idx = [target2tree_idx[i] for i in target]
+            tree_targets = numeric_robust_hyper_labels[[tree_target_idx]]
 
             # compute output
             output = model(input).double()
+
             # measure accuracy and record loss
-            prec1, prec2, prec5, prec10, prec20  = accuracy(output,
-                                                 target,
-                                                 topk=(1, 2, 5, 10, 20),
-                                                 T=args.T,
-                                                 eqweighted=args.eqweight)
+            prec1, prec2, prec3, prec4, prec5  = accuracy(output,
+                                                          tree_targets,
+                                                          topk=(1, 2,
+                                                          3, 4, 5),
+                                                          T=args.T)
             top1.update(prec1.item(), input.size(0))
             top2.update(prec2.item(), input.size(0))
+            top3.update(prec3.item(), input.size(0))
+            top4.update(prec4.item(), input.size(0))
             top5.update(prec5.item(), input.size(0))
-            top10.update(prec10.item(), input.size(0))
-            top20.update(prec20.item(), input.size(0))
+
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
+
             if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
                       'Prec@2 {top2.val:.3f} ({top2.avg:.3f})\t'
-                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})\t'
-                      'Prec@10 {top10.val:.3f} ({top10.avg:.3f})\t'
-                      'Prec@20 {top20.val:.3f} ({top20.avg:.3f})'.format(
+                      'Prec@3 {top3.val:.3f} ({top3.avg:.3f})\t'
+                      'Prec@4 {top4.val:.3f} ({top4.avg:.3f})\t'
+                      'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                        i, len(val_loader), batch_time=batch_time,
-                       top1=top1, top2=top2, top5=top5, top10=top10,
-                       top20=top20))
+                       top1=top1, top2=top2, top3=top3,
+                       top4=top4, top5=top5))
 
-        print(' * Prec@1 {top1.avg:.3f} Prec@2 {top2.avg:.3f}\t'
-                'Prec@5 {top5.avg:.3f} Prec@10 {top10.avg:.3f}\t'
-                'Prec@20 {top20.avg:.3f}'.format(top1=top1, top2=top2,
-                                                 top5=top5, top10=top10,
-                                                 top20=top20))
+        print(' * Prec@1 {top1.avg:.3f} Prec@3 {top3.avg:.3f}\t'
+              'Prec@3 {top3.avg:.3f} Prec@4 {top4.avg:.3f}\t'
+              'Prec@5 {top5.avg:.3f}'.format(top1=top1, top2=top2,
+              top3=top3, top4=top4, top5=top5))
 
-    return top1.avg, top2.avg, top5.avg, top10.avg, top20.avg
-
+    return top1.avg, top2.avg, top3.avg, top4.avg, top5.avg
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -267,7 +288,7 @@ class AverageMeter(object):
 
     def reset(self):
         self.val = 0
-        self.avg = 0
+        self.avg = 1
         self.sum = 0
         self.count = 0
 
@@ -277,46 +298,68 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
-def prediction(output, knn, T, equally_weighted):
-    """Predicts the nearest classes based on klein distance
-       to einstein midpoint"""
+
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = param_group['lr']*0.1
+
+def prediction(output, T, knn=1):
+    """Predicts the nearest class based on poincare distance"""
     with torch.no_grad():
+        pdist = PoincareDistance2()
         batch_size = output.size(0)
-        n_classes = poinc_emb_hop_wgt.size(0)
         n_emb_dims = poinc_emb_hop_wgt.size(1)
+        n_classes = poinc_emb_hop_wgt.size(0)
         smax = torch.nn.Softmax(dim=1)
         sm_out = smax(output)
         eins_wgts, topk_idx = torch.topk(sm_out, k=T, dim=1)
         klein_coords = eins.p2k_coords(poinc_emb_orig_wgt[topk_idx])
         lorenz_fs = eins.calc_lorenz_factors(klein_coords)
-        #eins_wgts = topk_wgt.div(topk_wgt.sum(dim=1, keepdim=True))
         emp_k = eins.einstein_midpoint(klein_coords, lorenz_fs, eins_wgts)
         emp = eins.k2p_coords(emp_k)
-        dists_to_all = PoincareDistance.apply(emp.repeat(1,
-                                       n_classes).view(-1, n_emb_dims),
-                                       poinc_emb_hop_wgt.repeat(batch_size,
-                                       1).cuda(args.gpu, non_blocking=True))
+        dists_to_all = pdist(emp.repeat(1, n_classes).view(-1,
+                             n_emb_dims), expand_all_embs)
         topk_per_batch = torch.topk(dists_to_all.view(batch_size, -1),
-                                     k=knn, dim=1,
-                                     largest=False)[1]
+                                    k=knn, dim=1,
+                                    largest=False)[1]
         if knn==1:
             return topk_per_batch.view(-1)
         return topk_per_batch
 
-def accuracy(output, targets, topk, T, eqweighted):
+def accuracy(output, targets, T, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
-        maxk = max(topk)
-        preds = prediction(output, maxk, T, eqweighted)
         batch_size = output.size(0)
+        maxk = max(topk)
+        preds = prediction(output, T, knn=maxk)
+        batch_size = output.size(0)
+        correct_tmp = preds.eq(targets)
+        acc_wgts = np.array([[1, 1/2, 1/3, 1/4, 1/5]])
         res = []
+        torch.cuda.synchronize()
+        torch.cuda.synchronize()
+        predcpu = preds.cpu().numpy()
+        targetcpu = targets.cpu().numpy()
         for k in topk:
-            i = k
-            preds_tmp = preds[:, :i]
-            correct_tmp = preds_tmp.eq(targets.view(batch_size, -1).repeat(1, i))
-            res.append(torch.sum(correct_tmp).float() / batch_size)
+            preds_tmp = predcpu[:, :k]
+            matches = np.any((targetcpu.reshape(targetcpu.shape
+                    + (1,)).reshape(targetcpu.shape[0], 1,
+                    targetcpu.shape[1])
+                    - preds_tmp.reshape(preds_tmp.shape+(1,)))==0, axis=1)
+            res.append(np.mean(np.sum(
+                       matches*acc_wgts, axis=1) / np.sum(acc_wgts)))
         return res
 
 
+
+
+
+def find_name(wnid):
+    ss = wnid.split('n')[1] + '-n'
+    name = wn.of2ss(ss)
+    return name
+
 if __name__ == '__main__':
-    main()
+    with torch.no_grad():
+        main()
