@@ -172,7 +172,7 @@ def main():
     wnids_3h_1k = wnids_21k[:8860]
 
     #select which hop data-set to use
-    chosen_hop_data = wnids_20k
+    chosen_hop_data = wnids_2hop
 
     #load poincare embedding data (include embs for only curren hops)
     with open('w2v_emb.pkl', 'rb') as f:
@@ -230,8 +230,8 @@ def validate(val_loader, model):
             if args.gpu is not None:
                 input = input.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
-            if i == 250:
-                pdb.set_trace()
+            #if i == 0:
+            #    pdb.set_trace()
             # compute output
             output = model(input)
 
@@ -340,6 +340,8 @@ def accuracy(output, i, all_embs, targets, topk=(1,)):
     with torch.no_grad():
         maxk = max(topk)
         preds = prediction(output, all_embs, knn=maxk)
+        if i == 600:
+            pdb.set_trace()
         batch_size = output.size(0)
         res = []
         for k in topk:
