@@ -11,6 +11,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{multirow}
 
 \newtheorem{theorem}{THEOREM}
 \newtheorem{lemma}[theorem]{LEMMA}
@@ -538,7 +539,7 @@ We initially tested the model on a small 100 class subset of the full 2012 1k Im
 Both Deep-HSEM-FC and Deep-HSEM were trained for a total of 90 epochs using SGD with momentum. The initial learning rate was set to 0.001 and it was reduced by factor of 10 every 30 epochs. We set momentum to 0.9. Batch-sizes of 32 images were used, with loss for each iteration averaged over the batch images. The above hyperparameters were based on initial tests of 20 epochs of various settings. During the training-phase, the models were evaluated on additional 50,000 validation images provided with the 2012 ImageNet dataset. The overall training time for Deep-HSEM-FC was 4 days and 6 days for Deep-HSEM.
 
 \subsection{Convex Hyperbolic Semantic Embedding Model (Convex-HSEM)}
-The Convex-HSEM model is a hyperbolic embedding version of the ConSE model of Norouzi \textit{et al.} \cite{Norouzi2013}. To reiterate the discussion from Section \ref{sec:semlit}, the ConSE approach can be described as two stages. In the first one, the model utilizes a standard pre-trained CNN to output predicted class probabilities in terms of the training classes. In our case, we use the original VGG-16 CNN trained on the ImageNet 1k 2012 classes. Therefore, for any input image (including zero-shot ones), the CNN will output probabilities $p(y_1|\mathbf{x}_i) \dots p(y_{1000}|\mathbf{x}_i)$ where $\mathbf{x}_i$ is the input image, $\sum_{i=1}^{1000}p(y|\mathbf{x})=1$, and $\{y_1, \dots, y_{1000}\}=Y_{train}$.
+The Convex-HSEM model is a hyperbolic embedding version of the ConSE model of Norouzi \textit{et al.} \cite{Norouzi2013}. To reiterate the discussion from Section \ref{sec:semlit}, the ConSE approach can be described as two stages. In the first one, the model utilizes a standard pre-trained CNN to output predicted class probabilities in terms of the training classes. In our case, we use the original pre-trained VGG-16 CNN trained on the ImageNet 1k 2012 classes. Therefore, for any input image (including zero-shot ones), the CNN will output probabilities $p(y_1|\mathbf{x}_i) \dots p(y_{1000}|\mathbf{x}_i)$ where $\mathbf{x}_i$ is the input image, $\sum_{i=1}^{1000}p(y|\mathbf{x})=1$, and $\{y_1, \dots, y_{1000}\}=Y_{train}$.
 
 In the second stage of the model, the predictions from the previous step are sorted according to the probabilities and the corresonding $T$ most likely class labels are extracted $\hat{y}(\mathbf{x}, 1),\hat{y}(\mathbf{x}, 2) \dots \hat{y}(\mathbf{x}, T)$. Next, their corresponding ground-truth embedding vectors are taken: $\mathbf{f}_1 = \mathcal{L}(\hat{y}(\mathbf{x}, 1)) \dots \mathbf{f}_T = \mathcal{L}(\hat{y}(\mathbf{x}, T))$ where $\mathcal{L}$ is just a look-up table between class labels and embeddings. Finally, the predicted embedding vector is calculated as the weighted convex combination of the $T$ most likely embeddings, where the weights are the respective softmax probabilities from the first stage of the model:
 \begin{align}
@@ -570,7 +571,7 @@ $T \in \{1, 2, 10, 100\}$. The motivation for this model architecture is to repr
 \section{Overview}
 This section starts by evaluating the Deep-HSEM and Convex-HSEM models on the training data, which provides several important observations for later discussion. We then move on to our two main zero-shot learning experiments. The first one measures the standard prediction accuracy of the models on approximately 21k previously unseen classes; this is the benchmark used most often in literature. The second experiment is a new task that we have developed in order to better study the robustness of the zero-shot classifications. Specifically, this tasks involes predicting not only the correct fine-grained labels, but also the superordinate labels of the images. In both experiments, we make comparisons to baseline models that use Euclidean similarity-based embeddings. The section below gives an overview of all the models that were evaluated in these tasks.
 
-\section{Baseline models}
+\section{Baseline Models}
 All of the experiments were run on the following models from the previous section: Deep-HSEM-FC (only the fully connected layer trained), Deep-HSEM (all layers trained), Convex-HSEM(1), Convex-HSEM(2), Convex-HSEM(10) and Convex-HSEM(100). The $T$ in Convex-HSEM($T$) denotes that the $T$ most likely classes were used in calculating the convex combination.
 \begin{table}
 \centering
@@ -593,7 +594,7 @@ All of the experiments were run on the following models from the previous sectio
 \caption{Summary of all the models used in the evaluation experiments and their main differences.}
 \label{tbl:blinemodels}
 \end{table}
-The Euclidean embedding baseline models are the DeViSE \cite{Frome2013} and ConSE \cite{Norouzi2013} models upon which the Deep-HSEM and Convex-HSEM models are based respectively. Only ConSE(10) is considered as it was the best performing one. Note that we were unable to obtain sufficient implementation details to train those two models ourselves and hence we present the results from the original papers. These models do not however provide a fair comparison for three major reasons. First, the CNN used by them is not as advanced as the VGG-16 model we utilized; our models might thus have an unfair advantage that's not based on the type of embedding used, which is our focus. Second, the Deep-HSEM model was only trained for 90 epochs, and while we dont know how long DeViSE was trained for, usually authors train their models up to thousands of epochs. Third, the dimensionality of the embeddings in the DeVise and ConSE papers is much higher than ours (500-d vs. 10-d). Whilst the Poincare Embedding model should do well even in low dimensions, this difference is so large that direct comparison is hard. For these reasons we trained a model called Deep-Glove which has exactly the same training details and architecture as Deep-HSEM except that it projects into a 50-dimensional \footnote{Lowest dimensionality readily available at https://nlp.stanford.edu/projects/glove/. We used the python open-source implementation of \cite{Wang2018a} to match the embedding to ImageNet classes: https://github.com/JudyYe/zero-shot-gcn} Euclidean word embedding space. \textit{Glove} \cite{Pennington2014} refers to the word embedding model used. Table \ref{tbl:blinemodels} summarizes all the models and their key details.
+The Euclidean embedding baseline models are the DeViSE \cite{Frome2013} and ConSE \cite{Norouzi2013} models upon which the Deep-HSEM and Convex-HSEM models are based respectively. Only ConSE(10) is considered out of the different ConSE($T$) versions as it was the best performing one. Note that we were unable to obtain sufficient implementation details to train those two models ourselves and hence we present the results from the original papers. These models do not however provide a fair comparison for three major reasons. First, the CNN used by them is not as advanced as the VGG-16 model we utilized; our models might thus have an unfair advantage that's not based on the type of embedding used, which is our focus. Second, the Deep-HSEM model was only trained for 90 epochs, and while we dont know how long DeViSE was trained for, usually authors train their models up to thousands of epochs. Third, the dimensionality of the embeddings in the DeVise and ConSE papers is much higher than ours (500-d vs. 10-d). Whilst the Poincare Embedding model should do well even in low dimensions, this difference is so large that direct comparison is hard. For these reasons we trained a model called Deep-Glove which has exactly the same training details and architecture as Deep-HSEM except that it projects into a 50-dimensional \footnote{Lowest dimensionality readily available at https://nlp.stanford.edu/projects/glove/. We used the python open-source implementation of \cite{Wang2018a} to match the embedding to ImageNet classes: https://github.com/JudyYe/zero-shot-gcn} Euclidean word embedding space. \textit{Glove} \cite{Pennington2014} refers to the word embedding model used. Table \ref{tbl:blinemodels} summarizes all the models and their key details.
 
 \section{Training Results}
 After the models were trained, their performance was evaluated on 50k validation images of the training classes. The results are displayed in \text{Table \ref{tbl:train}}. Since no zero-shot data was used, we have also included the original VGG-16 model as an additional baseline. This is indeed the one that performs by far the best. This is to be expected as the model is trained on one-hot-encoded labels - the benefit of orthogonal labels is that it makes the training data easier to separate (but as discussed, makes it impossible to do zero-shot classification). 
@@ -622,13 +623,11 @@ Notice that the Deep-HSEM(1) model achieves the same Top-1 classification accura
 \label{tbl:train}
 \end{table}
 
-
-
+Another interesting result is that Deep-Glove has much better validation performance than the Deep-HSEM and Convex-HSEM models. As they all used the VGG-16 feature extractor, this suggests that it's either easier to learn the mapping into the Euclidean space from image features (with equal amounts of training time) or that it is structured so that the training classes are easier to separate. This will be discussed in more depth in analysing the zero-shot results. Finally, the Deep-Glove also has a significantly higher top-1 accuracy than the DeViSE model. This is likely the consequence of Deep-Glove using a more powerful CNN feature extractor. The top-5 accuracies of the two are similar, however. Since top-5 accuracy is a better judge of the embedding spaces, the most probable explanation is that the 500-dimensional word embedding helps DeViSE to make up for its less advanced CNN.
 
 \section{Experiment 1 - Zero-shot Classification}
 \subsection{Experimental Set-up}
 This is the experiment used most widely to evaluate the prediction abilities of zero-shot models. The image and ground-truth labels for this task were extracted from the Full 2011 ImageNet dataset \cite{JiaDeng2009}, which contains approximately 14 million images on 21,481 classes. Since the dataset subsumes also the training classes, those were excluded. Thus we ended up with previously unseen 20,841 classes; we will refer to this dataset as the '2011 20k ImageNet' data from hereon. Following previous works, we also constructed two additional subsets of this dataset, called \textit{2-hop} and \textit{3-hop} datasets. The 2-hop dataset contains all of the 2011 20k images which were within two tree-hops of the 1000 training classes in the WordNet tree hierarchy; the 3-hop labels are within three tree-hops. The labels for the three datasets were provided to us by \cite{Norouzi2013}. Going from 2-hop, to 3-hop and finally to the full 2011 20k data we thus get an increasing level of difficult as the test labels are further from the training classes (note though that harder ones do contain the easier ones so the data are not completely disjoint). Table \ref{tbl:zsldata} summarizes this. Top-1, top-2, top-5, top-10, and top-20 prediction accuracies were the evaluation metrics. For example, top-20 accuracy means that the model outputs the 20 most-likely label predictions for each image and the classification is deemed to have 'hit' if any of the 20 match the ground-truth label.
-
 \begin{table}
 \centering
 \begin{tabular}{|l|l|}
@@ -642,7 +641,82 @@ This is the experiment used most widely to evaluate the prediction abilities of 
 \label{tbl:zsldata}
 \end{table}
 
+\subsection{Results}
+The results for the zero-shot classification experiment for all models and the three datasets are collated in Table \ref{tbl:zslres}.
 
+
+\begin{table}[]
+  \centering
+\begin{tabular}{cllllll}
+\hline
+\multicolumn{1}{r}{\textbf{}} & \textbf{} & \multicolumn{5}{l}{\textbf{Top-k Accuracies(\%)}} \\ \hline
+\textbf{Test Dataset} & \textbf{Model} & \textbf{1} & \textbf{2} & \textbf{5} & \textbf{10} & \textbf{20} \\ \hline
+\multirow{9}{*}{2-hop} & Deep-HSEM-FC & 2.4 & 5.4 & 14.6 & 23.2 & 33.2 \\
+ & Deep-HSEM & 2.5 & 5.6 & 15.0 & 23.7 & 34.1 \\
+  & Convex-HSEM(1) & 3.0 & 6.5 & 16.7 & 26.0 & 37.0 \\
+ & Convex-HSEM(2) & 1.4 & 3.6 & 10.9 & 18.5 & 27.2 \\
+  & Convex-HSEM(10) & 0.7 & 2.1 & 6.9 & 13.0 & 20.4 \\
+ & Convex-HSEM(100) & 0.6 & 1.8 & 6.1 & 11.5 & 18.3 \\
+  & Deep-Glove & 7.5 & 10.7 & 14.8 & 17.7 & 20.8 \\
+  & DeViSe \cite{Frome2013} & 6.0 & 10.0 & 18.1 & 26.4 & 36.4 \\
+  & ConSE(10) \cite{Norouzi2013} & \textbf{9.4} & \textbf{15.1} & \textbf{24.7} & \textbf{32.7} & \textbf{41.8} \\ \hline
+\multirow{9}{*}{3-hop} & Deep-HSEM-FC & 0.4 & 0.8 & 2.3 & 4.7 & 8.3 \\
+ & Deep-HSEM & 0.4 & 0.8 & 2.3 & 4.7 & 8.4 \\
+  & Convex-HSEM(1) & 0.5 & 0.1 & 2.6 & 5.2 & 9.0 \\
+ & Convex-HSEM(2) & 0.2 & 0.5 & 1.6 & 3.4 & 6.3 \\
+  & Convex-HSEM(10) & 0.1 & 0.2 & 0.9 & 2.2 & 4.2 \\
+ & Convex-HSEM(100) & 0.1 & 0.2 & 0.8 & 1.9 & 3.7 \\
+  & Deep-Glove & 1.9 & 2.7 & 4.1 & 5.2 & 6.2 \\
+ & DeViSE & 1.7 & 2.9 & 5.3 & 8.2 & 12.5 \\
+  & ConSE(10) & \textbf{2.7} & \textbf{4.4} & \textbf{7.8} & \textbf{11.5} & \textbf{16.1} \\ \hline
+  \multicolumn{1}{l}{\multirow{9}{*}{2011 20k ImageNet}} & Deep-HSEM-FC & 0.2 & 0.3 & 1.0 & 1.9 & 3.4 \\
+  \multicolumn{1}{l}{} & Deep-HSEM & 0.2 & 0.4 & 1.0 & 2.0 & 3.5 \\
+  \multicolumn{1}{l}{} & Convex-HSEM(1) & 0.2 & 0.4 & 1.1 & 2.2 & 3.9 \\
+  \multicolumn{1}{l}{} & Convex-HSEM(2) & 0.1 & 0.2 & 0.7 & 1.5 & 2.7 \\
+  \multicolumn{1}{l}{} & Convex-HSEM(10) & 0.1 & 0.1 & 0.4 & 0.9 & 1.8 \\
+  \multicolumn{1}{l}{} & Convex-HSEM(100) & 0.0 & 0.1 & 0.3 & 0.8 & 1.6 \\
+  \multicolumn{1}{l}{} & Deep-Glove &  &  &  &  &  \\
+  \multicolumn{1}{l}{} & DeViSE & 0.8 & 1.4 & 2.5 & 3.9 & 6.0 \\
+  \multicolumn{1}{l}{} & ConSE(10) & \textbf{1.4} & \textbf{2.2} & \textbf{3.9} & \textbf{5.8} & \textbf{8.3} \\ \hline
+\end{tabular}
+\caption{Top-k classification accuracies for $k \in \{1, 2, 5, 10, 20 \}$ on the three zero-shot datasets based on the 2011 20k ImageNet, with inceasing difficulty from top to bottom. None of the zero-shot classes were included in the training classes. Classification was always constrained to the labels of the dataset under consideration. The results for DeVise and ConSE are directly from \cite{Frome2013} and \cite{Norouzi2013} respectively.}
+\label{tbl:zslres}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
 \chapter{Conclusions \& Ideas for Future Work}
 
 \section{Summary}
