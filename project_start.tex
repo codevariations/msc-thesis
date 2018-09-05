@@ -682,11 +682,21 @@ The results for the zero-shot classification experiment for all models and the t
 \label{tbl:zslres}
 \end{table}
 
-Why would hyperbolic embeddings fare worse the further we get from the training labels? In an attempt to explore this, we found that this is most likely caused by the rigidity of WordNet semantic database used to construct our hyperbolic embeddings. To see this, we give an exam
+Why would hyperbolic embeddings fare worse the further we get from the training labels? In an attempt to explore this, browsed through several concrete predictions. Figure \ref{fig:eucgoodzsl} gives an example of a zero-shot class on which Deep-Glove does well and Deep-HSEM poorly, namely 'ski jumping'. The closest class in the training data is probably the word 'ski' which gives several images similar to those shown here in that they include wintery scenes and people with skis. The contextual similariy of the Euclidean embedding has 'ski' close to many related terms and thus the model can extrapolate appropriately, though as a consequence some non-sensical predictions are made e.g. 'ski-lodge'. The reason why our hyperbolic model fails on such examples is likely due to the rigidity of the WordNet hierarchy, in which 'ski jumping' is under a super-category of 'sports', while the most relevant training label 'ski' is under 
 
 
 
 
+The opposite case is displayed in Figure \ref{fig:poincgoodzsl}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{eucGoodzsl}
+  \caption{Example Top-10 predictions on two images of 'ski jumping' from the full 2011 20k ImageNet data. Deep-Glove makes correct classifications while Deep-HSEM does not}
+  \label{fig:eucgoodzsl}
+\end{figure}
+
+Finally, the overall accuracy of all the models is very low which portrays the difficulty of the task as a whole.
 
 
 
@@ -777,9 +787,15 @@ Finally, it would be worth exploring the possibility of imposing hyperbolic geom
 
 
 \subsubsection{add}
+To make comparisons more fair need to run models for various dimensions of embedding spaces, more qualitative analysis neede too to find benefits of each, also should train deep learning models to be of exactly same strength.
 
-On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..
+one possible problem is that we only consider predictions 5 upwards but dont considere total length of path to root, perhaps the ones that are gotten correct are very close to top\dots
 
+it is also debatable when robust prediction is useful. sometimes getting wrong something is bad. sometimes getting wrong the leaf label might be good.
+
+problem is how can we ensure correct prediction across fine grained classes e.g. snakes, for instance our model guessed several snake -- attribute data? 
+
+On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..  
 Possible issue runnign only 90 epochs
 
 \bibliographystyle{ieeetr}
