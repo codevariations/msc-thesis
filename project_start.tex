@@ -642,7 +642,7 @@ This is the experiment used most widely to evaluate the prediction abilities of 
 \end{table}
 
 \subsection{Results}
-The results for the zero-shot classification experiment for all models and the three datasets are collated in Table \ref{tbl:zslres}.
+The results for the zero-shot classification experiment for all models and the three datasets are collated in Table \ref{tbl:zslres}. Overall, we can see that the baseline Euclidean similarity based embedding models DeViSE and ConSE(10) outperform our Deep-HSEM and Convex-HSEM models across all the test settings. ConSE(10) in particular is the best performing model. The relative underperformance of our hyperbolic models becomes more evident as we move further away from the training labels i.e. from the 2-hop data to the full ImageNet 20k data. Since our models actually used a more advanced CNN, the explanation must be related to the type of embeddings used. This hence suggests that contextual semantic similarity provides better visual guidance than semantic hierarchies in classifying novel visual objects, especially when the object is very different from the trainin labels. In attempt to explore this in more depth, we found that this is most likely caused by the rigidity of WordNet semantic database used to construct our hyperbolic embeddings. To see this, we give an exam
 
 
 \begin{table}[]
