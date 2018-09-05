@@ -83,7 +83,7 @@ best_prec1 = 0
 
 def main():
     global args, best_prec1, glove_emb, imgnet_glove_wgt, imgnet_glove_labels
-    global glove_emb_hop_wgt
+    global glove_emb_hop_wgt, expand_all_embs
     args = parser.parse_args()
 
     if args.seed is not None:
@@ -172,7 +172,14 @@ def main():
     wnids_3h_1k = wnids_21k[:8860]
 
     #select which hop data-set to use
-    chosen_hop_data = wnids_3hop
+    chosen_hop_data = wnids_20k
+
+    #load poincare embedding data (include embs for only curren hops)
+    with open('w2v_emb.pkl', 'rb') as f:
+        glove_emb = pkl.load(f, encoding='latin')
+
+    #exclude the few wnids not in glove embedding
+    chosen_hop_data = [i for i in chosen_hop_data if i in glove_emb['objects']]
 
     #ZSL data loading code
     valdir = args.data
@@ -188,24 +195,14 @@ def main():
                                              pin_memory=True)
     val_classes = val_loader.dataset.classes
 
-    #load poincare embedding data (include embs for only curren hops)
-    with open('w2v_emb.pkl', 'rb') as f:
-        glove_emb = pkl.load(f, encoding='latin')
-
     glove_emb_wgt = torch.tensor(glove_emb['model'], dtype=torch.float)
-    glove_emb_orig_idx = [glove_emb['objects'].index(i)
-                          for i in orig_data.classes]
-    glove_emb_orig_wgt = glove_emb_wgt[glove_emb_orig_idx]
-
     glove_emb_hop_idx = [glove_emb['objects'].index(i)
                          for i in val_classes]
     glove_emb_hop_wgt = glove_emb_wgt[[glove_emb_hop_idx]]
     glove_emb_hop_labels = [glove_emb['objects'][i] for i in
                             glove_emb_hop_idx]
-
-    #mapping from predicted img label idx to embedding idx
-    img2emb_idx = torch.tensor(glove_emb_orig_idx).cuda(
-                non_blocking=True).view(1, -1)
+    expand_all_embs = glove_emb_hop_wgt.repeat(args.batch_size, 1).cuda(
+                    args.gpu, non_blocking=True)
 
     #finally, run evaluation
     validate(val_loader, model)
@@ -327,10 +324,8 @@ def prediction(output, all_embs, knn=1):
         n_emb_dims = output.size(1)
         n_classes = all_embs.size(0)
         expand_output = output.repeat(1, n_classes).view(-1, n_emb_dims)
-        expand_all_embs = all_embs.repeat(batch_size, 1)
         dists_to_all = eucdist(expand_output,
-                               expand_all_embs.cuda(args.gpu,
-                                                    non_blocking=True))
+                               expand_all_embs)
         topk_per_batch = torch.topk(dists_to_all.view(batch_size, -1),
                                     k=knn, dim=1,
                                     largest=False)[1]

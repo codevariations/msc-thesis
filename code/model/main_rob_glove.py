@@ -176,10 +176,10 @@ def main():
     wnids_2h_1k = wnids_21k[:2549]
     wnids_3h_1k = wnids_21k[:8860]
 
-    chosen_hop_data = wnids_3hop
+    chosen_hop_data = wnids_20k
 
     #load labels for current robust prediction
-    with open('dicts/glove_robust_labels_3hop.pickle', 'rb') as f:
+    with open('dicts/glove_robust_labels_20k.pickle', 'rb') as f:
         robust_labels = pickle.load(f)
     all_hyper_ids = robust_labels['all_hyper_ids']
     robust_hyper_labels = robust_labels['hyper_labels']
