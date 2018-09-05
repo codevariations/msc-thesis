@@ -8,6 +8,7 @@ import shutil
 import time
 import warnings
 
+import pickle as pkl
 import pandas as pd
 from nltk.corpus import wordnet as wn
 
@@ -160,7 +161,7 @@ def main():
     origdir = '/fast-data/datasets/ILSVRC/2012/clsloc/train/'
     orig_data = datasets.ImageFolder(origdir)
 
-    #load all zero-shot class ids sorted on hops
+   #load all zero-shot class ids sorted on hops
     labels_hop_order = pd.read_csv('21k_wnids.csv')
     wnids_21k = labels_hop_order.iloc[:, 1].tolist()
     wnids_20k = wnids_21k[1000:]
@@ -172,6 +173,10 @@ def main():
 
     #select which hop data-set to use
     chosen_hop_data = wnids_2hop
+
+    with open('w2v_emb.pkl', 'rb') as f:
+        glove_emb = pkl.load(f, encoding='latin')
+    chosen_hop_data = [i for i in chosen_hop_data if i in glove_emb['objects']]
 
     #ZSL data loading code
     valdir = args.data
@@ -231,12 +236,14 @@ def validate(val_loader, model):
             if args.gpu is not None:
                 input = input.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
+            if i == 0:
+                pdb.set_trace()
 
             # compute output
             output = model(input)
 
            # measure accuracy and record loss
-            prec1, prec2, prec5, prec10, prec20  = accuracy(output,
+            prec1, prec2, prec5, prec10, prec20  = accuracy(output, i,
                                                             poinc_emb_hop_wgt,
                                                             target,
                                                             topk=(1, 2, 5, 10,
@@ -347,11 +354,13 @@ def prediction(output, all_embs, knn=1):
         return topk_per_batch
 
 
-def accuracy(output, all_embs, targets, topk=(1,)):
+def accuracy(output, i, all_embs, targets, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
         maxk = max(topk)
         preds = prediction(output, all_embs, knn=maxk)
+        if i == 600:
+            pdb.set_trace()
         batch_size = output.size(0)
         res = []
         for k in topk:
