@@ -564,16 +564,46 @@ The Convex-HSEM therefore consists of two step. First, the pre-trained VGG-16 mo
 Since we used the pre-trained VGG-16 model, Convex-HSEM did not require any additional training and was therefore much faster to implement than the Deep-HSEM. The only hyperparameter to set was the number of data points, $T$ over which to calculate the Einstein midpoints. We ran our experiments for 
 $T \in \{1, 2, 10, 100\}$. The motivation for this model architecture is to represent any unknown image as a combination of the most similar known image classes. 
 \newpage
+
+
 \chapter{Experiments \& Results}
 \section{Overview}
-In this section we evaluate the trained Deep-HSEM and Convex-HSEM models on two zero-shot learning tasks, and make comparisons to baseline models that use Euclidean similarity-based word embeddings. The first zero-shot experiment measures the standard prediction accuracy of the models on approximately 21k previously unseen classes; this is the benchmark used most often in zero-shot literature. The second experiment is a new task that we have developed in order to better study the robustness of the zero-shot predictions. Specifically, this tasks involes predicting not only the correct fine-grained label, but also the superordinate labels of an image.
+This section starts by evaluating the Deep-HSEM and Convex-HSEM models on the training data, which provides several important observations for later discussion. We then move on to our two main zero-shot learning experiments. The first one measures the standard prediction accuracy of the models on approximately 21k previously unseen classes; this is the benchmark used most often in literature. The second experiment is a new task that we have developed in order to better study the robustness of the zero-shot classifications. Specifically, this tasks involes predicting not only the correct fine-grained labels, but also the superordinate labels of the images. In both experiments, we make comparisons to baseline models that use Euclidean similarity-based embeddings. The section below gives an overview of all the models that were evaluated in these tasks.
 
-\section{Training Resuls}
+\section{Baseline models}
+All of the experiments were run on the following models from the previous section: Deep-HSEM-FC (only the fully connected layer trained), Deep-HSEM (all layers trained), Convex-HSEM(1), Convex-HSEM(2), Convex-HSEM(10) and Convex-HSEM(100). The $T$ in Convex-HSEM($T$) denotes that the $T$ most likely classes were used in calculating the convex combination.
+\begin{table}
+\centering
+\begin{tabular}{@{}cccc@{}}
+\toprule
+\multicolumn{1}{c}{ }& \multicolumn{1}{c}{\textbf{CNN model}} & \multicolumn{1}{c}{\textbf{Embedding}}& \multicolumn{1}{c}{\textbf{Embedding}} \\ 
+\multicolumn{1}{c}{\textbf{Model}}& \multicolumn{1}{c}{\textbf{used}} & \multicolumn{1}{c}{\textbf{used}}& \multicolumn{1}{c}{\textbf{dimensions}} \\
+\midrule
+\multicolumn{1}{c}{Deep-HSEM-FC}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Poincare} &  \multicolumn{1}{c}{10}                \\
+\multicolumn{1}{c}{Deep-HSEM}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Poincare}    & \multicolumn{1}{c}{10}                 \\
+\multicolumn{1}{c}{Convex-HSEM(1)}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Poincare} & \multicolumn{1}{c}{10}               \\
+\multicolumn{1}{c}{Convex-HSEM(2)}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Poincare} & \multicolumn{1}{c}{10}               \\
+\multicolumn{1}{c}{Convex-HSEM(10)}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Poincare}&  \multicolumn{1}{c}{10}              \\
+\multicolumn{1}{c}{Convex-HSEM(100)}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Poincare} & \multicolumn{1}{c}{10}             \\
+\multicolumn{1}{c}{Deep-Glove}& \multicolumn{1}{c}{VGG-16}& \multicolumn{1}{c}{Glove \cite{Pennington2014}} & \multicolumn{1}{c}{50}\\  
+\multicolumn{1}{c}{DeViSE \cite{Frome2013}} & \multicolumn{1}{c}{AlexNet\cite{Krizhevsky2012}}& \multicolumn{1}{c}{word2vec \cite{Mikolov}} & \multicolumn{1}{c}{500}                        \\
+\multicolumn{1}{c}{ConSE(10) \cite{Norouzi2013}}& \multicolumn{1}{c}{AlexNet}& \multicolumn{1}{c}{word2vec} &  \multicolumn{1}{c}{500}  \\  
+\bottomrule
+\end{tabular}
+\caption{Summary of all the models used in the evaluation experiments and their main differences.}
+\label{tbl:blinemodels}
+\end{table}
+The Euclidean embedding baseline models are the DeViSE \cite{Frome2013} and ConSE \cite{Norouzi2013} models upon which the Deep-HSEM and Convex-HSEM models are based respectively. Only ConSE(10) is considered as it was the best performing one. Note that we were unable to obtain sufficient implementation details to train those two models ourselves and hence we present the results from the original papers. These models do not however provide a fair comparison for three major reasons. First, the CNN used by them is not as advanced as the VGG-16 model we utilized; our models might thus have an unfair advantage that's not based on the type of embedding used, which is our focus. Second, the Deep-HSEM model was only trained for 90 epochs, and while we dont know how long DeViSE was trained for, usually authors train their models up to thousands of epochs. Third, the dimensionality of the embeddings in the DeVise and ConSE papers is much higher than ours (500-d vs. 10-d). Whilst the Poincare Embedding model should do well even in low dimensions, this difference is so large that direct comparison is hard. For these reasons we trained a model called Deep-Glove which has exactly the same training details and architecture as Deep-HSEM except that it projects into a 50-dimensional \footnote{Lowest dimensionality readily available at https://nlp.stanford.edu/projects/glove/. We used the python open-source implementation of \cite{Wang2018a} to match the embedding to ImageNet classes: https://github.com/JudyYe/zero-shot-gcn} Euclidean word embedding space. \textit{Glove} \cite{Pennington2014} refers to the word embedding model used. Table \ref{tbl:blinemodels} summarizes all the models and their key details.
+
+\section{Training Results}
+After the models were trained, their performance was evaluated on 50k validation images of the training classes. The results are displayed in \text{Table \ref{tbl:train}}. Since no zero-shot data was used, we have also included the original VGG-16 model as an additional baseline. This is indeed the one that performs by far the best. This is to be expected as the model is trained on one-hot-encoded labels - the benefit of orthogonal labels is that it makes the training data easier to separate (but as discussed, makes it impossible to do zero-shot classification). 
+
+Notice that the Deep-HSEM(1) model achieves the same Top-1 classification accuracy as the VGG-16. This too is expected as only the embedding of the most likely prediction is extracted, which is used to look-up the most likely class label, so the top-1 predictions of the two models are always the same. This no longer holds for top-5 as Convex-HSEM(1) will search for four other class embeddings closest to the embedding of the \textit{top-1} most likely class, whilst VGG-16 outputs the five most likely classes. Additionally, note that the performance of the Convex-HSEM model deteriorates as we increase the size of the convex set. Indeed, there is no clear case for using convex combination models on training classes: if the fully trained VGG-16 predicts that an object is 60\% cat and 20\% dog, and these are the only two classes, taking an average of their embeddings will only reduce the prediction accuracy.
 
 \begin{table}
-  \centering
-  \begin{tabular}{@{}ccc@{}}
-  \toprule
+\centering
+\begin{tabular}{@{}ccc@{}}
+\toprule
 \multicolumn{3}{c}{\textbf{2012 1K Validation Data (training classes only)}}                                                                        \\ \midrule
 \multicolumn{1}{c}{\textbf{Model}}          & \multicolumn{1}{c}{\textbf{Top-1 accuracy (\%)}} & \multicolumn{1}{c}{\textbf{Top-5 accuracy (\%)}} \\ \midrule
 \multicolumn{1}{c}{VGG-16}                  & \multicolumn{1}{c}{\textbf{71.4}}               & \multicolumn{1}{c}{\textbf{90.2}}                        \\
@@ -588,8 +618,8 @@ In this section we evaluate the trained Deep-HSEM and Convex-HSEM models on two 
 \multicolumn{1}{c}{ConSE(10) \cite{Norouzi2013}}  & \multicolumn{1}{c}{54.3}                  & \multicolumn{1}{c}{68.0}                        \\ 
 \bottomrule
 \end{tabular}
-\label{tbl:train}
 \caption{Accuracies of all the models on the 2012 1k ImageNet validation data set.}
+\label{tbl:train}
 \end{table}
 
 
@@ -611,8 +641,6 @@ This is the experiment used most widely to evaluate the prediction abilities of 
 \caption{Overview of the datasets in the zero-shot classification experiment}
 \label{tbl:zsldata}
 \end{table}
-This experiment was run on the following models from the previous section: Deep-HSEM-FC (only the fully connected layer trained), Deep-HSEM (all layers trained), Convex-HSEM(1), Convex-HSEM(2), Convex-HSEM(10) and Convex-HSEM(100). The Euclidean embedding baseline models were the DeViSE \cite{Frome2013} and ConSE \cite{Norouzi2013} models upon which the Deep-HSEM and Convex-HSEM models are based respectively. Only ConSE(10) is considered as it was the best performing one. Note that we were unable to obtain sufficient implementation details to train those two models ourselves and hence we present the results from the original papers. These models do not however provide a fair comparison for three major reasons. First, the CNN used by them is not as advanced as the VGG-16 model we utilized; our models might thus have an unfair advantage that's not based on the type of embedding used, which is our focus. Second, the Deep-HSEM model was only trained for 90 epochs, and while we dont know how long DeViSE was trained for, usually authors train their models up to thousands of epochs. Third, the dimensionality of the embeddings in the DeVise and ConSE papers is much higher than ours (500-d vs. 10-d). Whilst the Poincare Embedding model should do well even in low dimensions, this difference is so large that direct comparison is hard. For these reasons we trained a model called Deep-Glove which has exactly the same training details and architecture as Deep-HSEM except that it projects into a 50-dimensional \footnote{Lowest dimensionality readily available at https://nlp.stanford.edu/projects/glove/. We used the python open-source implementation of \cite{Wang2018a} to match the embedding to ImageNet classes: https://github.com/JudyYe/zero-shot-gcn} Euclidean word embedding space. \textit{Glove} \cite{Pennington2014} refers to the word embedding model used.
-
 
 
 \chapter{Conclusions \& Ideas for Future Work}
