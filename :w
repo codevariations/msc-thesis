@@ -1,7 +1,6 @@
 \documentclass[12pt]{report}
 \usepackage{setspace}
 %\usepackage{subfigure}
-\usepackage{booktabs}
 
 \pagestyle{plain}
 \usepackage{amssymb,graphicx,color}
@@ -566,52 +565,14 @@ $T \in \{1, 2, 10, 100\}$. The motivation for this model architecture is to repr
 \newpage
 \chapter{Experiments \& Results}
 \section{Overview}
-In this section we evaluate the trained Deep-HSEM and Convex-HSEM models on two zero-shot learning tasks, and make comparisons to baseline models that use Euclidean similarity-based word embeddings. The first zero-shot experiment measures the standard prediction accuracy of the models on approximately 21k previously unseen classes; this is the benchmark used most often in zero-shot literature. The second experiment is a new task that we have developed in order to better study the robustness of the zero-shot predictions. Specifically, this tasks involes predicting not only the correct fine-grained label, but also the superordinate labels of an image.
-
-\section{Training Resuls}
-
-\begin{table}
-  \centering
-  \begin{tabular}{@{}ccc@{}}
-  \toprule
-\multicolumn{3}{c}{\textbf{2012 1K Validation Data (training classes only)}}                                                                        \\ \midrule
-\multicolumn{1}{c}{\textbf{Model}}          & \multicolumn{1}{c}{\textbf{Top-1 accuracy (\%)}} & \multicolumn{1}{c}{\textbf{Top-5 accuracy (\%)}} \\ \midrule
-\multicolumn{1}{c}{VGG-16}                  & \multicolumn{1}{c}{\textbf{71.4}}               & \multicolumn{1}{c}{\textbf{90.2}}                        \\
-\multicolumn{1}{c}{Deep-HSEM-FC}            & \multicolumn{1}{c}{52.9}                        & \multicolumn{1}{c}{62.6}                        \\
-\multicolumn{1}{c}{Deep-HSEM}               & \multicolumn{1}{c}{56.0}                        & \multicolumn{1}{c}{65.0}                        \\
-\multicolumn{1}{c}{Convex-HSEM(1)}          & \multicolumn{1}{c}{\textbf{71.4}}              & \multicolumn{1}{c}{73.6}                        \\
-\multicolumn{1}{c}{Convex-HSEM(2)}          & \multicolumn{1}{c}{56.3}                        & \multicolumn{1}{c}{65.3}                        \\
-\multicolumn{1}{c}{Convex-HSEM(10)}         & \multicolumn{1}{c}{49.6}                        & \multicolumn{1}{c}{59.1}                        \\
-\multicolumn{1}{c}{Convex-HSEM(100)}        & \multicolumn{1}{c}{30.9}                        & \multicolumn{1}{c}{40.6}                        \\
-\multicolumn{1}{c}{Deep-Glove}              & \multicolumn{1}{c}{67.2}                        & \multicolumn{1}{c}{74.1}                        \\
-\multicolumn{1}{c}{DeViSE \cite{Frome2013}} & \multicolumn{1}{c}{53.2}                        & \multicolumn{1}{c}{76.7}                        \\
-\multicolumn{1}{c}{ConSE(10) \cite{Norouzi2013}}  & \multicolumn{1}{c}{54.3}                  & \multicolumn{1}{c}{68.0}                        \\ 
-\bottomrule
-\end{tabular}
-\label{tbl:train}
-\caption{Accuracies of all the models on the 2012 1k ImageNet validation data set.}
-\end{table}
-
-
-
+In this section we evaluate the trained Deep-HSEM and Convex-HSEM models on two zero-shot learning tasks, and make comparisons to baseline models that use Euclidean similarity-based word embeddings. The first zero-shot experiment measures the standard prediction accuracy of the models on 21,000 previously unseen classes; this is the benchmark used most often in zero-shot literature. The second experiment is a new task that we have developed in order to better study the robustness of the zero-shot predictions. Specifically, this tasks involes predicting not only the correct fine-grained label, but also the superordinate labels of an image.
 
 \section{Experiment 1 - Zero-shot Classification}
 \subsection{Experimental Set-up}
-This is the experiment used most widely to evaluate the prediction abilities of zero-shot models. The image and ground-truth labels for this task were extracted from the Full 2011 ImageNet dataset \cite{JiaDeng2009}, which contains approximately 14 million images on 21,481 classes. Since the dataset subsumes also the training classes, those were excluded. Thus we ended up with previously unseen 20,841 classes; we will refer to this dataset as the '2011 20k ImageNet' data from hereon. Following previous works, we also constructed two additional subsets of this dataset, called \textit{2-hop} and \textit{3-hop} datasets. The 2-hop dataset contains all of the 2011 20k images which were within two tree-hops of the 1000 training classes in the WordNet tree hierarchy; the 3-hop labels are within three tree-hops. The labels for the three datasets were provided to us by \cite{Norouzi2013}. Going from 2-hop, to 3-hop and finally to the full 2011 20k data we thus get an increasing level of difficult as the test labels are further from the training classes (note though that harder ones do contain the easier ones so the data are not completely disjoint). Table \ref{tbl:zsldata} summarizes this. Top-1, top-2, top-5, top-10, and top-20 prediction accuracies were the evaluation metrics. For example, top-20 accuracy means that the model outputs the 20 most-likely label predictions for each image and the classification is deemed to have 'hit' if any of the 20 match the ground-truth label.
+This is the experiment used most widely to evaluate the prediction abilities of zero-shot models. The image and ground-truth labels for this experiment are extracted from the Full 2011 ImageNet dataset \cite{JiaDeng2009}, which contains approximately 14 million images on 21,481 classes. Since the dataset subsumes also the training classes, those were excluded. Thus we ended up with previously unseen 20,841 classes; we will refer to this dataset as the '2011 20k ImageNet' data from hereon. Following previous works, we also constructed two additional subsets of this dataset, called \textit{2-hop} and \textit{3-hop} dataset. The 2-hop dataset contains all of the 2011 20k images which were within two tree hops of the training classes in the WordNet hierarchy; the 3-hop labels are within three tree hops. Going from 2-hop, to 3-hop and finally to the full 2011 20k data we thus get an increasing level of difficult as the test labels are further from the training classe (note though that harder ones do contain the easier ones so the data are not completely disjoint).
 
-\begin{table}
-\centering
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Dataset}  & \textbf{\# of classes} \\ \hline
-2-hop             & 1,549                  \\
-3-hop             & 7,860                  \\
-2011 20K ImageNet & 20,841                 \\ \hline
-\end{tabular}
-\caption{Overview of the datasets in the zero-shot classification experiment}
-\label{tbl:zsldata}
-\end{table}
-This experiment was run on the following models from the previous section: Deep-HSEM-FC (only the fully connected layer trained), Deep-HSEM (all layers trained), Convex-HSEM(1), Convex-HSEM(2), Convex-HSEM(10) and Convex-HSEM(100). The Euclidean embedding baseline models were the DeViSE \cite{Frome2013} and ConSE \cite{Norouzi2013} models upon which the Deep-HSEM and Convex-HSEM models are based respectively. Only ConSE(10) is considered as it was the best performing one. Note that we were unable to obtain sufficient implementation details to train those two models ourselves and hence we present the results from the original papers. These models do not however provide a fair comparison for three major reasons. First, the CNN used by them is not as advanced as the VGG-16 model we utilized; our models might thus have an unfair advantage that's not based on the type of embedding used, which is our focus. Second, the Deep-HSEM model was only trained for 90 epochs, and while we dont know how long DeViSE was trained for, usually authors train their models up to thousands of epochs. Third, the dimensionality of the embeddings in the DeVise and ConSE papers is much higher than ours (500-d vs. 10-d). Whilst the Poincare Embedding model should do well even in low dimensions, this difference is so large that direct comparison is hard. For these reasons we trained a model called Deep-Glove which has exactly the same training details and architecture as Deep-HSEM except that it projects into a 50-dimensional \footnote{Lowest dimensionality readily available at https://nlp.stanford.edu/projects/glove/. We used the python open-source implementation of \cite{Wang2018a} to match the embedding to ImageNet classes: https://github.com/JudyYe/zero-shot-gcn} Euclidean word embedding space. \textit{Glove} \cite{Pennington2014} refers to the word embedding model used.
+
+
 
 
 
