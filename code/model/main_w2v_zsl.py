@@ -230,12 +230,13 @@ def validate(val_loader, model):
             if args.gpu is not None:
                 input = input.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
-
+            if i == 250:
+                pdb.set_trace()
             # compute output
             output = model(input)
 
            # measure accuracy and record loss
-            prec1, prec2, prec5, prec10, prec20  = accuracy(output,
+            prec1, prec2, prec5, prec10, prec20  = accuracy(output,i,
                                                             glove_emb_hop_wgt,
                                                             target,
                                                             topk=(1, 2, 5, 10,
@@ -334,7 +335,7 @@ def prediction(output, all_embs, knn=1):
         return topk_per_batch
 
 
-def accuracy(output, all_embs, targets, topk=(1,)):
+def accuracy(output, i, all_embs, targets, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     with torch.no_grad():
         maxk = max(topk)
