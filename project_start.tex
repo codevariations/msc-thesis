@@ -47,7 +47,7 @@ $\Box$ \end{quotation}}
 
 
 \title{  	{ \includegraphics[scale=.5]{ucl_logo.png}}\\
-{{\Huge Deep Hyperbolic Semantic Embedding Model for Zero-Shot Learning}}\\
+{{\Huge Deep Hyperbolic Semantic Embedding Models for Zero-Shot Learning}}\\
 %{\large }\\
 		}
 \date{Submission date: Day Month Year}
@@ -734,8 +734,8 @@ Hierarchical &  Deep-HSEM & \textbf{4.1} & \textbf{8.1} & \textbf{11.7} & \textb
  & Convex-HSEM(2) & 3.1 & 6.5 & 9.6 & 12.4 & 14.9 \\
   & Deep-Glove & 2.9 & 3.3 & 3.9 & 4.3 & 4.6 \\ \midrule
 \multirow{5}{*}{2011 20k ImageNet} & Deep-HSEM-FC & 2.0 & 5.0 & 7.3 & 9.3 & 11.2 \\
- Hierarchical  & Deep-HSEM & 2.5 & 5.0 & 7.3 & 9.3 & 11.2 \\
-  & Convex-HSEM(1) &  &  &  &  &  \\
+Hierarchical  & Deep-HSEM & \textbf{2.5} & \textbf{5.0} & \textbf{7.3} & \textbf{9.3} & \textbf{11.2} \\
+  & Convex-HSEM(1) & 1.8 & 4.2 & 6.4 & 8.3 & 10.2  \\
  & Convex-HSEM(2) & 2.0 & 4.2 & 6.3 & 8.0 & 9.8 \\
   & Deep-Glove & 1.1 & 1.4 & 1.7 & 1.8 & 2.0 \\ \bottomrule
 \end{tabular}%
@@ -777,24 +777,11 @@ Above paragraphs have covered the most immediate areas and shortcomings of our m
 
 Concerning the first set of limitations, one of our conclusions was that the vast amount of contextual information that is inherent in the datasets used by Euclidean embedding methods gives the model much more flexibility than the righid WordNet hierarchy, yet we also saw some benefits of hyperbolic embeddings. An interesting idea for future research, would be to build a hyperbolic embedding based on both contextual data as well as explicit semantic word taxonomies. This is possible because the Poincare model of Nickel and Kiela \cite{Nickel2018} does not require excplicit hierarchy as an input, instead, as discussed above, it only needs to be given data about which words are connected to each other. If such dataset could be compiled from the Wikipedia text data, then we could use it to learn a latent hierarchy of those words and employ that in conjunction with WordNet based Poincare embedding, possibly for improved performance. Another, simpler, approach of combining the benefits of the two groups of models may be to take a similarity based embedding model and our hyperbolic embedding model and always pick the most likely prediction across the two. 
 
-One of the most fundamental challenges in zero-shot learning \cite{Ji2017} is that the structure of the semantic embedding space should closely reflect the local smoothness of the visual feature-space. Certainly, the low overall accuracy of all of our models suggest this might be an issue. One possible way of dealing with this might be to use an approach similar to Kodirov \textit{et al.} \cite{Kodirov2017} in which the semantic embedding corresponds to the latent represenation layer of the autoencoder. We could improve on this by initializing the latent vectors to be those of the hyperbolic embedding, but make the vectors trainable. The reconstruction constraint of the autoencoder could thus help the model to re-adjust the initial hyperbolic embedding to be more visually smooth.
-in combination with a hyperbolic embedding. 
+One of the most fundamental challenges in zero-shot learning \cite{Ji2017} is that the structure of the semantic embedding space should closely reflect the local smoothness of the visual feature-space. Certainly, the low overall accuracy of all of our models suggest this might be an issue. One possible way of dealing with this might be to use an approach similar to Kodirov \textit{et al.} \cite{Kodirov2017} who used an autoencoder to ensure that it was possible to reconstruct the input images from the latent embedding. We could look to improve on this by initializing the latent vectors to be those the hyperbolic embedding vectors, but make the vectors trainable. The reconstruction constraint of the autoencoder could thus help the model to re-adjust the initial hyperbolic embedding space to be more visually smooth.
 
-Another common issue encountered in zero-shot learning is that of the domain projection shift \cite{Fu2015}; the training and test classes in zero-shot learning are fully disjoint and thus the learnt mapping may not transfer well. We suspect that this issue might be very relevant for hyperbolic embeddings on the ImageNet data. This is because a vast majority of the training labels are leaf nodes in the WordNet hierarchy and subsequently their locations in the hyperbolic embedding will be near to the border of the open unit ball. We hence effectively learning a mapping to only a constrained area of the hyperbolic space. This is likely exacerbated by the fact that almost 10\% \cite{Peterson2018} of the training image are specific dog breeds. A natural way future research could attempt to resolve this is by creating pseudo-exemplars for higher level visual categories. For instance, all the different images of 'mammals' could be clustered to find the sub-space of image features from where to sample these exemplars, which then could be used in training.
+Another common issue encountered in zero-shot learning is that of the domain projection shift \cite{Fu2015}; the training and test classes in zero-shot learning are fully disjoint and thus the learnt mapping may not transfer well. We suspect that this issue might be very relevant for hyperbolic embeddings on the ImageNet data. This is because a vast majority of the training labels are leaf nodes in the WordNet hierarchy and subsequently their locations in the hyperbolic embedding will be near to the border of the open unit ball. We are hence effectively learning a mapping to only a constrained area of the hyperbolic space. This could be why the hyperbolic models had much lower accuracy than the Euclidean baselines on zero-shot classes that were far away from the training labels. A natural way future research could attempt to resolve this is by creating pseudo-exemplars for higher level visual categories. For instance, all the different images of 'mammals' could be clustered to find the sub-space of image features from where to sample these exemplars, which then could be used in training.
 
-Finally, it would be worth exploring the possibility of imposing hyperbolic geometry on our model more broadly. For instance, Gulcehere \textit{et al.}, showed that placing hyperbolic geometry on the activation functions of neural networks can increase their representational capacity and improve performance. Currently only our embedding is in hyperbolic space and in training Riemannian gradients from the Poincare distance loss function are combined with Euclidean gradinets. If hyperbolic space was imposed on all model parameters, all the layers could be trained with Riemannian optimization. A more ambitous future research project would thus look at how this might be implemented and investigate its benefits on zero-shot learning.
-
-
-
-\subsubsection{add}
-
-In particular, the hierarchical performed worse further away from training data. The structured nature of the emebdding space may mean that we are suffering from domain projection shift more i.e. overfitting.
-
-a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
-
-need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
-
-On the other hand, our ConSE model failed but this may be because Einstein midpoint is not great..  
+Finally, it would be worth exploring the possibility of imposing hyperbolic geometry on our model more broadly. For instance, Gulcehere \textit{et al.}, showed that placing hyperbolic geometry on the activation functions of neural networks can increase their representational capacity and improve performance. Currently only our embedding is in hyperbolic space and in training Riemannian gradients from the Poincare distance loss function are combined with Euclidean gradients. If hyperbolic space was imposed on all model parameters, all the layers could be trained with Riemannian optimization. A more ambitous future research project would thus look at how this might be implemented and investigate its benefits on zero-shot learning.
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
