@@ -679,7 +679,7 @@ The results for the zero-shot classification experiment for all the models and t
 
 Why would hyperbolic embeddings fare worse the further we get from the training labels? To explore this, we browsed through several concrete predictions. Figure \ref{fig:eucgoodzsl} gives an example of a zero-shot class on which Deep-Glove does well and Deep-HSEM poorly, namely 'ski jumping'. The closest class in the training data is probably the word 'ski' which gives several images similar to those shown here, in that they include wintery scenes and people with skis. The contextual nature of the Euclidean embeddings places 'ski' close to many related terms and thus the model can extrapolate appropriately, though as a consequence some non-sensical predictions are made e.g. 'ski-lodge'. The reason why our hyperbolic model fails on such examples is likely due to the rigidity of the WordNet hierarchy, in which 'ski jumping' is under a super-category of 'sports', while the most relevant training label 'ski' is under 'devices'. 
 
-Figuer \ref{fig:poincgoodzsl}, on the otherhand, displays an example of 'rattlesnake', which Deep-HSEM has labelled correctly, but Deep-Glove has not. These images are from the 2-hop dataset and the classfication suggestions illustrate that Deep-HSEM has been able to exploit the semantic hierarcy of the WordNet to its advantage. The training data contained several snake species and thus the hyperbolic embedding has learnt a good spatial representation of the relevant taxonomy: notice how one of the predictions is the super-category 'snake'. Given the abundance of different snakes in the training data, it is interesting that the Deep-Glove does so poorly. Most of the predictions are animal and nature related, and probably they occur relatively near in the emebedding to 'snake' but the space is not structured enough for making correct predictions given the visual features of the images. This, in turn, is likely a reflection of the problems with low dimensional Euclidean embedding and helps to explain why Deep-Glove's accuracy is so far behind DeViSE's. As anticipated, these examples demonstrate that Hyperbolic embeddings do well when there is a clear hierarchical structure to be exploited, but suffer from the lack of contextual information when this is not the case.
+Figuer \ref{fig:poincgoodzsl}, on the other hand, displays an example of 'rattlesnake', which Deep-HSEM has labelled correctly, but Deep-Glove has not. These images are from the 2-hop dataset and the classfication suggestions illustrate that Deep-HSEM has been able to exploit the semantic hierarcy of the WordNet to its advantage. The training data contained several snake species and thus the hyperbolic embedding has learnt a good spatial representation of the relevant taxonomy: notice how one of the predictions is the super-category 'snake'. Given the abundance of different snakes in the training data, it is interesting that the Deep-Glove does so poorly. Most of the predictions are animal and nature related, and probably they occur relatively near in the emebedding to 'snake' but the space is not structured enough for making correct predictions given the visual features of the images. This, in turn, is likely a reflection of the problems with low dimensional Euclidean embedding and helps to explain why Deep-Glove's accuracy is so far behind DeViSE's. As anticipated, these examples demonstrate that Hyperbolic embeddings do well when there is a clear hierarchical structure to be exploited, but suffer from the lack of contextual information when this is not the case.
 
 \begin{figure}
   \centering
@@ -710,7 +710,7 @@ This experiment is similar to the \textit{hierarchical precision} challenge in \
   \label{fig:robexp}
 \end{figure}
 S
-The data sets for the experiment are based on the 2-hop, 3-hop and 2011 20k ImageNet data. However, now each of them contains also all the required superordinate nouns i.e. we now have hierarchical 2-hop, 3-hop and 2011 20k datasets. As there are now more labels in the embedding space, this might make it harder to find the correct nearest neighbour. On the otherhand, being rewarded for predicting any of the five hierarchical labels should make the task easier if the model has a well structured embeddng space. Since this a new experiment, we were only able to run it on our own models -- DeViSE and ConSE were thus excluded from the baseline. Due to time constraints, we also chose to dispense with the Convex-HSEM(10) and Convex-HSEM(100) models as they were the two with worst performance in Experiment 1. 
+The data sets for the experiment are based on the 2-hop, 3-hop and 2011 20k ImageNet data. However, now each of them contains also all the required superordinate nouns i.e. we now have hierarchical 2-hop, 3-hop and 2011 20k datasets. As there are now more labels in the embedding space, this might make it harder to find the correct nearest neighbour. On the other hand, being rewarded for predicting any of the five hierarchical labels should make the task easier if the model has a well structured embeddng space. Since this a new experiment, we were only able to run it on our own models -- DeViSE and ConSE were thus excluded from the baseline. Due to time constraints, we also chose to dispense with the Convex-HSEM(10) and Convex-HSEM(100) models as they were the two with worst performance in Experiment 1. 
 
 \subsection{Results \& Discussion}
 All the results for the robust zero-shot classification experiment are displayed in Table \ref{tbl:robres}. Overall, we found that the Deep-HSEM and Convex-HSEM models perform better than the baseline Deep-Glove model across all the runs. In Experiment 1 we found that our hyperbolic models did progressively worse, relative to Euclidean models, as we moved further away from training labels. The reverse is true here: on the 2-hop data the weighted top-1 accuracy of Deep-HSEM is still worse than Convex-HSEM's (6.2\% vs. 7.6\%), as was in Experiment 1, however on the 2011 20k data the corresponding numbers are 2.5\% (Deep-HSEM) and 1.1\% (Deep-Glove). Together these observations from the two experiments suggest that the contextual semantic information of Euclidean embeddings helps to find the correct label more easily, especially in the 2011 20k data, the overall structure is less robust -\- there are more instances where their predictions are completely off. The hyperbolic embeddings, in turn, may struggle to identify the exact class of an object but can still relatively often predict one of the superordinate categories correct. This is particularly evident from how our hyperbolic models' accuracies improve as we move from the weighted top-1 accuracy to top-5. This implies that the models are particularly adept at predicting the higher level categories of objects. By definition the higher level categories hold more objects so this may appear a trivial point, however, we can see that the accuracy of Deep-Glove only improves marginally for higher $k$ as there is no hierarchical structure in the embedding to exploit. The result here is however only for the 50-dimensional Glove model, and likely the 500-dimensional one used by DeViSE and ConSE would do much better.
@@ -748,30 +748,27 @@ Overall, the findings here corroborate our hypothesis that the hyperbolic embedd
 
 Comparing our hyperbolic models, we can see that the results for the Deep- and Convex- models are now much more similar to each other. Eventhough Convex-HSEM was better at predicting the correct class, it appears that the cost of relying on just the embedding of the closest training class does not allow the model to generalze as well to higher level categories. Finally, the Deep-HSEM-FC and Deep-HSEM models perform very similarly to each other. It therefore seems that the pre-trained VGG-16 architecture we utilized comes with sufficiently good visual features that there is was no substantial benefit from training them further.
 
-
-
-
-
-
-
-
-
-
 \newpage
 \chapter{Conclusions \& Ideas for Future Work}
 
 \section{Summary}
-The aim of this thesis has been to improve the generalization ability of deep learning models used for image classification, and zero-shot learning in particular. The precise research question we set out to explore was: 
+The aim of this thesis has been to improve the generalization ability of deep learning models used for zero-shot learning. The precise research question we set out to explore was: 
 \begin{itemize}
 \item \textit{Does semantic hierarchical knowledge in the form of hyperbolic embeddings help to improve the zero-shot prediction capability of deep learning models}
 \end{itemize}
-Two zero-shot learning models were introduced to investigate this: the Deep-Hyperbolic Semantic Embedding model used a CNN to learn a mapping from training images into a Poincare embedding, whilst the Convex-Hyperbolic Semantic Embedding model constructed embedding predictions as a weighted convex combination of known classes' embedding. Various zero-shot experiments were run on up to 21k previously unseen classes in an attempt to answer the above reserch question.
+Two zero-shot learning models were introduced to investigate this. The Deep-Hyperbolic Semantic Embedding Model (Deep-HSEM) applies a CNN to learn a mapping from training images into a hyperbolic Poincare embedding. The Convex-Hyperbolic Semantic Embedding Model (Convex-HSEM) predicts the Poincare embedding vectors of zero-shot images as a convex combination of training classes' embeddings. In both models, zero-shot classification is performed by finding the nearest neighbour of the predicted embedding vector in the hyperbolic embedding space.
 
-Overall our results show promising results \dots..versus Euclidean similarity based embeddings...The main contribution is therefore \dots.. However, as the next two sections highlight, there are several improvements that can be made in future works to explore this approach in more detail.
+These models were evaluated on two related zero-shot experiments and their results were compared against baseline models that used similarity-based word embeddings. The first one measured the models' classification accuracies on approximately 20k previously unseen image classes from the ImageNet database. In the second experiment, called robust zero-shot classification, the models were evaluated on how well they were able to predict both the correct label of new images as well as which higher level categories they belong in.
 
-Whilst our hypebolic models did perform better on the robust zero-shot task, thus indicating the power of these models in learning hierarchical relations, their accuracy in non-zero shot and the standard zero-shot setting was worse. This suggests that \dots 
+Overall, our results suggest that there are benefits to both similarity based embeddings and hyperbolic embeddings. The former have the advantage of being more flexbile as they are ingrained with huge amounts of contextual information and are in this sense able to make connections with new classes of images more freely, even if they are in a hierarchical sense far away from each other. On the other hand, the hyperbolic embedding models have the advantage of being able to exploit the relationship between visual and semantic hierarchies, when those exist; our explorations suggest that this is often the case with biological categories, as expected. Further, we found that even though the Deep-HSEM and Convex-HSEM models predicted the correct class less often, they were also less often completely wrong. In particular, the robust zero-shot experiment results showed that the hyperbolic models were more adept at grouping image classes into their correct higher level categories than the benchmark model which used an Euclidean embedings. To answer the research question above, our results are promising and suggest several potential benefits, such as more robust classifiction of objects into their higher level categories. Nevertheless, many improvements and further tests need to be done before any strong conclusions can be drawn. These are discussed below.
+
+
+
+
 
 \section{Limitations \& Future Work}
+In particular, the hierarchical performed worse further away from training data. The structured nature of the emebdding space may mean that we are suffering from domain projection shift more i.e. overfitting.
+
 
 
 a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
@@ -829,7 +826,7 @@ DeViSE and ConSE to be done for zero-shot learning.
 
 one major possible issue is that robust zero-shot classificaiton is based on the word tree. but note that wordnet is much wider thatn the imagenet dataset and could also be applied to most other data, and second, we never gave the Poincare embedding hierarchical information on but only on which nouns are connected to each other.
 
-On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..  
+On the other hand, our ConSE model failed but this may be because Einstein midpoint is not great..  
 Possible issue runnign only 90 epochs
 
 \bibliographystyle{ieeetr}
