@@ -7,7 +7,7 @@ import random
 import shutil
 import time
 import warnings
-import pickle
+import pickle 
 
 import numpy as np
 import pandas as pd
@@ -178,14 +178,18 @@ def main():
 
     chosen_hop_data = wnids_20k
 
+    #load w2v embedding data
+    with open('w2v_emb.pkl', 'rb') as f:
+        glove_emb = pickle.load(f, encoding='latin')
+
+    #exclude the few wnids not in glove embeding
+    chosen_hop_data = [i for i in chosen_hop_data if i in glove_emb['objects']]
+
     #load labels for current robust prediction
     with open('dicts/glove_robust_labels_20k.pickle', 'rb') as f:
         robust_labels = pickle.load(f)
     all_hyper_ids = robust_labels['all_hyper_ids']
     robust_hyper_labels = robust_labels['hyper_labels']
-    numeric_robust_hyper_labels = torch.tensor([[all_hyper_ids.index(i)
-                                                 for i in j] for j in
-                                                 robust_hyper_labels]).cuda()
     exc_ids = robust_labels['exc_ids']
     chosen_hop_data = [i for i in chosen_hop_data if i not in exc_ids]
 
@@ -198,25 +202,19 @@ def main():
                                transforms.ToTensor(), normalize,]))
     val_loader = torch.utils.data.DataLoader(img_data,
                                              batch_size=args.batch_size,
-                                             shuffle=False,
+                                             shuffle=True,
                                              num_workers=args.workers,
                                              pin_memory=True)
     val_classes = val_loader.dataset.classes
-
-    #load poincare embedding data (include embs for only curren hops)
-    with open('w2v_emb.pkl', 'rb') as f:
-        glove_emb = pickle.load(f, encoding='latin')
-
     glove_emb_wgt = torch.tensor(glove_emb['model'], dtype=torch.float)
-    glove_emb_orig_idx = [glove_emb['objects'].index(i)
-                          for i in orig_data.classes]
-    glove_emb_orig_wgt = glove_emb_wgt[[glove_emb_orig_idx]]
-
     glove_emb_hop_idx = [glove_emb['objects'].index(i)
                          for i in all_hyper_ids]
     glove_emb_hop_wgt = glove_emb_wgt[[glove_emb_hop_idx]]
     glove_emb_hop_labels = [glove_emb['objects'][i] for i in
                             glove_emb_hop_idx]
+    numeric_robust_hyper_labels = torch.tensor([[all_hyper_ids.index(i)
+                                                 for i in j] for j in
+                                                 robust_hyper_labels]).cuda()
 
     #locate target idx in tree idx
     target2tree_idx = [chosen_hop_data.index(i) for i in val_classes]

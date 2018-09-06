@@ -38,7 +38,10 @@ hyper = lambda s: s.hypernyms()
 all_hypers = []
 all_dists = []
 for i in all_ss:
-  holder = ['n'+wn.ss2of(i).split('-')[0]]
+  if 'n'+wn.ss2of(i).split('-')[0] in glove_idx:
+        holder = ['n'+wn.ss2of(i).split('-')[0]]
+  else:
+     continue
   cur_hypers = list(i.closure(hyper))
   cur_hypers = ['n' + wn.ss2of(i).split('-')[0] for i in cur_hypers]
   cur_hypers = [i for i in cur_hypers if i in glove_idx]
@@ -51,7 +54,6 @@ all_hypers_ids = rem_dups(all_hypers_ids)
 
 #constrain everything to 5 edges upwards max
 all_hypers = [i[:5] for i in all_hypers]
-
 hyper_dict = {}
 hyper_dict['exc_ids'] = exc_ids
 hyper_dict['all_hyper_ids'] = all_hypers_ids
