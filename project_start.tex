@@ -700,14 +700,17 @@ Another interesting result is that Convex-HSEM(1) performs the best out of our h
 
 \section{Experiment 2 - Robust Zero-Shot \\ Classification}
 \subsection{Experimental Set-up}
-A limitation of the previous experiment is that classifications are considered correct only if the precise label of the image is predicted. For example, predicting 'arctic fox' as a 'fox' yields no points, eventhough in many situations that could be a useful. The top-10 and top-20 accuracies partly alleviate this issue as they allow for a wider area to be searched, nevertheless they fail to provide a complete measure of how well the embedding space is structured. This is in particular the case for Poincare embeddings that place the top-level categories in the middle of the hyperbolic ball and lowest level ones near its boundary. If such structure truly has been learned, it could happen that, when the model is uncertain about a particular image, that all the top 20 predictons fall on the superordinate categories within the tree. This would be desirable property as it would imply robustness of the model. We have therefore developed a 'robust zero-shot classification' task to investigate this.
+A limitation of the previous experiment is that classifications are considered correct only if the precise label of the image is predicted. For example, predicting 'arctic fox' as a 'fox' yields no points, eventhough in many situations that could be a useful. The top-10 and top-20 accuracies partly alleviate this issue as they allow for a wider area to be searched, nevertheless they fail to provide a complete measure of how well the embedding space is structured. This is in particular the case for Poincare embeddings that place the top-level categories in the middle of the hyperbolic ball and lowest level ones near its boundary. If such structure truly has been learned, it could happen that, when the model is uncertain about a particular image, that all the top 20 predictons fall on the superordinate categories within the tree. This would be a desirable property as it would imply robustness of the model. We have therefore developed a 'robust zero-shot classification' task to investigate this, which involves predicting the correct label as well as its parent categories.
 
-
-
-
-
-
-
+This experiment is similar to the \textit{hierarchical precision} challenge in \cite{Frome2013}. However, that task involved trying to predict labels within a certain radius off the correct label, and as a consequence rewarded incorrect predictions such as labeling an image of a brown bear as a polar bear. Moreover, the predictions in the \textit{hierarchical precision} experiment are equally weighted irrespective of their distance from the correct label. Our robust zero-shot experiment, on the other hand, weighs predictions by the inverse of their distance (in edges) from the correct fine grained label. We decided to limit the levels of hierarchy in this task to five, that is, the ground truth label-set includes the original label and its superordinate category labels four levels up. These are extracted from the WordNet database \cite{Miller1995}. This constraint was put into place to prevent very generic predictions like 'entity' being rewarded. The evaluation metric used is a weighted top-k accuracy; for instance,  top-$3$ accuracy means that 3 predictions are made and we calculate their inverse distance weighted hit rate over the 5 labels. Figure \ref{fig:robexp} gives a hypothetical example of this experiment for one image.
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{robexamp}
+  \caption{Illustrationg of how top-5 accuracy is calculated in the robust zero-shot experiment}
+  \label{fig:robexp}
+\end{figure}
+S
+In some ways this an easier task. In some harder.
 
 
 
