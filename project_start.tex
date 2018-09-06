@@ -85,12 +85,6 @@ First, I would like to thank my supervisor Prof. Bradley Love, for all of his gu
 \listoftables
 \setcounter{page}{1}
 
-\chapter{Notes}
-\begin{itemize}
-    \item Do I clearly state that CNNs are the state-of-the-art on image classification, give some example of current results / super human performance or when they wont competitions first time
-    \item we have created Deep-Glove because a.) it has lower dimensionality of w2v vector b.) newever DNN to make the model comparable to ours.
-\end{itemize}
-
 \chapter[Introduction]{Introduction\raisebox{.3\baselineskip}{\normalsize\footnotemark}}
 \footnotetext{All the code developed for this project can be accessed at https://github.com/HHalva/msc-thesis}
 
@@ -705,9 +699,8 @@ Figuer \ref{fig:poincgoodzsl}, on the otherhand, displays an example of 'rattles
 Another interesting result is that Convex-HSEM(1) performs the best out of our hyperbolic models. This implies that there is no benefit to calculating convex combinations which is at odds with Conse(10) being the best ConSE model \cite{Norouzi2013}. One potential explantion is that convex combinations are more beneficial with similarity based embeddings where the vast amount of contextual information creates noise which this method helps to iron out. Alternatively, it could be that calculating convex combinations in hyperbolic geometry does not provide similar impact as in Euclidean spaces; whilst the Einstein midpoint shares many similarities with the Euclidean convex combination, the two are not equivalent \cite{Ungar2009}. These are however just speculations and more work is needed to investigate them. The fact that Deep-HSEM performs worse than Convex-HSEM(1) could suggest that learning a mapping from the image features into the Poincare space is challenging. Finally, the overall low accuracies for all the models emphasizes the difficulty of zero-shot learning.
 
 \section{Experiment 2 - Robust Zero-Shot \\ Classification}
-
-
-
+\subsection{Experimental Set-up}
+A limitation of the previous experiment is that classifications are considered correct only if the precise label of the image is predicted. For example, predicting 'arctic fox' as a 'fox' yields no points, eventhough in many situations that could be a useful. The top-10 and top-20 accuracies partly alleviate this issue as they allow for a wider area to be searched, nevertheless they fail to provide a complete measure of how well the embedding space is structured. This is in particular the case for Poincare embeddings that place the top-level categories in the middle of the hyperbolic ball and lowest level ones near its boundary. If such structure truly has been learned, it could happen that, when the model is uncertain about a particular image, that all the top 20 predictons fall on the superordinate categories within the tree. This would be desirable property as it would imply robustness of the model. We have therefore developed a 'robust zero-shot classification' task to investigate this.
 
 
 
@@ -802,6 +795,9 @@ one possible problem is that we only consider predictions 5 upwards but dont con
 it is also debatable when robust prediction is useful. sometimes getting wrong something is bad. sometimes getting wrong the leaf label might be good.
 
 problem is how can we ensure correct prediction across fine grained classes e.g. snakes, for instance our model guessed several snake -- attribute data? 
+
+
+one major possible issue is that robust zero-shot classificaiton is based on the word tree. but note that wordnet is much wider thatn the imagenet dataset and could also be applied to most other data, and second, we never gave the Poincare embedding hierarchical information on but only on which nouns are connected to each other.
 
 On the otherhand, our ConSE model failed but this may be because Einstein midpoint is not great..  
 Possible issue runnign only 90 epochs
