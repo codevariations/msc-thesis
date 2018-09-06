@@ -763,48 +763,21 @@ These models were evaluated on two related zero-shot experiments and their resul
 Overall, our results suggest that there are benefits to both similarity based embeddings and hyperbolic embeddings. The former have the advantage of being more flexbile as they are ingrained with huge amounts of contextual information and are in this sense able to make connections with new classes of images more freely, even if they are in a hierarchical sense far away from each other. On the other hand, the hyperbolic embedding models have the advantage of being able to exploit the relationship between visual and semantic hierarchies, when those exist; our explorations suggest that this is often the case with biological categories, as expected. Further, we found that even though the Deep-HSEM and Convex-HSEM models predicted the correct class less often, they were also less often completely wrong. In particular, the robust zero-shot experiment results showed that the hyperbolic models were more adept at grouping image classes into their correct higher level categories than the benchmark model which used an Euclidean embedings. To answer the research question above, our results are promising and suggest several potential benefits, such as more robust classifiction of objects into their higher level categories. Nevertheless, many improvements and further tests need to be done before any strong conclusions can be drawn. These are discussed below.
 
 
-
-
-
 \section{Limitations \& Future Work}
-In particular, the hierarchical performed worse further away from training data. The structured nature of the emebdding space may mean that we are suffering from domain projection shift more i.e. overfitting.
 
+Several important experiments were not completed due to the high compute cost of these models and the large datasets they needed to be trained on. One particularly important test that future studies should complete is to repeat above experiments with different dimensionalities of the Poincare embedding. As discussed in the previous chapter, our models did relatively well when compared to the Deep-Glove model that used only 50-dimensional Euclidean embedding, but could not match the performance of the DeViSE and ConSE models that used 500-d embedding vectors. It is likely that our decision to use only a 10-d Poinare embedding was too ambitious for such a large dataset. Alternate hyperbolic embedding models could also be investigated: Nickel and Kiela \cite{Nickel2018} demonstrated very recently the superiority of the Hyperboloid model over their Poincare model on various graph embedding tasks.
 
+Several other architectural details should be experimented with. In particular, different loss functions should be explored in more detail. In the present study only cross-entropy loss was used. We did perform evaluations of other loss functions on the training data but not on the zero-shot tasks. For instance, the cross-entropy loss may be the optimal one for discriminating between different training classes, while some other function such as simple squared hyperbolic distance may help to learn a more precise mapping into the embedding space that generalizes better to zero-shot classes. Hyperparameter settings and different CNN architectures should also be experimented with in more detail. Finally, on top of pre-training, our models were trained only for 90 epochs, which is much less than typically seen in deep learning. Longer training time could improve the results substantially.
 
-a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
+Critique can also be levelled at our experimental designs. One potential source of bias is that in the robust zero-shot classification task we used the WordNet database to construct the hierarchical labels. This is the very same database used to build our Poincare embeddings. One could argue that our models outperforming the Euclidean baseline, which used Wikipedia insead, is not surprising. There are two counter-arguments however. First, the WordNet database is much larger and more general than the set of ImageNet labels. Subsequently, it should be possible to use the learned Poincare embedding on most other dataset as their labels too can be mapped into WordNet. Second, in the training phase the embedding is given no explicit hierarchical information, such as a dog is an animal, but only information about which nouns are directly linked to each other \cite{Nickel2017}. The model learns the hierarchical structure as part of the training, relying on the properties of the hyperbolic space. These issues need to be explored in more detail, preferably on a separate datase. A baseline model that uses Euclidean WordNet embedding should be included in the robust zero-shot experiment (though Nickel and Kiela \cite{Nickel2017} did precisely show their inferiority to hyperbolic embeddings in representing the WordNet graph). Finally, we should create our own implementations of the DeViSE and ConSE models so they could also be evaluated on the robust zero-shot classification task.
 
-maybe different loss function; mse, distortion of xentropy, adding allemb to xentropy
+The standard zero-shot classification experiment should also be expanded. In our current version, the models perform nearest neighbour search only over the zero-shot classes. In the, so called, \textit{generalized} zero-shot learning the models are allowed also to predict training classes (which will always be wrong). This is thus a step harder experiment but is also often used in literature. In future, we will look to include many more baseline models from recent research; many of these are much more powerful than the DeViSE and ConSE models. Nevertheless, our purpose was not to create the most powerful zero-shot model but rather explore the potential benefits of the hyperbolic embeddings in this task and thus chose the models that allow the relevant comparisons to be made.
 
-need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
+Above paragraphs have covered the most immediate areas and shortcomings of our methodology that need to be addressed. Future works should also concern themselves with more fundamental challenges that may be constraining the performance of the proposed deep hyperbolic zero-shot models. The can be grouped under two broader, related, categories. The first ones have to do with the quality and usefulness of the hyperbolic semantic embedding built on the WordNet hierarchy, and the second ones have to with the quality of mapping we have learned from the image space into the embedding space.
 
-random poincare embeddings.
-issues of training time
-generalize zsl excluded.
-more dimensions of the embedding space
-new data sets e.g. if trained against embedding learns well new data sets
-w2v model trained to same accuracy as poincare  
+Concerning the first set of limitations, one of our conclusions was that the vast amount of contextual information that is inherent in the datasets used by Euclidean embedding methods gives the model much more flexibility than the righid WordNet hierarchy, yet we also saw some benefits of hyperbolic embeddings. An interesting idea for future research, would be to build a hyperbolic embedding based on both contextual data as well as explicit semantic word taxonomies. This is possible because the Poincare model of Nickel and Kiela \cite{Nickel2018} does not require excplicit hierarchy as an input, instead, as discussed above, it only needs to be given data about which words are connected to each other. If such dataset could be compiled from the Wikipedia text data, then we could use it to learn a latent hierarchy of those words and employ that in conjunction with WordNet based Poincare embedding, possibly for improved performance. Another, simpler, approach of combining the benefits of the two groups of models may be to take a similarity based embedding model and our hyperbolic embedding model and always pick the most likely prediction across the two. 
 
-compare against state of the art -- we now havent, but would be interesting to see if their performance could be improved by Poincare embedding.
-Numerical issues, attempted to use double-precision (64 bit floating points, more careful exploration of hyperparameters.
-
-
-
-
-
-
-
-
-
-
-
-
-Big problem is that in the non-zero shot training the embedding model did much worse.
-
-The main potential shortcomings of our model can be grouped under two broader, related, categories. The first ones have to do with the quality and usefulness of the hyperbolic semantic embedding built on the WordNet hierarchy, and the second ones have to with the quality of mapping we have learned from the image space into the embedding space.
-
-Concerning the first set of limitations, it is clear from our analysis that there are certain situations in which our model performed worse than the baseline model that used similarity based worde embedding. One of the examples given was that of the word 'benthos' defined as 'organisms living at near the seabed'. Our model failed to classify this as it was not directly linked any species in the WordNet hierarchy. The baseline model had more success, persumably because the massive Wikipedia data used to create its embedding space had many species in the same context with 'benthos'. This illustrates that hierarchical semantic taxonomy is not alway better descriptor of visually relatedness than semantic contex. To be clear, this is not a shortcoming of hyperbolic embeddings in general, but rather a limitation of the WordNet versus the massive contextual data available from other data sets, in certain situations. In fact, future work could attempt to build a hyperbolic embedding based on both contextual data as well as explicit semantic word taxonomies. This is possible because the Poincare model of Nickel and Kiela \cite{Nickel2018} do not require excplicit hierarchy as an input, instead it just needs to be given data about which words are connected to each other. If such data set could be constructed from the Wikipedia data set, then we could use it to learn a latent hierarchy of those words and use that in conjunction with the Poincare embedding of this paper for improved performance. Another simpler approach may be to take a similarity based embedding model and our hyperbolic embedding model and always pick the most likely prediction across the two. 
-
-The above issue is closely linked to the broader of problem of an embedding space not preserving the local structure of its input image space. This is a common challenge in zero-shot learning \cite{Ji2017}. Even if we didnt suffer from any of the potential problems discussed in the previous paragraph, it may be that no word-based semantic embedding can preserve visual structure smoothly. One possible way of dealing with this might be to use an approach similar to Kodirov \textit{et al.} \cite{Kodirov2017} in which the semantic embedding corresponds to the latent represenation layer of the autoencoder. We could improve on this by initializing the latent vectors to be those of the hyperbolic embedding, but make the vectors trainable. The reconstruction constraint of the autoencoder could thus help the model to re-adjust the initial hyperbolic embedding to be more visually smooth.
+One of the most fundamental challenges in zero-shot learning \cite{Ji2017} is that the structure of the semantic embedding space should closely reflect the local smoothness of the visual feature-space. Certainly, the low overall accuracy of all of our models suggest this might be an issue. One possible way of dealing with this might be to use an approach similar to Kodirov \textit{et al.} \cite{Kodirov2017} in which the semantic embedding corresponds to the latent represenation layer of the autoencoder. We could improve on this by initializing the latent vectors to be those of the hyperbolic embedding, but make the vectors trainable. The reconstruction constraint of the autoencoder could thus help the model to re-adjust the initial hyperbolic embedding to be more visually smooth.
 in combination with a hyperbolic embedding. 
 
 Another common issue encountered in zero-shot learning is that of the domain projection shift \cite{Fu2015}; the training and test classes in zero-shot learning are fully disjoint and thus the learnt mapping may not transfer well. We suspect that this issue might be very relevant for hyperbolic embeddings on the ImageNet data. This is because a vast majority of the training labels are leaf nodes in the WordNet hierarchy and subsequently their locations in the hyperbolic embedding will be near to the border of the open unit ball. We hence effectively learning a mapping to only a constrained area of the hyperbolic space. This is likely exacerbated by the fact that almost 10\% \cite{Peterson2018} of the training image are specific dog breeds. A natural way future research could attempt to resolve this is by creating pseudo-exemplars for higher level visual categories. For instance, all the different images of 'mammals' could be clustered to find the sub-space of image features from where to sample these exemplars, which then could be used in training.
@@ -814,20 +787,14 @@ Finally, it would be worth exploring the possibility of imposing hyperbolic geom
 
 
 \subsubsection{add}
-To make comparisons more fair need to run models for various dimensions of embedding spaces, more qualitative analysis neede too to find benefits of each, also should train deep learning models to be of exactly same strength.
 
-one possible problem is that we only consider predictions 5 upwards but dont considere total length of path to root, perhaps the ones that are gotten correct are very close to top\dots
+In particular, the hierarchical performed worse further away from training data. The structured nature of the emebdding space may mean that we are suffering from domain projection shift more i.e. overfitting.
 
-it is also debatable when robust prediction is useful. sometimes getting wrong something is bad. sometimes getting wrong the leaf label might be good.
+a potential problem is dimensionality is it too low? especially we wish some local smoothness in therms of visual samples in embedding space.perhaps more dimensions are needed for this. Though hard to really say since hyperbolic space..
 
-problem is how can we ensure correct prediction across fine grained classes e.g. snakes, for instance our model guessed several snake -- attribute data? 
-
-DeViSE and ConSE to be done for zero-shot learning.
-
-one major possible issue is that robust zero-shot classificaiton is based on the word tree. but note that wordnet is much wider thatn the imagenet dataset and could also be applied to most other data, and second, we never gave the Poincare embedding hierarchical information on but only on which nouns are connected to each other.
+need better embedding maybe lorenz, maybe higher dimensional and also maybe need ot learn mapping with not-just leaf nodes. In fact, if there is imprecision more at the leaf nodes, then by leanrig a mapping on them we may overfit. This maybe also why softmax works better than distanc
 
 On the other hand, our ConSE model failed but this may be because Einstein midpoint is not great..  
-Possible issue runnign only 90 epochs
 
 \bibliographystyle{ieeetr}
 \bibliography{Thesis}
