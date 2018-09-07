@@ -85,6 +85,7 @@ best_prec1 = 0
 def main():
     global args, best_prec1, imgnet_poinc_wgt, all_hyper_ids, poinc_emb_hop_wgt
     global target2tree_idx, numeric_robust_hyper_labels, expand_all_embs
+    global tree2target_idx
     args = parser.parse_args()
 
     if args.seed is not None:
@@ -174,10 +175,10 @@ def main():
     wnids_2h_1k = wnids_21k[:2549]
     wnids_3h_1k = wnids_21k[:8860]
 
-    chosen_hop_data = wnids_2hop
+    chosen_hop_data = wnids_3hop
 
     #load labels for current robust prediction
-    with open('dicts/glove_robust_labels_2hop.pickle', 'rb') as f:
+    with open('dicts/glove_robust_labels_3hop.pickle', 'rb') as f:
         robust_labels = pickle.load(f)
     all_hyper_ids = robust_labels['all_hyper_ids']
     robust_hyper_labels = robust_labels['hyper_labels']
@@ -217,7 +218,7 @@ def main():
 
     #locate target idx in tree idx
     target2tree_idx = [chosen_hop_data.index(i) for i in val_classes]
-
+    tree2target_idx = [val_classes.index(i) for i in chosen_hop_data]
     #this is needed in prediction
     expand_all_embs = poinc_emb_hop_wgt.repeat(args.batch_size,
                     1).cuda(args.gpu, non_blocking=True)
@@ -251,14 +252,22 @@ def validate(val_loader, model):
             tree_target_idx = [target2tree_idx[i] for i in target]
             tree_targets = numeric_robust_hyper_labels[[tree_target_idx]]
 
+            def get_it(preds):
+                idx = [all_hyper_ids[i] for i in preds]
+                of = [i.split('n')[1] +'n' for i in idx]
+                ss = [wn.of2ss(i) for i in of]
+                return ss
             # compute output
             output = model(input)
 
             # measure accuracy and record loss
-            prec1, prec2, prec3, prec4, prec5  = accuracy(output,
+            prec, preds  = accuracy(output,
                                                poinc_emb_hop_wgt,
                                                tree_targets, topk=(1, 2,
                                                3, 4, 5))
+            prec1, prec2, prec3, prec4, prec5 = prec
+            if i == 170:
+                pdb.set_trace()
             top1.update(prec1.item(), input.size(0))
             top2.update(prec2.item(), input.size(0))
             top3.update(prec3.item(), input.size(0))
@@ -391,7 +400,7 @@ def accuracy(output, all_embs, targets, topk=(1,)):
                     - preds_tmp.reshape(preds_tmp.shape+(1,)))==0, axis=1)
             res.append(np.mean(np.sum(
                        matches*acc_wgts, axis=1) / np.sum(acc_wgts)))
-        return res
+        return res, preds
 
 
 
