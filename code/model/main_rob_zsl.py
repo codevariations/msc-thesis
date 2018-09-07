@@ -266,7 +266,7 @@ def validate(val_loader, model):
                                                tree_targets, topk=(1, 2,
                                                3, 4, 5))
             prec1, prec2, prec3, prec4, prec5 = prec
-            if i == 690:
+            if i == 170:
                 pdb.set_trace()
             top1.update(prec1.item(), input.size(0))
             top2.update(prec2.item(), input.size(0))
