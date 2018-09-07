@@ -202,7 +202,7 @@ def main():
                                transforms.ToTensor(), normalize,]))
     val_loader = torch.utils.data.DataLoader(img_data,
                                              batch_size=args.batch_size,
-                                             shuffle=True,
+                                             shuffle=False,
                                              num_workers=args.workers,
                                              pin_memory=True)
     val_classes = val_loader.dataset.classes
@@ -254,7 +254,7 @@ def validate(val_loader, model):
 
             def get_it(preds):
                 idx = [all_hyper_ids[i] for i in preds]
-                of = [i.splt('n')[1] + 'n' for i in idx]
+                of = [i.split('n')[1] + 'n' for i in idx]
                 ss = [wn.of2ss(i) for i in of]
                 return ss
             output = model(input)
@@ -265,7 +265,7 @@ def validate(val_loader, model):
                                                tree_targets, topk=(1, 2,
                                                3, 4, 5))
             prec1, prec2, prec3, prec4, prec5 = prec
-            if i == 10:
+            if i == 280:
                 pdb.set_trace()
             top1.update(prec1.item(), input.size(0))
             top2.update(prec2.item(), input.size(0))
