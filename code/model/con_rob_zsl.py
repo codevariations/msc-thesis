@@ -165,6 +165,12 @@ def main():
 
     chosen_hop_data = wnids_3hop
 
+    #load glove just to make sure index is comparable
+    with open('w2v_emb.pkl', 'rb') as f:
+        glove_emb = pickle.load(f, encoding='latin')
+    chosen_hop_data = [i for i in chosen_hop_data
+                    if i in glove_emb['objects']]
+
     #load labels for current robust prediction
     with open('dicts/glove_robust_labels_3hop.pickle', 'rb') as f:
         robust_labels = pickle.load(f)
